@@ -200,9 +200,11 @@
       <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
         <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
       </div>
-      <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-32 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
+      <!-- 修正 pb-20：縮減底部空白 -->
+      <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-20 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       </div>
-      <div class="absolute bottom-6 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none">
+      <!-- 修正 bottom-4：讓浮動按鈕更貼齊底部 -->
+      <div class="absolute bottom-4 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none">
         <button id="btn-add-location" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-dark text-brand-card font-bold h-14 px-6 rounded-full shadow-lg shadow-brand-dark/20 hover:bg-brand-textMain active:scale-95 transition-all">
           <i class="fa-solid fa-location-dot"></i> <span class="text-sm">地點</span>
         </button>
@@ -256,7 +258,7 @@
 
         <div id="quick-fill-container" class="hidden flex gap-2 overflow-x-auto hide-scrollbar"></div>
 
-        <!-- 地點專屬：地點 Icon 分類 (改為 grid-cols-3 九宮格) -->
+        <!-- 地點專屬：地點 Icon 分類 -->
         <div id="group-location-mode" class="hidden bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">地點類型</label>
           <div id="location-modes-grid" class="grid grid-cols-3 gap-2"></div>
@@ -402,7 +404,6 @@
       { id: 'walk', label: '步行', icon: 'fa-solid fa-person-walking' }
     ];
 
-    // 更新地點模式的選項，擴充至 9 個
     const LOCATION_MODES = [
       { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
       { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
@@ -501,14 +502,16 @@
       const navBtnPlans = document.getElementById('nav-btn-plans');
       const navBtnProfile = document.getElementById('nav-btn-profile');
 
-      if (v === 'plans' || v === 'profile') {
+      // 修正：行程頁面 (itinerary) 也顯示導覽列
+      if (v === 'plans' || v === 'profile' || v === 'itinerary') {
          bottomNav.classList.remove('hidden');
-         if(v === 'plans') {
-             navBtnPlans.classList.add('text-brand-primary'); navBtnPlans.classList.remove('text-brand-textSub');
-             navBtnProfile.classList.add('text-brand-textSub'); navBtnProfile.classList.remove('text-brand-primary');
-         } else {
+         if(v === 'profile') {
              navBtnProfile.classList.add('text-brand-primary'); navBtnProfile.classList.remove('text-brand-textSub');
              navBtnPlans.classList.add('text-brand-textSub'); navBtnPlans.classList.remove('text-brand-primary');
+         } else {
+             // plans 和 itinerary 都在「首頁」範圍內，所以亮起首頁圖示
+             navBtnPlans.classList.add('text-brand-primary'); navBtnPlans.classList.remove('text-brand-textSub');
+             navBtnProfile.classList.add('text-brand-textSub'); navBtnProfile.classList.remove('text-brand-primary');
          }
       } else {
          bottomNav.classList.add('hidden');
@@ -656,7 +659,8 @@
         return;
       }
 
-      let html = '<div class="relative pl-1 pr-1 pt-4 pb-12">';
+      // 修正：將內層的 pb-12 改為 pb-4 減少空白
+      let html = '<div class="relative pl-1 pr-1 pt-4 pb-4">';
       items.sort((a, b) => a.timeStart.localeCompare(b.timeStart)).forEach((item, index) => {
         const isLast = index === items.length - 1; const isFirst = index === 0; const isOnly = items.length === 1;
         const costHtml = renderCost(item.cost, item.currency);
@@ -677,7 +681,6 @@
             ? `<div class="w-4 h-4 rounded-full bg-brand-bg border-2 border-brand-primary z-10 mt-[20px] shadow-sm flex items-center justify-center"><i class="fa-solid fa-angles-down text-[8px] text-brand-primary"></i></div>`
             : `<div class="w-3.5 h-3.5 rounded-full border-[3px] border-brand-primary bg-brand-card z-10 mt-[20px] shadow-sm"></div>`;
 
-          // 在這裡加上帶背景底框的設計 (同交通卡片風格)
           html += `
             <div class="relative flex group cursor-pointer" onclick="openOptions('${item.id}')">
               <div class="w-[68px] shrink-0 text-right pr-3 pt-[20px]">${timeHtml}</div>
