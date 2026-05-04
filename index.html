@@ -13,7 +13,7 @@
         extend: {
           colors: {
             brand: {
-              primary: '#0EA5E9', /* 清爽天藍 */
+              primary: '#0EA5E9', /* 活力天藍 */
               dark: '#0369A1',
               light: '#F0F9FF',
               bg: '#F1F5F9', /* 淺灰背景 */
@@ -23,8 +23,11 @@
               accent: '#F59E0B'
             }
           },
+          fontFamily: {
+            // 將 LINE Seed TW 設為全站預設字體
+            sans: ['"LINE Seed TW"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
           boxShadow: {
-            // 僅用於白色容器的柔和陰影
             'subtle-card': '0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
             'floating-sheet': '0 -10px 40px -10px rgba(0, 0, 0, 0.1)'
           }
@@ -34,6 +37,31 @@
   </script>
 
   <style>
+    /* --- LINE Seed TW 字體整合 --- */
+    @font-face {
+      font-family: 'LINE Seed TW';
+      src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'LINE Seed TW';
+      src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'LINE Seed TW';
+      src: url('./fonts/LINESeedTW_OTF_Eb.woff2') format('woff2');
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .bottom-sheet { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -42,7 +70,6 @@
     .view-transition { transition: opacity 0.3s ease; }
     .timeline-line { width: 2px; }
     
-    /* 登入頁背景 */
     .login-view-bg { background-color: #F1F5F9; }
 
     /* Desktop Layout Adjustment */
@@ -59,23 +86,20 @@
   <div id="app" class="w-full h-[100dvh] flex flex-col relative">
     
     <!-- Toast (浮動提示) -->
-    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-textMain text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 text-sm font-bold flex items-center gap-2">
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-textMain text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 text-sm font-bold flex items-center gap-2 border border-gray-700">
       <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg"></span>
     </div>
 
     <!-- VIEW: 登入頁 -->
     <div id="view-login" class="absolute inset-0 z-50 flex flex-col items-center justify-center login-view-bg px-6 view-transition">
-      <!-- 卡片有陰影 -->
       <div id="login-card" class="w-full bg-white rounded-[40px] p-12 shadow-subtle-card border border-slate-100 flex flex-col items-center transition-all">
-        <!-- 藍色方塊維持扁平，不放陰影 -->
         <div class="w-20 h-20 bg-brand-primary rounded-3xl flex items-center justify-center mb-8">
           <i class="fa-solid fa-compass text-white text-3xl"></i>
         </div>
         
-        <h1 class="text-3xl font-black text-brand-dark mb-3 tracking-tighter">趣．旅行</h1>
+        <h1 class="text-3xl font-bold text-brand-dark mb-3 tracking-tighter">趣．旅行</h1>
         <p class="text-brand-textSub mb-12 text-center text-sm font-bold opacity-60 tracking-tight">記錄您的所有精彩旅程</p>
         
-        <!-- 按鈕維持扁平，不放陰影 -->
         <button id="btn-login-google" class="w-full bg-white border border-slate-200 text-brand-textMain font-bold py-4 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-50 active:scale-[0.98] transition-all">
           <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -94,14 +118,12 @@
       <!-- VIEW: 我的行程 -->
       <div id="view-plans" class="hidden flex-1 flex flex-col overflow-hidden">
         <header class="pt-12 pb-6 px-8 shrink-0 flex justify-between items-center">
-          <h1 class="text-3xl font-black text-brand-dark tracking-tighter">我的計畫</h1>
-          <!-- 藍色按鈕扁平 -->
+          <h1 class="text-3xl font-bold text-brand-dark tracking-tighter">我的計畫</h1>
           <button id="btn-new-plan" class="bg-brand-primary text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 transition-all">
             <i class="fa-solid fa-plus text-xl"></i>
           </button>
         </header>
         <div id="plans-list" class="flex-1 overflow-y-auto px-6 pb-28 hide-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-min bg-slate-50 pt-4">
-          <!-- 行程卡片由 JS 生成，會加上 shadow-subtle-card -->
         </div>
       </div>
 
@@ -112,8 +134,8 @@
             <i class="fa-solid fa-arrow-left text-xl"></i>
           </button>
           <div class="text-center flex-1">
-            <h2 id="current-plan-title" class="font-black text-brand-textMain truncate px-4">載入中...</h2>
-            <p id="current-plan-date" class="text-[10px] text-brand-primary font-black uppercase tracking-widest"></p>
+            <h2 id="current-plan-title" class="font-bold text-brand-textMain truncate px-4">載入中...</h2>
+            <p id="current-plan-date" class="text-[10px] text-brand-primary font-bold uppercase tracking-widest"></p>
           </div>
           <button id="btn-edit-plan-info" class="w-10 h-10 flex items-center justify-end text-brand-textSub">
             <i class="fa-solid fa-sliders text-lg"></i>
@@ -125,10 +147,8 @@
         </div>
 
         <div id="timeline-container" class="flex-1 overflow-y-auto px-4 pb-32 pt-6 relative bg-white md:px-16 lg:px-32">
-          <!-- 時間軸內容 -->
         </div>
 
-        <!-- 懸浮動作按鈕 (扁平無陰影) -->
         <div class="absolute bottom-28 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none md:bottom-12">
           <button id="btn-add-location" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-textMain text-white font-bold h-14 px-6 rounded-2xl active:scale-95 transition-all border border-brand-textMain">
             <i class="fa-solid fa-location-dot"></i> <span class="text-sm">地點</span>
@@ -144,7 +164,7 @@
          <div class="w-24 h-24 bg-white rounded-[32px] mb-6 overflow-hidden border border-slate-200 shadow-subtle-card">
            <img id="user-photo" src="https://ui-avatars.com/api/?name=User" class="w-full h-full object-cover">
          </div>
-         <h2 id="user-name" class="text-2xl font-black text-brand-textMain mb-1">旅行者</h2>
+         <h2 id="user-name" class="text-2xl font-bold text-brand-textMain mb-1">旅行者</h2>
          <p id="user-email" class="text-xs text-brand-textSub font-bold mb-12 tracking-wide opacity-60"></p>
          <button id="btn-logout" class="w-full max-w-xs py-4 bg-white text-red-500 font-bold rounded-2xl border border-red-100 transition-all active:scale-95 flex items-center justify-center gap-3">
            <i class="fa-solid fa-right-from-bracket"></i> 登出帳號
@@ -155,25 +175,22 @@
       <nav id="bottom-nav" class="hidden absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 h-20 shrink-0 flex items-center justify-around px-8 z-[40]">
         <button class="nav-item flex flex-col items-center gap-1 group relative active" data-view="plans">
           <i class="fa-solid fa-calendar-check text-xl text-brand-textSub group-[.active]:text-brand-primary transition-all"></i>
-          <span class="text-[10px] font-black text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">行程列表</span>
+          <span class="text-[10px] font-bold text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">行程列表</span>
         </button>
         <button class="nav-item flex flex-col items-center gap-1 group relative" data-view="profile">
           <i class="fa-solid fa-user-gear text-xl text-brand-textSub group-[.active]:text-brand-primary transition-all"></i>
-          <span class="text-[10px] font-black text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">設定</span>
+          <span class="text-[10px] font-bold text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">設定</span>
         </button>
       </nav>
     </div>
 
   </div> <!-- End App -->
 
-  <!-- Modal Overlay -->
   <div id="modal-overlay" class="hidden fixed inset-0 z-[60] bg-slate-900/10 backdrop-blur-[1px] transition-opacity"></div>
   
-  <!-- Sheet Form (白色彈窗有陰影) -->
   <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[61] bg-white rounded-t-[40px] max-h-[90vh] flex flex-col max-w-md mx-auto overflow-hidden border-t border-slate-100 shadow-floating-sheet">
      <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
      <div id="sheet-content" class="p-8 pt-4 overflow-y-auto hide-scrollbar">
-       <!-- JS 注入內容 -->
      </div>
   </div>
 
@@ -203,7 +220,6 @@
       { id: 'walk', label: '步行', icon: 'fa-solid fa-person-walking' },
       { id: 'plane', label: '飛機', icon: 'fa-solid fa-plane' }
     ];
-
     const LOCATION_MODES = [
       { id: 'spot', label: '景點', icon: 'fa-solid fa-location-dot' },
       { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
@@ -269,8 +285,8 @@
             <i class="fa-solid fa-plane-up text-3xl opacity-30"></i>
           </div>
           <div class="flex-1 p-6 flex flex-col justify-center overflow-hidden">
-            <h3 class="font-black text-brand-textMain text-lg truncate tracking-tight">${plan.title}</h3>
-            <p class="text-[10px] text-brand-primary mt-1 font-black uppercase tracking-widest opacity-80">${plan.startDate} · ${plan.days} DAYS</p>
+            <h3 class="font-bold text-brand-textMain text-lg truncate tracking-tight">${plan.title}</h3>
+            <p class="text-[10px] text-brand-primary mt-1 font-bold uppercase tracking-widest opacity-80">${plan.startDate} · ${plan.days} DAYS</p>
           </div>
           <div class="px-6 flex items-center text-slate-300"><i class="fa-solid fa-angle-right"></i></div>
         </div>
@@ -290,7 +306,7 @@
       let tabsHtml = '';
       for (let i = 1; i <= plan.days; i++) {
         const active = state.activeDay === i;
-        tabsHtml += `<button onclick="state.activeDay = ${i}; openPlan('${plan.id}')" class="snap-start shrink-0 px-6 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all border ${active ? 'bg-brand-primary text-white border-brand-primary' : 'bg-slate-50 text-brand-textSub border-slate-100'}">Day ${i}</button>`;
+        tabsHtml += `<button onclick="state.activeDay = ${i}; openPlan('${plan.id}')" class="snap-start shrink-0 px-6 py-2.5 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all border ${active ? 'bg-brand-primary text-white border-brand-primary' : 'bg-slate-50 text-brand-textSub border-slate-100'}">Day ${i}</button>`;
       }
       tabs.innerHTML = tabsHtml;
 
@@ -309,7 +325,7 @@
         if (item.type === 'location') {
           html += `
             <div class="relative flex group py-5 cursor-pointer" onclick="editItem('${item.id}', 'location')">
-              <div class="w-[76px] shrink-0 text-right pr-5 pt-[2px] flex flex-col font-black font-mono text-brand-textMain text-[15px] leading-tight tracking-tighter opacity-80">
+              <div class="w-[76px] shrink-0 text-right pr-5 pt-[2px] flex flex-col font-bold font-mono text-brand-textMain text-[15px] leading-tight tracking-tighter opacity-80">
                 <span>${item.timeStart}</span>
                 ${item.timeEnd ? `<span class="opacity-20 text-[12px]">${item.timeEnd}</span>` : ''}
               </div>
@@ -319,8 +335,8 @@
               </div>
               <div class="flex-1 pl-5">
                 <div class="flex items-center gap-2">
-                   <h4 class="font-black text-brand-textMain text-lg tracking-tight">${item.name}</h4>
-                   ${item.isThrough ? '<span class="text-[9px] font-black uppercase text-white bg-brand-primary px-2 py-0.5 rounded tracking-widest">Through</span>' : ''}
+                   <h4 class="font-bold text-brand-textMain text-lg tracking-tight">${item.name}</h4>
+                   ${item.isThrough ? '<span class="text-[9px] font-bold uppercase text-white bg-brand-primary px-2 py-0.5 rounded tracking-widest">Through</span>' : ''}
                 </div>
                 ${item.subtitle ? `<p class="text-xs font-bold text-brand-textSub mt-1.5 leading-relaxed opacity-60">${item.subtitle}</p>` : ''}
               </div>
@@ -333,11 +349,11 @@
           const modeObj = TRANSPORT_MODES.find(m => m.id === item.mode) || TRANSPORT_MODES[0];
           html += `
             <div class="relative flex group items-stretch cursor-pointer" onclick="editItem('${item.id}', 'transport')">
-              <div class="w-[76px] shrink-0 text-right pr-5 py-7 flex flex-col justify-between items-end font-black font-mono text-brand-textMain text-[15px] tracking-tighter opacity-80">
+              <div class="w-[76px] shrink-0 text-right pr-5 py-7 flex flex-col justify-between items-end font-bold font-mono text-brand-textMain text-[15px] tracking-tighter opacity-80">
                 <span class="${showStart ? '' : 'opacity-0'}">${item.timeStart}</span>
                 <div class="flex flex-col items-end my-2">
-                   <span class="text-[11px] font-black text-brand-textSub uppercase tracking-widest opacity-40">${item.duration || ''}</span>
-                   ${item.extraInfo ? `<span class="text-[10px] font-black text-brand-primary flex items-center mt-1 tracking-widest uppercase">${item.extraInfo}<i class="fa-solid fa-caret-down ml-1 text-[8px] opacity-30"></i></span>` : ''}
+                   <span class="text-[11px] font-bold text-brand-textSub uppercase tracking-widest opacity-40">${item.duration || ''}</span>
+                   ${item.extraInfo ? `<span class="text-[10px] font-bold text-brand-primary flex items-center mt-1 tracking-widest uppercase">${item.extraInfo}<i class="fa-solid fa-caret-down ml-1 text-[8px] opacity-30"></i></span>` : ''}
                 </div>
                 <span class="${showEnd ? '' : 'opacity-0'}">${item.timeEnd || ''}</span>
               </div>
@@ -349,9 +365,9 @@
                    <div class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 text-brand-primary flex items-center justify-center shrink-0">
                      <i class="${modeObj.icon} text-sm"></i>
                    </div>
-                   <span class="text-[11px] font-black uppercase tracking-widest text-brand-primary">${item.operator || ''} ${item.vehicleNo || ''}</span>
+                   <span class="text-[11px] font-bold uppercase tracking-widest text-brand-primary">${item.operator || ''} ${item.vehicleNo || ''}</span>
                  </div>
-                 <h4 class="font-black text-brand-textMain text-lg ml-[40px] tracking-tight">${item.name || ''} ${item.direction ? `(${item.direction})` : ''}</h4>
+                 <h4 class="font-bold text-brand-textMain text-lg ml-[40px] tracking-tight">${item.name || ''} ${item.direction ? `(${item.direction})` : ''}</h4>
               </div>
             </div>`;
         }
@@ -369,48 +385,48 @@
 
       if (type === 'plan-info') {
         content.innerHTML = `
-          <h3 class="text-2xl font-black mb-8 text-brand-textMain tracking-tight text-center">行程細節</h3>
+          <h3 class="text-2xl font-bold mb-8 text-brand-textMain tracking-tight text-center">行程細節</h3>
           <div class="space-y-6">
-            <div><label class="text-[10px] font-black text-brand-textSub block mb-2 uppercase tracking-[2px]">名稱</label><input id="f-title" type="text" value="${plan.title}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-black text-lg"></div>
+            <div><label class="text-[10px] font-bold text-brand-textSub block mb-2 uppercase tracking-[2px]">名稱</label><input id="f-title" type="text" value="${plan.title}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-bold text-lg"></div>
             <div class="flex gap-4">
-              <div class="flex-1"><label class="text-[10px] font-black text-brand-textSub block mb-2 uppercase tracking-[2px]">日期</label><input id="f-date" type="date" value="${plan.startDate}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-mono font-bold"></div>
-              <div class="w-28"><label class="text-[10px] font-black text-brand-textSub block mb-2 uppercase tracking-[2px]">天數</label><input id="f-days" type="number" value="${plan.days}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-black text-center"></div>
+              <div class="flex-1"><label class="text-[10px] font-bold text-brand-textSub block mb-2 uppercase tracking-[2px]">日期</label><input id="f-date" type="date" value="${plan.startDate}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-mono font-bold"></div>
+              <div class="w-28"><label class="text-[10px] font-bold text-brand-textSub block mb-2 uppercase tracking-[2px]">天數</label><input id="f-days" type="number" value="${plan.days}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-bold text-center"></div>
             </div>
-            <button onclick="updatePlanInfo()" class="w-full bg-brand-primary text-white py-5 rounded-[24px] font-black text-lg mt-6 active:scale-[0.98]">儲存</button>
-            <button onclick="deletePlan()" class="w-full py-4 text-red-500 font-bold opacity-30 hover:opacity-100 text-xs tracking-widest uppercase">刪除行程</button>
+            <button onclick="updatePlanInfo()" class="w-full bg-brand-primary text-white py-5 rounded-[24px] font-bold text-lg mt-6 active:scale-[0.98]">儲存</button>
+            <button onclick="deletePlan()" class="w-full py-4 text-red-500 font-bold opacity-30 text-xs tracking-widest uppercase">刪除行程</button>
           </div>
         `;
       } else {
         const isLoc = type === 'location';
         content.innerHTML = `
-          <h3 class="text-2xl font-black mb-8 text-brand-textMain tracking-tight text-center">${item ? '編輯' : '新增'}${isLoc ? '地點' : '交通'}</h3>
+          <h3 class="text-2xl font-bold mb-8 text-brand-textMain tracking-tight text-center">${item ? '編輯' : '新增'}${isLoc ? '地點' : '交通'}</h3>
           <div class="space-y-6">
             <div class="flex gap-4">
-              <div class="flex-1"><label class="text-[10px] font-black text-brand-textSub uppercase tracking-[2px] mb-2 block">起始</label><input id="f-start" type="time" value="${item?.timeStart || '08:00'}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-black text-xl font-mono"></div>
-              <div class="flex-1"><label class="text-[10px] font-black text-brand-textSub uppercase tracking-[2px] mb-2 block">到達</label><input id="f-end" type="time" value="${item?.timeEnd || ''}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-black text-xl font-mono"></div>
+              <div class="flex-1"><label class="text-[10px] font-bold text-brand-textSub uppercase tracking-[2px] mb-2 block">起始</label><input id="f-start" type="time" value="${item?.timeStart || '08:00'}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-bold text-xl font-mono"></div>
+              <div class="flex-1"><label class="text-[10px] font-bold text-brand-textSub uppercase tracking-[2px] mb-2 block">到達</label><input id="f-end" type="time" value="${item?.timeEnd || ''}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none font-bold text-xl font-mono"></div>
             </div>
             ${isLoc ? `
               <div class="grid grid-cols-5 gap-3">
                 ${LOCATION_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-14 rounded-2xl border border-slate-200 flex items-center justify-center transition-all ${item?.locMode === m.id ? 'active-mode' : (isLoc && m.id==='spot' && !item ? 'active-mode' : '')}"><i class="${m.icon} text-lg"></i></button>`).join('')}
               </div>
-              <input id="f-name" type="text" placeholder="名稱" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none font-black text-lg">
+              <input id="f-name" type="text" placeholder="名稱" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none font-bold text-lg">
               <textarea id="f-sub" placeholder="備註..." class="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none text-sm font-bold h-24">${item?.subtitle || ''}</textarea>
-              <label class="flex items-center gap-4 text-sm font-black text-brand-textMain cursor-pointer p-2"><input type="checkbox" id="f-through" ${item?.isThrough ? 'checked' : ''} class="w-6 h-6 accent-brand-primary"> 直通不換車</label>
+              <label class="flex items-center gap-4 text-sm font-bold text-brand-textMain cursor-pointer p-2"><input type="checkbox" id="f-through" ${item?.isThrough ? 'checked' : ''} class="w-6 h-6 accent-brand-primary"> 直通不換車</label>
             ` : `
               <div class="grid grid-cols-5 gap-3">
                 ${TRANSPORT_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-14 rounded-2xl border border-slate-200 flex items-center justify-center transition-all ${item?.mode === m.id ? 'active-mode' : (!isLoc && m.id==='train' && !item ? 'active-mode' : '')}"><i class="${m.icon} text-lg"></i></button>`).join('')}
               </div>
               <div class="flex gap-3">
-                <input id="f-op" type="text" placeholder="業者" value="${item?.operator || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-black text-sm">
-                <input id="f-veh" type="text" placeholder="班次" value="${item?.vehicleNo || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-black text-sm">
+                <input id="f-op" type="text" placeholder="業者" value="${item?.operator || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-bold text-sm">
+                <input id="f-veh" type="text" placeholder="班次" value="${item?.vehicleNo || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-bold text-sm">
               </div>
-              <input id="f-name" type="text" placeholder="目的地或路線" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none font-black text-lg">
+              <input id="f-name" type="text" placeholder="目的地或路線" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none font-bold text-lg">
               <div class="flex gap-3">
-                <input id="f-dur" type="text" placeholder="耗時" value="${item?.duration || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-black text-sm">
-                <input id="f-extra" type="text" placeholder="站數" value="${item?.extraInfo || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-black text-sm">
+                <input id="f-dur" type="text" placeholder="耗時" value="${item?.duration || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-bold text-sm">
+                <input id="f-extra" type="text" placeholder="站數" value="${item?.extraInfo || ''}" class="flex-1 bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-bold text-sm">
               </div>
             `}
-            <button onclick="saveItem('${itemId}', '${type}')" class="w-full ${isLoc ? 'bg-brand-textMain' : 'bg-brand-primary'} text-white py-5 rounded-[24px] font-black text-lg mt-6 active:scale-95 transition-all">儲存並同步</button>
+            <button onclick="saveItem('${itemId}', '${type}')" class="w-full ${isLoc ? 'bg-brand-textMain' : 'bg-brand-primary'} text-white py-5 rounded-[24px] font-bold text-lg mt-6 active:scale-95 transition-all">儲存並同步</button>
             ${itemId ? `<button onclick="deleteItem('${itemId}')" class="w-full py-4 text-red-500 font-bold opacity-30 text-xs tracking-[2px] uppercase">刪除</button>` : ''}
           </div>
         `;
@@ -477,7 +493,7 @@
     document.getElementById('btn-new-plan').onclick = async () => {
       const title = prompt("命名您的新計畫", "我的新旅程");
       if (title) {
-        const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), { title, days: 3, startDate: new Date().toISOString().split('T')[0], itinerary: {}, createdAt: Date.now() });
+        const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), { title, days: 3, startDate: new Date().toISOString().split('T')[0], itinerary: {}, createdAt: serverTimestamp() });
         openPlan(docRef.id);
       }
     };
