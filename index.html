@@ -56,8 +56,9 @@
     .custom-checkbox input:checked + div { background-color: #748CAB; border-color: #748CAB; }
     .custom-checkbox input:checked + div i { opacity: 1; }
 
-    /* iPhone 底部安全距離適配 */
+    /* 安全邊距適配 (解決不明空白區塊的問題) */
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
@@ -67,11 +68,12 @@
     <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg">成功！</span>
   </div>
 
-  <!-- APP 容器 (原汁原味單欄) -->
+  <!-- APP 容器 -->
   <div id="app" class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
 
     <!-- 共用 HEADER (首頁 / 會員 / 設定) -->
-    <header id="header-standard" class="hidden bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+    <!-- 改用 pt-safe 動態抓取頂部安全距離 -->
+    <header id="header-standard" class="hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
       <div>
         <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest">My Trip</p>
         <h1 id="header-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">載入中...</h1>
@@ -81,18 +83,18 @@
       </button>
     </header>
 
-    <!-- 行程專屬 HEADER (居中設計 - 字級調小) -->
-    <header id="header-itinerary" class="hidden bg-brand-bg pt-12 pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
-      <button onclick="switchView('plans')" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
+    <!-- 行程專屬 HEADER -->
+    <header id="header-itinerary" class="hidden bg-brand-bg pt-safe pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
+      <!-- 修正：改用 ID 綁定，避免 JS 讀不到全域變數 -->
+      <button id="btn-itinerary-back" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
         <i class="fa-solid fa-chevron-left text-xl"></i>
       </button>
       <div class="flex-1 flex flex-col items-center justify-center text-center px-2 truncate">
-        <!-- 字級 18px -> 16px -->
         <h1 id="header-itinerary-title" class="text-[16px] font-extrabold text-brand-dark tracking-tight truncate w-full">載入中...</h1>
-        <!-- 字級 12px -> 11px -->
         <p id="header-itinerary-subtitle" class="text-[11px] font-bold text-brand-textSub mt-0.5">--</p>
       </div>
-      <button onclick="openSetup(state.currentPlanId)" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
+      <!-- 修正：改用 ID 綁定 -->
+      <button id="btn-itinerary-setup" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
         <i class="fa-solid fa-gear text-xl"></i>
       </button>
     </header>
@@ -222,8 +224,8 @@
       <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-20 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       </div>
       
-      <!-- 合併後的 FAB (Floating Action Button) 浮動按鈕 -->
-      <div class="absolute bottom-6 right-6 z-20 pointer-events-none">
+      <!-- 加上 ID 以便在總覽頁面時隱藏 -->
+      <div id="fab-container" class="absolute bottom-6 right-6 z-20 pointer-events-none">
         <button id="btn-fab-add" class="pointer-events-auto w-14 h-14 bg-brand-primary text-brand-card rounded-full shadow-lg shadow-brand-primary/30 flex items-center justify-center text-2xl hover:bg-brand-dark active:scale-95 transition-all">
           <i class="fa-solid fa-plus"></i>
         </button>
@@ -462,7 +464,7 @@
     ];
 
     let state = {
-      user: null, plans: [], currentPlanId: null, activeDay: 1, modalMode: null, itemType: 'location', editingId: null,
+      user: null, plans: [], currentPlanId: null, activeDay: 0, modalMode: null, itemType: 'location', editingId: null,
       formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false },
       tripData: { title: '', startDate: '', days: 3, accommodation: '', airportDept: '', airportArr: '', flightOut: '', flightRet: '', itinerary: {} }
     };
@@ -608,7 +610,7 @@
       
       // 未登入時顯示鎖定畫面
       if (!state.user) {
-        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-lock text-6xl mb-6"></i><p class="font-bold">請先至會員中心登入<br>以建立或查看行程</p></div>`;
+        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-lock text-6xl mb-6"></i><p class="font-bold mt-2">請先至會員中心登入<br>以建立或查看行程</p></div>`;
         return;
       }
 
@@ -632,7 +634,7 @@
     window.openPlan = (id) => { 
       if(!state.user) { showToast('請先至會員中心登入'); switchView('profile'); return; }
       state.currentPlanId = id; 
-      state.activeDay = 1; 
+      state.activeDay = 0; // 預設進入總覽
       state.tripData = state.plans.find(p => p.id === id) || state.tripData;
       renderItinerary(); 
       switchView('itinerary'); 
@@ -698,13 +700,24 @@
     function renderDaysTabs() {
       const tabs = document.getElementById('days-tabs');
       tabs.innerHTML = '';
+
+      // 新增：總覽 Tab (activeDay = 0)
+      const isOverview = state.activeDay === 0;
+      const btnOverview = document.createElement('button');
+      btnOverview.className = `snap-start shrink-0 px-5 py-2.5 rounded-full font-bold transition-all duration-200 border ${
+        isOverview ? 'bg-brand-primary text-brand-card border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-brand-card text-brand-textSub border-brand-light hover:bg-brand-light/50'}`;
+      btnOverview.innerHTML = `<div class="flex items-center gap-2"><span class="text-[12px]">總覽</span></div>`;
+      btnOverview.onclick = () => { state.activeDay = 0; renderDaysTabs(); renderTimeline(); };
+      tabs.appendChild(btnOverview);
+
+      // 其他天數 Tab
       for (let i = 1; i <= state.tripData.days; i++) {
         const isActive = state.activeDay === i;
         const btn = document.createElement('button');
         btn.className = `snap-start shrink-0 px-5 py-2.5 rounded-full font-bold transition-all duration-200 border ${
           isActive ? 'bg-brand-primary text-brand-card border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-brand-card text-brand-textSub border-brand-light hover:bg-brand-light/50'}`;
         // 字級：12px -> 11px, 14px -> 12px
-        btn.innerHTML = `<div class="flex items-center gap-2"><span class="text-[11px] opacity-80">Day ${i}</span><span class="text-xs">${getDayDateString(i)}</span></div>`;
+        btn.innerHTML = `<div class="flex items-center gap-2"><span class="text-[11px] opacity-80">Day ${i}</span><span class="text-[12px]">${getDayDateString(i)}</span></div>`;
         btn.onclick = () => { state.activeDay = i; renderDaysTabs(); renderTimeline(); };
         tabs.appendChild(btn);
       }
@@ -727,11 +740,53 @@
 
     function renderTimeline() {
       const container = document.getElementById('timeline-container');
-      const items = state.tripData.itinerary[state.activeDay] || [];
+      const plan = state.tripData;
+      
+      // 如果是總覽頁 (activeDay === 0)
+      if (state.activeDay === 0) {
+        document.getElementById('fab-container').classList.add('hidden'); // 隱藏新增按鈕
+        container.innerHTML = `
+          <div class="px-2 py-2 space-y-4">
+            
+            <div class="bg-brand-bg border border-brand-light rounded-[24px] p-6 shadow-sm relative overflow-hidden">
+               <div class="absolute top-[-10px] right-[-10px] p-4 opacity-[0.03] text-brand-primary"><i class="fa-solid fa-plane text-8xl"></i></div>
+               <h3 class="text-[14px] font-extrabold text-brand-dark mb-4 flex items-center gap-2"><i class="fa-solid fa-plane-departure text-brand-primary"></i> 航班資訊</h3>
+               <div class="space-y-4 relative z-10">
+                  <div>
+                     <p class="text-[11px] text-brand-textSub font-bold mb-0.5">去程航班</p>
+                     <p class="text-[15px] font-bold text-brand-textMain">${plan.flightOut || '<span class="text-brand-textSub/50 font-normal">未設定</span>'}</p>
+                     <p class="text-[12px] text-brand-textSub mt-0.5">${plan.airportDept || '出發地'} <i class="fa-solid fa-arrow-right mx-1 text-[10px]"></i> ${plan.airportArr || '目的地'}</p>
+                  </div>
+                  <div class="w-full h-[1px] bg-brand-light/70"></div>
+                  <div>
+                     <p class="text-[11px] text-brand-textSub font-bold mb-0.5">回程航班</p>
+                     <p class="text-[15px] font-bold text-brand-textMain">${plan.flightRet || '<span class="text-brand-textSub/50 font-normal">未設定</span>'}</p>
+                     <p class="text-[12px] text-brand-textSub mt-0.5">${plan.airportArr || '目的地'} <i class="fa-solid fa-arrow-right mx-1 text-[10px]"></i> ${plan.airportDept || '出發地'}</p>
+                  </div>
+               </div>
+            </div>
+
+            <div class="bg-brand-bg border border-brand-light rounded-[24px] p-6 shadow-sm relative overflow-hidden mb-8">
+               <div class="absolute top-[-5px] right-0 p-4 opacity-[0.03] text-brand-accent"><i class="fa-solid fa-hotel text-7xl"></i></div>
+               <h3 class="text-[14px] font-extrabold text-brand-dark mb-4 flex items-center gap-2"><i class="fa-solid fa-bed text-brand-accent"></i> 住宿資訊</h3>
+               <div class="relative z-10">
+                  <p class="text-[11px] text-brand-textSub font-bold mb-0.5">預設住宿地點</p>
+                  <p class="text-[15px] font-bold text-brand-textMain leading-snug">${plan.accommodation || '<span class="text-brand-textSub/50 font-normal">未設定</span>'}</p>
+               </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 一般行程天數
+      document.getElementById('fab-container').classList.remove('hidden'); // 顯示新增按鈕
+      
+      const items = plan.itinerary[state.activeDay] || [];
       container.innerHTML = '';
 
       if (items.length === 0) {
-        container.innerHTML = `<div class="flex flex-col items-center justify-center h-48 mt-12 text-brand-textSub"><div class="w-16 h-16 bg-brand-bg border border-brand-light rounded-full flex items-center justify-center mb-4 shadow-sm"><i class="fa-solid fa-calendar-day text-2xl text-brand-primary"></i></div><p class="font-bold">這一天尚未安排行程</p></div>`;
+        container.innerHTML = `<div class="flex flex-col items-center justify-center h-48 mt-12 text-brand-textSub"><div class="w-16 h-16 bg-brand-bg border border-brand-light rounded-full flex items-center justify-center mb-4 shadow-sm"><i class="fa-solid fa-calendar-day text-2xl text-brand-primary"></i></div><p class="font-bold text-[14px]">這一天尚未安排行程</p></div>`;
         return;
       }
 
@@ -1009,6 +1064,14 @@
 
     function setupEventListeners() {
       
+      // 綁定行程專屬頁首按鈕 (解決失效問題)
+      document.getElementById('btn-itinerary-back').addEventListener('click', () => {
+        window.switchView('plans');
+      });
+      document.getElementById('btn-itinerary-setup').addEventListener('click', () => {
+        window.openSetup(state.currentPlanId);
+      });
+
       document.getElementById('form-setup').addEventListener('submit', async (e) => {
         e.preventDefault();
         const planData = {
