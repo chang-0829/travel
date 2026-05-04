@@ -143,7 +143,7 @@
     <!-- VIEW: SETUP -->
     <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar">
       <form id="form-setup" class="space-y-6 mt-4">
-        <!-- 省略部分不變的 SETUP 內容，直接沿用舊版的 -->
+        
         <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm space-y-3">
           <div>
             <label class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">行程名稱 <span class="text-brand-primary">*</span></label>
@@ -172,7 +172,31 @@
               <div class="grid grid-cols-2 gap-2.5">
                 <div>
                   <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
-                  <input type="text" id="setup-flight-out-airline" placeholder="例: 長榮" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <div class="relative">
+                    <select id="setup-flight-out-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
+                      <option value="" disabled selected>請選擇航空公司</option>
+                      <option value="中華航空">中華航空</option>
+                      <option value="長榮航空">長榮航空</option>
+                      <option value="星宇航空">星宇航空</option>
+                      <option value="華信航空">華信航空</option>
+                      <option value="台灣虎航">台灣虎航</option>
+                      <option value="全日空">全日空</option>
+                      <option value="日本航空">日本航空</option>
+                      <option value="日本越洋航空">日本越洋航空</option>
+                      <option value="星悅航空">星悅航空</option>
+                      <option value="國泰航空">國泰航空</option>
+                      <option value="聯合航空">聯合航空</option>
+                      <option value="菲律賓航空">菲律賓航空</option>
+                      <option value="樂桃航空">樂桃航空</option>
+                      <option value="捷星日本">捷星日本</option>
+                      <option value="酷航">酷航</option>
+                      <option value="亞洲航空">亞洲航空</option>
+                      <option value="泰國獅子航空">泰國獅子航空</option>
+                      <option value="泰越捷航空">泰越捷航空</option>
+                      <option value="峇迪航空">峇迪航空</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
+                  </div>
                 </div>
                 <div>
                   <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
@@ -204,7 +228,31 @@
               <div class="grid grid-cols-2 gap-2.5">
                 <div>
                   <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
-                  <input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <div class="relative">
+                    <select id="setup-flight-ret-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
+                      <option value="" disabled selected>請選擇航空公司</option>
+                      <option value="中華航空">中華航空</option>
+                      <option value="長榮航空">長榮航空</option>
+                      <option value="星宇航空">星宇航空</option>
+                      <option value="華信航空">華信航空</option>
+                      <option value="台灣虎航">台灣虎航</option>
+                      <option value="全日空">全日空</option>
+                      <option value="日本航空">日本航空</option>
+                      <option value="日本越洋航空">日本越洋航空</option>
+                      <option value="星悅航空">星悅航空</option>
+                      <option value="國泰航空">國泰航空</option>
+                      <option value="聯合航空">聯合航空</option>
+                      <option value="菲律賓航空">菲律賓航空</option>
+                      <option value="樂桃航空">樂桃航空</option>
+                      <option value="捷星日本">捷星日本</option>
+                      <option value="酷航">酷航</option>
+                      <option value="亞洲航空">亞洲航空</option>
+                      <option value="泰國獅子航空">泰國獅子航空</option>
+                      <option value="泰越捷航空">泰越捷航空</option>
+                      <option value="峇迪航空">峇迪航空</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
+                  </div>
                 </div>
                 <div>
                   <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
@@ -331,18 +379,13 @@
       <!-- 表單滾動內容區 (淺灰底 + 白卡片) -->
       <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
         
-        <!-- 時間卡片 -->
-        <div class="form-card">
-          <div class="form-row items-center">
-            <div>
-              <span class="form-label">開始時間</span>
-              <input type="time" id="input-time-start" class="form-input text-center">
-            </div>
-            <span class="text-brand-light font-bold text-lg">-</span>
-            <div>
-              <span class="form-label">結束時間</span>
-              <input type="time" id="input-time-end" class="form-input text-center">
-            </div>
+        <!-- 時間卡片 (全新樣式解決破圖問題) -->
+        <div class="bg-[#F8FAFC] border border-brand-light/80 rounded-[16px] p-4 shadow-sm">
+          <span class="block text-[13px] font-bold text-brand-textSub mb-2 pl-1">時間 <span class="text-brand-primary">*</span></span>
+          <div class="flex items-center justify-center gap-4">
+            <input type="time" id="input-time-start" class="bg-transparent text-[22px] font-extrabold text-brand-dark outline-none text-center appearance-none w-[130px]">
+            <span class="text-brand-textSub/60 font-extrabold text-xl">-</span>
+            <input type="time" id="input-time-end" class="bg-transparent text-[22px] font-extrabold text-brand-dark outline-none text-center appearance-none w-[130px]">
           </div>
         </div>
 
@@ -398,7 +441,34 @@
             <!-- 航班專屬 -->
             <div id="group-flight-fields" class="space-y-3 hidden">
               <div class="form-row">
-                <div><span class="form-label">航空公司</span><input type="text" id="input-flight-airline" placeholder="例: 長榮" class="form-input"></div>
+                <div>
+                  <span class="form-label">航空公司</span>
+                  <div class="relative">
+                    <select id="input-flight-airline" class="form-input appearance-none pr-8">
+                      <option value="" disabled selected>請選擇</option>
+                      <option value="中華航空">中華航空</option>
+                      <option value="長榮航空">長榮航空</option>
+                      <option value="星宇航空">星宇航空</option>
+                      <option value="華信航空">華信航空</option>
+                      <option value="台灣虎航">台灣虎航</option>
+                      <option value="全日空">全日空</option>
+                      <option value="日本航空">日本航空</option>
+                      <option value="日本越洋航空">日本越洋航空</option>
+                      <option value="星悅航空">星悅航空</option>
+                      <option value="國泰航空">國泰航空</option>
+                      <option value="聯合航空">聯合航空</option>
+                      <option value="菲律賓航空">菲律賓航空</option>
+                      <option value="樂桃航空">樂桃航空</option>
+                      <option value="捷星日本">捷星日本</option>
+                      <option value="酷航">酷航</option>
+                      <option value="亞洲航空">亞洲航空</option>
+                      <option value="泰國獅子航空">泰國獅子航空</option>
+                      <option value="泰越捷航空">泰越捷航空</option>
+                      <option value="峇迪航空">峇迪航空</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
+                  </div>
+                </div>
                 <div><span class="form-label">航班編號</span><input type="text" id="input-flight-no" placeholder="例: BR192" class="form-input"></div>
               </div>
               <div class="form-row">
@@ -416,7 +486,7 @@
               <div><span class="form-label text-brand-primary">路線名稱 *</span><input type="text" id="input-route-name" placeholder="例: 關西機場線" class="form-input"></div>
               <div><span class="form-label">方向 (選填)</span><input type="text" id="input-direction" placeholder="例: 往天王寺" class="form-input"></div>
               <div class="form-row">
-                <div><span class="form-label">花費時間</span><input type="text" id="input-duration" placeholder="例: 1小時4分" class="form-input"></div>
+                <div><span class="form-label">花費時間</span><input type="text" id="input-duration" placeholder="例: 1時4分" class="form-input"></div>
                 <div><span class="form-label">經過站數</span><input type="text" id="input-extraInfo" placeholder="例: 9站" class="form-input"></div>
               </div>
             </div>
@@ -582,6 +652,16 @@
     function safeSet(id, val) {
         const el = document.getElementById(id);
         if (el) { el.value = val; }
+    }
+
+    // 防護舊有資料的 Select 更新方法
+    function safeSetSelect(id, val) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (val && !Array.from(el.options).some(opt => opt.value === val)) {
+            el.add(new Option(val, val)); // 允許舊有的自訂航空顯示
+        }
+        el.value = val || '';
     }
 
     window.toggleEditMode = function() {
@@ -776,13 +856,13 @@
       safeSet('setup-title', state.tripData.title || ''); 
       safeSet('setup-start-date', state.tripData.startDate || '');
       safeSet('setup-days', state.tripData.days || 3); 
-      safeSet('setup-flight-out-airline', state.tripData.flightOutAirline || ''); 
+      safeSetSelect('setup-flight-out-airline', state.tripData.flightOutAirline || ''); 
       safeSet('setup-flight-out-no', state.tripData.flightOutNo || ''); 
       safeSet('setup-flight-out-dept-loc', state.tripData.flightOutDeptLoc || ''); 
       safeSet('setup-flight-out-arr-loc', state.tripData.flightOutArrLoc || ''); 
       safeSet('setup-flight-out-dept-time', state.tripData.flightOutDeptTime || ''); 
       safeSet('setup-flight-out-arr-time', state.tripData.flightOutArrTime || ''); 
-      safeSet('setup-flight-ret-airline', state.tripData.flightRetAirline || ''); 
+      safeSetSelect('setup-flight-ret-airline', state.tripData.flightRetAirline || ''); 
       safeSet('setup-flight-ret-no', state.tripData.flightRetNo || ''); 
       safeSet('setup-flight-ret-dept-loc', state.tripData.flightRetDeptLoc || ''); 
       safeSet('setup-flight-ret-arr-loc', state.tripData.flightRetArrLoc || ''); 
@@ -815,15 +895,14 @@
       let diff = endMin - startMin;
       let h = Math.floor(diff / 60);
       let m = diff % 60;
-      if (h > 0 && m > 0) return `${h}小時${m}分`;
-      if (h > 0) return `${h}小時`;
-      return `${m}分鐘`;
+      if (h > 0 && m > 0) return `${h}時${m}分`;
+      if (h > 0) return `${h}時`;
+      return `${m}分`;
     }
 
-    // 將時間字串格式化，將 "小時" 後面插入換行
+    // 將時間字串格式化，將 "時" 後面插入換行
     function formatDurationHTML(str) {
       if (!str) return '';
-      // 例如將 "2小時45分" 變成 "2小時<br>45分"
       return str.replace(/(小時|時)(?!\s*$)/g, '$1<br>');
     }
 
@@ -948,7 +1027,7 @@
           </div>`;
     }
 
-    // 全新設計：交通群組詳細資訊 Modal (無縫時間軸，不再破圖，編輯模式支援選項)
+    // 交通群組詳細資訊 Modal
     window.viewTransit = function(itemsJson) {
         const items = JSON.parse(decodeURIComponent(itemsJson));
         const container = document.getElementById('transit-detail-container');
@@ -960,7 +1039,7 @@
             const isLast = index === items.length - 1;
             const modeObj = TRANSPORT_MODES.find(m => m.id === item.mode) || TRANSPORT_MODES[1];
             
-            // 轉乘或免換乘：極簡節點呈現
+            // 轉乘或免換乘
             if (item.type === 'location' && (item.isTransfer || item.isThrough)) {
                 let typeColorClass = item.isTransfer ? 'text-[#E76F51]' : 'text-brand-primary';
                 let bgLightClass = item.isTransfer ? 'bg-[#E76F51]/10' : 'bg-brand-primary/10';
@@ -992,11 +1071,20 @@
                 </div>
                 `;
             } 
-            // 實際交通工具：顯示卡片
+            // 實際交通工具
             else {
                 let titleLine = `${item.operator || ''} ${item.vehicleNo || ''}`.trim();
                 let routeStr = item.name ? item.name.replace(/\n/g, ' ') : '';
-                if(item.direction) routeStr += ` (${item.direction})`;
+                
+                // 判斷若為航班，將降落機場一起帶出
+                if (item.mode === 'flight') {
+                    if (item.subtitle) {
+                        routeStr += ` <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${item.subtitle}`;
+                    }
+                } else {
+                    if(item.direction) routeStr += ` (${item.direction})`;
+                }
+
                 if(!titleLine && !routeStr) titleLine = '未命名交通';
 
                 let extraHtml = item.extraInfo ? `<div class="text-[11px] font-bold text-brand-accent mt-1">${item.extraInfo}</div>` : '';
@@ -1044,7 +1132,6 @@
             }
         });
         
-        // 若為編輯模式，在交通群組最後增加 "+ 新增交通" 按鈕
         if (isEdit) {
             let lastTimeRef = items.length > 0 ? (items[items.length - 1].timeEnd || items[items.length - 1].timeStart || '') : '';
             html += `
@@ -1165,7 +1252,6 @@
         return;
       }
 
-      // 自動群組交通 (Transit Grouping)：編輯模式與瀏覽模式統一處理
       const grouped = [];
       let currentTransit = [];
       
@@ -1202,7 +1288,6 @@
               }
               const summary = getTransitSummary(gItems);
 
-              // 交通群組左側統一改回實線 (不再使用虛線)
               if (!isOnly) {
                   if (isFirst) lineHtml = `<div class="absolute top-[26px] bottom-0 w-[3px] bg-brand-primary z-0"></div>`;
                   else if (isLast) lineHtml = `<div class="absolute top-0 h-[26px] w-[3px] bg-brand-primary z-0"></div>`;
@@ -1238,7 +1323,6 @@
               html += generateItemHtml(groupOrItem, index, grouped, isEdit);
           }
           
-          // 在編輯模式下，若兩個「地點」之間沒有交通，顯示新增交通按鈕
           let isCurrentLoc = !groupOrItem.isGroup && groupOrItem.type === 'location' && !groupOrItem.isTransfer && !groupOrItem.isThrough;
           let nextItem = grouped[index+1];
           let nextIsLoc = !nextItem || (!nextItem.isGroup && nextItem.type === 'location' && !nextItem.isTransfer && !nextItem.isThrough);
@@ -1266,7 +1350,6 @@
       container.innerHTML = html;
     }
 
-    // 展開選單：重構為分離 地點/住宿 (main) 與 交通 (transit)
     window.showAddMenu = function(type = 'main') {
         const titleEl = document.getElementById('sheet-add-title');
         const contentEl = document.getElementById('sheet-add-content');
@@ -1476,7 +1559,6 @@
              }
          }
          
-         // 幫助排序：將交通項目的預設時間設為前一項目的時間
          if (autoFillData === 'autoTime' && state.tempTimeRef) {
              state.formData.timeStart = state.tempTimeRef;
          }
@@ -1491,7 +1573,7 @@
       } else if (subType === 'hotel') {
          safeSet('input-hotel-name', state.formData.name || ''); safeSet('input-hotel-foreign', state.formData.operator || ''); safeSet('input-hotel-address', state.formData.subtitle || '');
       } else if (subType === 'flight') {
-         safeSet('input-flight-airline', state.formData.operator || ''); safeSet('input-flight-no', state.formData.vehicleNo || '');
+         safeSetSelect('input-flight-airline', state.formData.operator || ''); safeSet('input-flight-no', state.formData.vehicleNo || '');
          safeSet('input-flight-dept', state.formData.name || ''); safeSet('input-flight-arr', state.formData.subtitle || '');
       } else if (subType === 'transport') {
          safeSet('input-operator', state.formData.operator || ''); safeSet('input-vehicle-no', state.formData.vehicleNo || '');
