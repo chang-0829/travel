@@ -42,6 +42,11 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+    
+    /* 隱藏數字輸入框的上下箭頭 */
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    
     .bottom-sheet { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .bottom-sheet.open { transform: translateY(0); }
     .bottom-sheet.closed { transform: translateY(100%); }
@@ -52,7 +57,6 @@
     textarea { resize: none; overflow: hidden; }
     .timeline-line { width: 4px; }
     
-    /* 隱藏原生 checkbox 並美化 */
     .custom-checkbox input:checked + div { background-color: #748CAB; border-color: #748CAB; }
     .custom-checkbox input:checked + div i { opacity: 1; }
 
@@ -71,7 +75,7 @@
   <!-- APP 容器 -->
   <div id="app" class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
 
-    <!-- 共用 HEADER (首頁 / 會員 / 設定) -->
+    <!-- 共用 HEADER -->
     <header id="header-standard" class="hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
       <div>
         <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">My Trip</p>
@@ -107,21 +111,27 @@
     <!-- VIEW: 會員中心 -->
     <div id="view-profile" class="hidden flex-1 overflow-y-auto px-6 hide-scrollbar flex flex-col items-center pt-12 pb-6">
       
-      <!-- 尚未登入區塊 -->
       <div id="profile-unauth" class="w-full flex flex-col items-center mt-6">
         <div class="w-20 h-20 bg-brand-primary rounded-3xl flex items-center justify-center mb-6 shadow-md shadow-brand-primary/20">
           <i class="fa-solid fa-compass text-white text-4xl"></i>
         </div>
-        <h2 class="text-2xl font-bold text-brand-dark mb-2">尚未登入</h2>
-        <p class="text-brand-textSub mb-8 text-sm">登入後即可建立並同步您的專屬行程</p>
-        <button id="btn-login-google" class="w-full bg-white border-2 border-brand-light text-brand-textMain font-bold py-4 rounded-[20px] shadow-sm hover:bg-brand-bg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Google 帳號登入
-        </button>
+        <h2 class="text-2xl font-bold text-brand-dark mb-2">登入或試用</h2>
+        <p class="text-brand-textSub mb-8 text-sm text-center">登入可跨裝置同步行程資料<br>或使用本機試用模式體驗功能</p>
+        
+        <div class="w-full space-y-3">
+          <button id="btn-login-google" class="w-full bg-white border-2 border-brand-light text-brand-textMain font-bold py-4 rounded-[20px] shadow-sm hover:bg-brand-bg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+            <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google 帳號登入
+          </button>
+          
+          <button onclick="window.handleGuestLogin()" class="w-full bg-brand-primary text-brand-card font-bold py-4 rounded-[20px] shadow-sm shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+            <i class="fa-solid fa-user-astronaut text-lg"></i>
+            先逛逛 (本機暫存模式)
+          </button>
+        </div>
       </div>
 
-      <!-- 已登入區塊 -->
-      <div id="profile-auth" class="hidden w-full flex flex-col items-center">
+      <div id="profile-auth" class="hidden w-full flex flex-col items-center mt-6">
         <div class="w-24 h-24 bg-white border-4 border-brand-light rounded-full flex items-center justify-center mb-4 text-brand-primary text-4xl shadow-md overflow-hidden relative">
           <img id="profile-pic" src="" alt="avatar" class="hidden w-full h-full object-cover">
           <i id="profile-icon" class="fa-solid fa-user"></i>
@@ -129,111 +139,111 @@
         <h2 id="profile-name" class="text-2xl font-bold text-brand-dark mb-1">User</h2>
         <p id="profile-email" class="text-sm font-bold text-brand-textSub mb-8">email@example.com</p>
         
-        <button onclick="handleSignOut()" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-lg py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-auto">
-          <i class="fa-solid fa-right-from-bracket"></i> 登出帳號
+        <button onclick="window.handleSignOut()" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-lg py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-auto">
+          <i class="fa-solid fa-right-from-bracket"></i> 登出 / 離開試用
         </button>
       </div>
     </div>
 
-    <!-- VIEW: SETUP (升級UI與分開航班填寫) -->
+    <!-- VIEW: SETUP -->
     <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar">
       <form id="form-setup" class="space-y-6 mt-4">
         
         <!-- 基本設定 -->
-        <div class="bg-white p-5 rounded-[24px] border border-brand-light shadow-sm space-y-4">
+        <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm space-y-3">
           <div>
-            <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">行程名稱 <span class="text-brand-primary">*</span></label>
+            <label class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">行程名稱 <span class="text-brand-primary">*</span></label>
             <input type="text" id="setup-title" placeholder="例：東京五日遊" required
-              class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
+              class="w-full text-[15px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
           </div>
-          <div class="flex gap-3">
-            <div class="flex-1">
-              <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">出發日期</label>
-              <input type="date" id="setup-start-date" class="w-full text-[15px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
-            </div>
-            <div class="w-24 shrink-0 relative">
-              <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">天數</label>
-              <input type="number" id="setup-days" min="1" max="30" value="3" required
-                class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl pl-4 pr-8 py-3 text-center border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
-              <span class="absolute right-3 top-[34px] text-[12px] font-bold text-brand-textSub pointer-events-none">天</span>
+          
+          <!-- 修正：日期與天數完美合併設計 -->
+          <div>
+            <label class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">出發日期與天數</label>
+            <div class="flex items-center bg-brand-bg rounded-xl border border-transparent focus-within:border-brand-primary/50 focus-within:bg-white transition-all h-[46px] overflow-hidden">
+              <input type="date" id="setup-start-date" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent px-3 py-2">
+              <div class="h-6 w-[1px] bg-brand-light"></div>
+              <div class="w-24 shrink-0 flex items-center px-3">
+                <input type="number" id="setup-days" min="1" max="30" value="3" required class="w-full text-[15px] font-bold text-brand-dark outline-none bg-transparent text-right">
+                <span class="text-[13px] font-bold text-brand-textSub shrink-0 ml-1">天</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 航班資訊 (細化為 6 欄位/單趟) -->
-        <div class="bg-white p-5 rounded-[24px] border border-brand-light shadow-sm">
-          <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
+        <!-- 航班資訊 -->
+        <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm">
+          <h3 class="text-[14px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[12px]"></i></div> 航班資訊
           </h3>
-          <div class="space-y-5">
+          <div class="space-y-4">
+            
             <!-- 去程 -->
-            <div class="p-4 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
-              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/50 pb-1 mb-2"><i class="fa-solid fa-plane-departure mr-1"></i>去程航班</label>
+            <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
+              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-departure mr-1"></i>去程</label>
               
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
-                  <input type="text" id="setup-flight-out-airline" placeholder="例: 長榮航空" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-out-airline" placeholder="例: 長榮" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
-                  <input type="text" id="setup-flight-out-no" placeholder="例: BR192" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
-                  <input type="text" id="setup-flight-out-dept-loc" placeholder="例: 桃園(TPE)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
-                </div>
-                <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
-                  <input type="text" id="setup-flight-out-arr-loc" placeholder="例: 關西(KIX)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-out-no" placeholder="例: BR192" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛時間</label>
-                  <input type="time" id="setup-flight-out-dept-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-out-dept-loc" placeholder="例: 桃園" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落時間</label>
-                  <input type="time" id="setup-flight-out-arr-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-out-arr-loc" placeholder="例: 關西" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <!-- 航班時間合併 -->
+              <div>
+                <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班時間</label>
+                <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-brand-light/50 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all shadow-sm h-[44px]">
+                  <input type="time" id="setup-flight-out-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                  <span class="text-[14px] text-brand-textSub font-bold shrink-0">-</span>
+                  <input type="time" id="setup-flight-out-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
                 </div>
               </div>
             </div>
 
             <!-- 回程 -->
-            <div class="p-4 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
-              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/50 pb-1 mb-2"><i class="fa-solid fa-plane-arrival mr-1"></i>回程航班</label>
+            <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
+              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-arrival mr-1"></i>回程</label>
               
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
-                  <input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇航空" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
-                  <input type="text" id="setup-flight-ret-no" placeholder="例: JX803" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
-                  <input type="text" id="setup-flight-ret-dept-loc" placeholder="例: 關西(KIX)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
-                </div>
-                <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
-                  <input type="text" id="setup-flight-ret-arr-loc" placeholder="例: 桃園(TPE)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-ret-no" placeholder="例: JX803" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛時間</label>
-                  <input type="time" id="setup-flight-ret-dept-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-ret-dept-loc" placeholder="例: 關西" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
                 </div>
                 <div>
-                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落時間</label>
-                  <input type="time" id="setup-flight-ret-arr-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-ret-arr-loc" placeholder="例: 桃園" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <!-- 航班時間合併 -->
+              <div>
+                <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班時間</label>
+                <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-brand-light/50 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all shadow-sm h-[44px]">
+                  <input type="time" id="setup-flight-ret-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                  <span class="text-[14px] text-brand-textSub font-bold shrink-0">-</span>
+                  <input type="time" id="setup-flight-ret-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
                 </div>
               </div>
             </div>
@@ -241,21 +251,21 @@
           </div>
         </div>
 
-        <!-- 住宿資訊 (修復破圖與優化排列) -->
-        <div class="bg-white p-5 rounded-[24px] border border-brand-light shadow-sm relative">
-          <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
+        <!-- 住宿資訊 -->
+        <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm relative">
+          <h3 class="text-[14px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center"><i class="fa-solid fa-hotel text-[12px]"></i></div> 住宿安排
           </h3>
           
-          <div id="hotel-list-container" class="space-y-4"></div>
+          <div id="hotel-list-container" class="space-y-3"></div>
 
-          <button type="button" onclick="window.addSetupHotel()" class="w-full mt-4 py-3 bg-brand-bg border border-brand-light/80 text-brand-accent font-bold rounded-[16px] hover:bg-brand-accent/5 active:scale-95 transition-all flex justify-center items-center gap-2 text-[13px] shadow-sm">
+          <button type="button" onclick="window.addSetupHotel()" class="w-full mt-3 py-3 bg-brand-bg border border-brand-light/80 text-brand-accent font-bold rounded-[16px] hover:bg-brand-accent/5 active:scale-95 transition-all flex justify-center items-center gap-2 text-[13px] shadow-sm">
             <i class="fa-solid fa-plus"></i> 新增住宿
           </button>
         </div>
 
-        <button type="submit" class="w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all mt-8 flex justify-center items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-xl"></i> 儲存並同步雲端
+        <button type="submit" class="w-full bg-brand-primary text-brand-card font-bold text-[16px] py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all mt-6 flex justify-center items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-lg"></i> 儲存行程設定
         </button>
         
         <button type="button" id="btn-delete-plan" class="hidden w-full bg-[#FFE5E5] text-[#E63946] font-bold text-[15px] py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all mt-4 flex justify-center items-center gap-2">
@@ -267,10 +277,10 @@
       <div class="mt-8 mb-8 border-t border-brand-light pt-6">
         <label class="block text-xs font-bold text-brand-textSub mb-3 pl-1">資料備份與分享</label>
         <div class="flex gap-3">
-          <button id="btn-export" type="button" class="flex-1 bg-white border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2 text-[14px]">
+          <button id="btn-export" type="button" class="flex-1 bg-white border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2 text-[13px]">
             <i class="fa-solid fa-file-export text-brand-primary"></i> 匯出行程
           </button>
-          <button id="btn-import" type="button" class="flex-1 bg-white border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2 text-[14px]">
+          <button id="btn-import" type="button" class="flex-1 bg-white border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2 text-[13px]">
             <i class="fa-solid fa-file-import text-brand-primary"></i> 匯入行程
           </button>
           <input type="file" id="input-import-file" accept=".json" class="hidden">
@@ -286,7 +296,6 @@
       <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-20 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       </div>
       
-      <!-- 浮動按鈕 FAB -->
       <div id="fab-container" class="absolute bottom-6 right-6 z-20 pointer-events-none">
         <button id="btn-fab-add" class="pointer-events-auto w-14 h-14 bg-brand-primary text-brand-card rounded-full shadow-lg shadow-brand-primary/30 flex items-center justify-center text-2xl hover:bg-brand-dark active:scale-95 transition-all">
           <i class="fa-solid fa-plus"></i>
@@ -323,14 +332,14 @@
         </button>
       </div>
       <div class="px-6 py-6 flex gap-4">
-        <button id="btn-choose-location" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
-          <div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl">
+        <button id="btn-choose-location" class="flex-1 bg-brand-bg text-brand-dark font-bold text-[15px] py-6 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl">
             <i class="fa-solid fa-location-dot"></i>
           </div>
           新增地點
         </button>
-        <button id="btn-choose-transport" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
-          <div class="w-14 h-14 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center text-2xl">
+        <button id="btn-choose-transport" class="flex-1 bg-brand-bg text-brand-dark font-bold text-[15px] py-6 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl">
             <i class="fa-solid fa-train-tram"></i>
           </div>
           新增交通
@@ -355,22 +364,19 @@
         <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label id="label-time" class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">時間 <span class="text-brand-primary">*</span></label>
           <div class="flex items-center gap-3">
-            <input type="time" id="input-time-start" required class="flex-1 text-xl font-bold text-brand-textMain outline-none bg-transparent">
+            <input type="time" id="input-time-start" required class="flex-1 text-[16px] font-bold text-brand-textMain outline-none bg-transparent text-center">
             <span class="text-brand-textSub font-bold">-</span>
-            <input type="time" id="input-time-end" class="flex-1 text-xl font-bold text-brand-textMain outline-none bg-transparent">
+            <input type="time" id="input-time-end" class="flex-1 text-[16px] font-bold text-brand-textMain outline-none bg-transparent text-center">
           </div>
-          <p id="hint-time" class="text-[10px] text-brand-textSub mt-2"></p>
         </div>
 
         <div id="quick-fill-container" class="hidden flex gap-2 overflow-x-auto hide-scrollbar"></div>
 
-        <!-- 地點專屬：地點 Icon 分類 -->
         <div id="group-location-mode" class="hidden bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">地點類型</label>
           <div id="location-modes-grid" class="grid grid-cols-3 gap-2"></div>
         </div>
 
-        <!-- 交通專屬：交通工具選擇 -->
         <div id="group-transport-mode" class="hidden bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">交通工具</label>
           <div id="transport-modes-grid" class="grid grid-cols-4 gap-2"></div>
@@ -380,7 +386,7 @@
           <div class="flex gap-3">
             <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light flex-1">
               <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider">業者名稱 <span class="text-brand-accent">*</span></label>
-              <input type="text" id="input-operator" placeholder="例：國泰航空" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60">
+              <input type="text" id="input-operator" placeholder="例：國泰" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60">
             </div>
             <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light flex-1">
               <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider">車次/班次</label>
@@ -409,16 +415,15 @@
           </div>
         </div>
 
-        <!-- 地點專屬：文字輸入 -->
         <div id="group-location-fields" class="space-y-4">
           <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
             <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider">地點名稱 <span class="text-brand-primary">*</span></label>
-            <textarea id="input-loc-name" placeholder="例：成田空港" rows="1" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" class="w-full text-lg font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60 resize-none"></textarea>
+            <textarea id="input-loc-name" placeholder="例：成田空港" rows="1" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" class="w-full text-[16px] font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60 resize-none"></textarea>
           </div>
           
           <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
             <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider">備註</label>
-            <textarea id="input-loc-subtitle" placeholder="例：記得帶票..." rows="2" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60 resize-none"></textarea>
+            <textarea id="input-loc-subtitle" placeholder="例：記得帶票..." rows="2" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" class="w-full text-[14px] font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/60 resize-none"></textarea>
           </div>
 
           <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
@@ -427,13 +432,12 @@
               <div class="w-5 h-5 rounded border-2 border-brand-textSub flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-check text-white text-[11px] opacity-0 transition-opacity"></i>
               </div>
-              <span class="text-sm font-bold text-brand-dark">設為直通 / 免換乘站 (不下車)</span>
+              <span class="text-[13px] font-bold text-brand-dark">設為直通 / 免換乘站 (不下車)</span>
             </label>
-            <p class="text-[10px] text-brand-textSub mt-1.5 ml-8 leading-relaxed">勾選後，此地點會顯示為直通引導，代表您繼續搭乘同一班車但路線或車次改變。</p>
+            <p class="text-[10px] text-brand-textSub mt-1.5 ml-8 leading-relaxed">勾選後，此地點會顯示為直通引導，代表您繼續搭乘同一班車。</p>
           </div>
         </div>
 
-        <!-- 共用：費用與幣別 -->
         <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <div class="flex justify-between items-center mb-3">
             <label class="block text-xs font-bold text-brand-textSub uppercase tracking-wider">花費金額 (選填)</label>
@@ -443,32 +447,32 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span id="display-curr-symbol" class="text-lg font-bold text-brand-textSub">¥</span>
-            <input type="number" id="input-cost" placeholder="例：970" class="w-full text-xl font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+            <span id="display-curr-symbol" class="text-[16px] font-bold text-brand-textSub">¥</span>
+            <input type="number" id="input-cost" placeholder="例：970" class="w-full text-[16px] font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
           </div>
         </div>
         
         <button id="btn-save-item" class="w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 mt-6 active:scale-95 transition-all">
-          儲存至雲端
+          完成
         </button>
       </div>
     </div>
   </div>
 
   <div id="sheet-options" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[54] flex flex-col justify-end pointer-events-none">
-    <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col">
+    <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
       <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
-        <h3 class="text-xl font-bold text-brand-dark">選項</h3>
+        <h3 class="text-[16px] font-bold text-brand-dark">選項</h3>
         <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-brand-bg rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
       <div class="px-6 py-6 space-y-3">
-        <button id="btn-option-edit" class="w-full bg-brand-bg text-brand-dark font-bold text-lg py-4 rounded-[16px] flex justify-center items-center gap-2 hover:bg-brand-light transition-colors">
+        <button id="btn-option-edit" class="w-full bg-brand-bg text-brand-dark font-bold text-[15px] py-4 rounded-[16px] flex justify-center items-center gap-2 hover:bg-brand-light transition-colors">
           <i class="fa-solid fa-pen"></i> 編輯此項目
         </button>
-        <button id="btn-option-delete" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-lg py-4 rounded-[16px] flex justify-center items-center gap-2 hover:bg-[#FFD1D1] transition-colors">
+        <button id="btn-option-delete" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-[15px] py-4 rounded-[16px] flex justify-center items-center gap-2 hover:bg-[#FFD1D1] transition-colors">
           <i class="fa-solid fa-trash-can"></i> 刪除此項目
         </button>
       </div>
@@ -522,9 +526,10 @@
     ];
 
     let state = {
-      user: null, plans: [], currentPlanId: null, activeDay: 0, modalMode: null, itemType: 'location', editingId: null,
+      user: null, 
+      isGuest: false,
+      plans: [], currentPlanId: null, activeDay: 0, modalMode: null, itemType: 'location', editingId: null,
       formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false },
-      // 新版 12 個航班欄位結構
       tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} }
     };
 
@@ -544,36 +549,70 @@
       }, 3000);
     }
 
+    window.handleGuestLogin = () => {
+      state.isGuest = true;
+      state.user = { uid: 'guest', displayName: '訪客', email: '僅儲存於此裝置瀏覽器' };
+      
+      document.getElementById('profile-auth').classList.remove('hidden');
+      document.getElementById('profile-unauth').classList.add('hidden');
+      document.getElementById('profile-name').innerText = '訪客模式';
+      document.getElementById('profile-email').innerText = '僅儲存於此瀏覽器，不會同步至雲端';
+      document.getElementById('profile-pic').classList.add('hidden');
+      document.getElementById('profile-icon').classList.remove('hidden');
+
+      const localData = localStorage.getItem('guest_plans');
+      if (localData) {
+          state.plans = JSON.parse(localData);
+      } else {
+          state.plans = [];
+      }
+      
+      showToast("已進入免登入試用模式");
+      window.switchView('plans');
+      renderPlansList();
+    };
+
     window.handleSignOut = () => {
-      signOut(auth).then(() => { showToast("已登出帳號"); });
+      if (state.isGuest) {
+          state.isGuest = false;
+          state.user = null;
+          state.plans = [];
+          document.getElementById('profile-auth').classList.add('hidden');
+          document.getElementById('profile-unauth').classList.remove('hidden');
+          showToast("已離開試用模式");
+          window.switchView('plans');
+          renderPlansList();
+      } else {
+          signOut(auth).then(() => { showToast("已登出帳號"); });
+      }
     };
 
     window.handleSetupClick = () => { window.openSetup(state.currentPlanId); };
 
-    // --- 動態新增飯店 DOM (修復破圖、拆分成上下排版) ---
     window.addSetupHotel = () => {
       const container = document.getElementById('hotel-list-container');
       const index = container.children.length;
       const html = `
-        <div class="hotel-item bg-brand-bg/60 p-4 rounded-[20px] border border-brand-light/80 relative mb-3 shadow-sm">
-          <div class="flex justify-between items-center mb-3">
-            <h4 class="text-[14px] font-extrabold text-brand-dark flex items-center gap-1.5 pl-1"><i class="fa-solid fa-bed text-brand-accent text-[12px]"></i> 住宿 ${index + 1}</h4>
-            <button type="button" onclick="this.closest('.hotel-item').remove()" class="w-7 h-7 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-[#E63946] border border-brand-light shadow-sm transition-colors"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
+        <div class="hotel-item bg-brand-bg/60 p-3 rounded-[16px] border border-brand-light/80 relative mb-3 shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-[13px] font-extrabold text-brand-dark flex items-center gap-1 pl-1"><i class="fa-solid fa-bed text-brand-accent text-[11px]"></i> 住宿 ${index + 1}</h4>
+            <button type="button" onclick="this.closest('.hotel-item').remove()" class="w-6 h-6 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-[#E63946] border border-brand-light shadow-sm transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
           </div>
-          <div class="space-y-3">
+          <div class="space-y-2">
             <div>
-              <input type="text" class="hotel-name w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="中文或常用名稱 (必填)">
-            </div>
-            <!-- 修改：將外文名稱與天數分開，避免手機窄螢幕破圖 -->
-            <div>
-              <input type="text" class="hotel-foreign w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="外文名稱 (選填)">
+              <input type="text" class="hotel-name w-full text-[13px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm" placeholder="中文或常用名稱 (必填)">
             </div>
             <div>
-              <input type="text" class="hotel-address w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="詳細地址 (選填)">
+              <input type="text" class="hotel-foreign w-full text-[13px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm" placeholder="外文名稱 (選填)">
             </div>
-            <div class="flex items-center gap-2 mt-1 px-1">
-              <span class="text-[12px] font-bold text-brand-textSub">入住</span>
-              <input type="number" min="1" value="1" class="hotel-nights w-20 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl py-2 text-center border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm">
+            <div>
+              <input type="text" class="hotel-address w-full text-[13px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm" placeholder="詳細地址 (選填)">
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[12px] font-bold text-brand-textSub pl-1">入住晚數</span>
+              <div class="flex bg-white rounded-lg border border-brand-light/50 shadow-sm overflow-hidden h-[36px] w-24">
+                 <input type="number" min="1" value="1" class="hotel-nights w-full text-[14px] font-bold text-brand-dark outline-none text-center bg-transparent">
+              </div>
               <span class="text-[12px] font-bold text-brand-textSub">晚</span>
             </div>
           </div>
@@ -600,8 +639,8 @@
       }
     };
 
-    // --- Firebase Auth & Sync ---
     onAuthStateChanged(auth, (user) => {
+      if(state.isGuest) return;
       state.user = user;
       if (user) {
         document.getElementById('profile-auth').classList.remove('hidden');
@@ -624,7 +663,7 @@
     });
 
     function listenToPlans() {
-      if (!state.user) return;
+      if (!state.user || state.isGuest) return;
       const q = collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans');
       onSnapshot(q, (snapshot) => {
         state.plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -643,7 +682,6 @@
       });
     }
 
-    // --- View Switching ---
     window.switchView = function(v) {
       ['plans', 'setup', 'itinerary', 'profile'].forEach(id => {
         const el = document.getElementById(`view-${id}`);
@@ -706,7 +744,7 @@
     function renderPlansList() {
       const container = document.getElementById('plans-list');
       if (!state.user) {
-        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-lock text-6xl mb-6"></i><p class="font-bold mt-2 text-[14px]">請先至會員中心登入<br>以建立或查看行程</p></div>`;
+        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-compass text-6xl mb-6"></i><p class="font-bold mt-2 text-[14px]">請先至會員中心登入<br>或使用免登入試用模式</p></div>`;
         return;
       }
       if (state.plans.length === 0) { 
@@ -727,7 +765,7 @@
     }
 
     window.openPlan = (id) => { 
-      if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
       state.currentPlanId = id; 
       state.activeDay = 0; 
       state.tripData = state.plans.find(p => p.id === id) || state.tripData;
@@ -736,11 +774,10 @@
     };
 
     window.createNewPlanInit = () => {
-      if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
       window.openSetup(null);
     };
 
-    // --- 開啟設定並綁定 12 個航班欄位 ---
     window.openSetup = (id = null) => {
       state.currentPlanId = id;
       if (id) {
@@ -756,7 +793,6 @@
       document.getElementById('setup-start-date').value = state.tripData.startDate || '';
       document.getElementById('setup-days').value = state.tripData.days || 3; 
       
-      // 去程
       document.getElementById('setup-flight-out-airline').value = state.tripData.flightOutAirline || ''; 
       document.getElementById('setup-flight-out-no').value = state.tripData.flightOutNo || ''; 
       document.getElementById('setup-flight-out-dept-loc').value = state.tripData.flightOutDeptLoc || ''; 
@@ -764,7 +800,6 @@
       document.getElementById('setup-flight-out-dept-time').value = state.tripData.flightOutDeptTime || ''; 
       document.getElementById('setup-flight-out-arr-time').value = state.tripData.flightOutArrTime || ''; 
       
-      // 回程
       document.getElementById('setup-flight-ret-airline').value = state.tripData.flightRetAirline || ''; 
       document.getElementById('setup-flight-ret-no').value = state.tripData.flightRetNo || ''; 
       document.getElementById('setup-flight-ret-dept-loc').value = state.tripData.flightRetDeptLoc || ''; 
@@ -777,14 +812,19 @@
     };
 
     window.deletePlan = async () => {
-      if(confirm("確定要刪除整個行程嗎？雲端資料將無法復原。")) {
-        await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId));
+      if(confirm("確定要刪除整個行程嗎？")) {
+        if(state.isGuest) {
+            state.plans = state.plans.filter(p => p.id !== state.currentPlanId);
+            localStorage.setItem('guest_plans', JSON.stringify(state.plans));
+        } else {
+            await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId));
+        }
         state.currentPlanId = null;
         window.switchView('plans');
+        if(state.isGuest) renderPlansList();
       }
     };
 
-    // --- Itinerary View ---
     function renderItinerary() {
       const formattedDate = (state.tripData.startDate || '').replace(/-/g, '/');
       document.getElementById('header-itinerary-title').innerText = state.tripData.title || '行程表';
@@ -840,16 +880,15 @@
       const container = document.getElementById('timeline-container');
       const plan = state.tripData;
       
-      // ===== 總覽畫面 (整合精細版航班) =====
       if (state.activeDay === 0) {
         document.getElementById('fab-container').classList.add('hidden');
         
-        let flightOutTitle = plan.flightOutAirline || plan.flightOutNo ? `${plan.flightOutAirline || ''} ${plan.flightOutNo || ''}`.trim() : '未設定去程';
-        let flightOutRoute = plan.flightOutDeptLoc || plan.flightOutArrLoc ? `${plan.flightOutDeptLoc || '出發'} <i class="fa-solid fa-plane text-[10px] mx-1 opacity-50"></i> ${plan.flightOutArrLoc || '降落'}` : '';
+        let flightOutTitle = plan.flightOutAirline || plan.flightOutNo ? `${plan.flightOutAirline || ''} ${plan.flightOutNo || ''}`.trim() : '未設定出發航班';
+        let flightOutRoute = plan.flightOutDeptLoc || plan.flightOutArrLoc ? `${plan.flightOutDeptLoc || '出發地'} <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${plan.flightOutArrLoc || '降落地'}` : '';
         let flightOutTimeStr = plan.flightOutDeptTime || plan.flightOutArrTime ? `${plan.flightOutDeptTime || '--:--'} - ${plan.flightOutArrTime || '--:--'}` : '';
 
-        let flightRetTitle = plan.flightRetAirline || plan.flightRetNo ? `${plan.flightRetAirline || ''} ${plan.flightRetNo || ''}`.trim() : '未設定回程';
-        let flightRetRoute = plan.flightRetDeptLoc || plan.flightRetArrLoc ? `${plan.flightRetDeptLoc || '出發'} <i class="fa-solid fa-plane text-[10px] mx-1 opacity-50"></i> ${plan.flightRetArrLoc || '降落'}` : '';
+        let flightRetTitle = plan.flightRetAirline || plan.flightRetNo ? `${plan.flightRetAirline || ''} ${plan.flightRetNo || ''}`.trim() : '未設定回程航班';
+        let flightRetRoute = plan.flightRetDeptLoc || plan.flightRetArrLoc ? `${plan.flightRetDeptLoc || '出發地'} <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${plan.flightRetArrLoc || '降落地'}` : '';
         let flightRetTimeStr = plan.flightRetDeptTime || plan.flightRetArrTime ? `${plan.flightRetDeptTime || '--:--'} - ${plan.flightRetArrTime || '--:--'}` : '';
 
         let flightHtml = `
@@ -857,18 +896,23 @@
              <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[13px]"></i></div> 航班資訊
              </h3>
-             <div class="grid grid-cols-2 gap-3">
-                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative overflow-hidden">
-                   <p class="text-[11px] text-brand-textSub font-bold mb-1.5 border-b border-brand-light pb-1">出發</p>
-                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${flightOutTitle}</p>
+             <div class="space-y-3">
+                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative">
+                   <div class="flex justify-between items-start mb-1">
+                      <p class="text-[11px] text-brand-textSub font-bold bg-white px-2 py-0.5 rounded border border-brand-light/80">出發</p>
+                      ${flightOutTimeStr ? `<p class="text-[13px] font-mono text-brand-primary font-bold mt-0.5">${flightOutTimeStr}</p>` : ''}
+                   </div>
+                   <p class="text-[15px] font-extrabold text-brand-dark truncate">${flightOutTitle}</p>
                    ${flightOutRoute ? `<p class="text-[12px] font-bold text-brand-textSub mt-1 truncate flex items-center">${flightOutRoute}</p>` : ''}
-                   ${flightOutTimeStr ? `<p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${flightOutTimeStr}</p>` : ''}
                 </div>
-                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative overflow-hidden">
-                   <p class="text-[11px] text-brand-textSub font-bold mb-1.5 border-b border-brand-light pb-1">回程</p>
-                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${flightRetTitle}</p>
+                
+                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative">
+                   <div class="flex justify-between items-start mb-1">
+                      <p class="text-[11px] text-brand-textSub font-bold bg-white px-2 py-0.5 rounded border border-brand-light/80">回程</p>
+                      ${flightRetTimeStr ? `<p class="text-[13px] font-mono text-brand-primary font-bold mt-0.5">${flightRetTimeStr}</p>` : ''}
+                   </div>
+                   <p class="text-[15px] font-extrabold text-brand-dark truncate">${flightRetTitle}</p>
                    ${flightRetRoute ? `<p class="text-[12px] font-bold text-brand-textSub mt-1 truncate flex items-center">${flightRetRoute}</p>` : ''}
-                   ${flightRetTimeStr ? `<p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${flightRetTimeStr}</p>` : ''}
                 </div>
              </div>
           </div>
@@ -876,25 +920,27 @@
 
         let accommodationsHtml = '';
         if (plan.accommodations && plan.accommodations.length > 0) {
-            accommodationsHtml = `<div class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-2 pt-1 px-1 -mx-1">`;
+            accommodationsHtml = `<div class="space-y-3">`;
             plan.accommodations.forEach((h, idx) => {
                 accommodationsHtml += `
-                  <div class="snap-start shrink-0 w-[240px] bg-brand-bg p-4 rounded-[20px] border border-brand-light/50 flex flex-col justify-between shadow-sm min-h-[120px]">
-                     <div>
-                        <div class="flex items-center gap-1.5 mb-2">
-                           <span class="w-5 h-5 rounded-full bg-brand-accent text-white flex items-center justify-center text-[10px] font-bold shadow-sm">${idx + 1}</span>
-                           <span class="text-[11px] font-bold text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded">入住 ${h.nights || 1} 晚</span>
-                        </div>
-                        <p class="text-[15px] font-extrabold text-brand-dark leading-snug line-clamp-1">${h.name || '未命名住宿'}</p>
-                        ${h.foreignName ? `<p class="text-[11px] font-medium text-brand-textSub mt-1 line-clamp-1">${h.foreignName}</p>` : ''}
+                  <div class="bg-brand-bg p-4 rounded-[20px] border border-brand-light/50 flex flex-col gap-2">
+                     <div class="flex justify-between items-start">
+                         <div class="flex-1 pr-3">
+                             <div class="flex items-center gap-1.5 mb-1.5">
+                                 <span class="w-[18px] h-[18px] rounded-full bg-brand-accent text-white flex items-center justify-center text-[10px] font-bold shadow-sm">${idx + 1}</span>
+                                 <p class="text-[15px] font-extrabold text-brand-dark leading-snug line-clamp-1">${h.name || '未命名住宿'}</p>
+                             </div>
+                             ${h.foreignName ? `<p class="text-[11px] font-medium text-brand-textSub line-clamp-1 pl-6">${h.foreignName}</p>` : ''}
+                         </div>
+                         <span class="text-[11px] font-bold text-brand-accent bg-brand-accent/10 px-2 py-1 rounded shrink-0">入住 ${h.nights || 1} 晚</span>
                      </div>
-                     ${h.address ? `<p class="text-[11px] font-medium text-brand-textSub mt-3 flex items-start gap-1 line-clamp-2"><i class="fa-solid fa-location-dot mt-0.5 opacity-70"></i> <span>${h.address}</span></p>` : ''}
+                     ${h.address ? `<p class="text-[12px] font-medium text-brand-textSub mt-1 flex items-start gap-1 pl-[22px]"><i class="fa-solid fa-location-dot mt-0.5 opacity-70"></i> <span>${h.address}</span></p>` : ''}
                   </div>
                 `;
             });
             accommodationsHtml += `</div>`;
         } else {
-            accommodationsHtml = `<div class="text-center py-6 text-brand-textSub bg-brand-bg rounded-[16px]"><p class="text-[13px] font-bold">尚未設定住宿</p></div>`;
+            accommodationsHtml = `<div class="text-center py-6 text-brand-textSub bg-brand-bg rounded-[16px] border border-brand-light/50"><p class="text-[13px] font-bold">尚未設定住宿</p></div>`;
         }
 
         let hotelHtml = `
@@ -910,7 +956,6 @@
         return;
       }
 
-      // 一般行程畫面
       document.getElementById('fab-container').classList.remove('hidden'); 
       const items = plan.itinerary[state.activeDay] || [];
       container.innerHTML = '';
@@ -1166,7 +1211,7 @@
     }
 
     window.handleExport = () => {
-      if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入'); window.switchView('profile'); return; }
       const dataStr = JSON.stringify(state.plans, null, 2);
       const blob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -1175,7 +1220,7 @@
     };
 
     window.handleImport = (e) => {
-      if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入'); window.switchView('profile'); return; }
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = async (event) => {
@@ -1191,9 +1236,16 @@
               flightRetAirline: p.flightRetAirline || "", flightRetNo: p.flightRetNo || "", flightRetDeptLoc: p.flightRetDeptLoc || "", flightRetArrLoc: p.flightRetArrLoc || "", flightRetDeptTime: p.flightRetDeptTime || "", flightRetArrTime: p.flightRetArrTime || "",
               accommodations: p.accommodations || [], itinerary: p.itinerary || {}, createdAt: serverTimestamp() 
             };
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
+            if(state.isGuest) {
+                cleanPlan.id = Date.now().toString() + Math.random().toString(36).substring(7);
+                state.plans.push(cleanPlan);
+            } else {
+                await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
+            }
           }
+          if(state.isGuest) localStorage.setItem('guest_plans', JSON.stringify(state.plans));
           showToast('成功匯入行程！'); window.switchView('plans');
+          if(state.isGuest) renderPlansList();
         } catch (err) { alert('檔案格式錯誤，請確認這是由本系統匯出的 JSON 行程檔。'); }
         document.getElementById('input-import-file').value = '';
       };
@@ -1238,6 +1290,25 @@
           accommodations: accommodations
         };
         
+        if (state.isGuest) {
+            if (state.currentPlanId) {
+                const idx = state.plans.findIndex(p => p.id === state.currentPlanId);
+                state.plans[idx] = { ...state.plans[idx], ...planData };
+                localStorage.setItem('guest_plans', JSON.stringify(state.plans));
+                showToast("已暫存設定"); window.switchView('itinerary');
+                state.tripData = state.plans[idx];
+                renderItinerary();
+            } else {
+                planData.id = Date.now().toString();
+                planData.itinerary = {};
+                planData.createdAt = Date.now();
+                state.plans.push(planData);
+                localStorage.setItem('guest_plans', JSON.stringify(state.plans));
+                window.openPlan(planData.id); showToast("已建立新行程");
+            }
+            return;
+        }
+
         if (state.currentPlanId) {
           await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), planData);
           showToast("已儲存設定"); window.switchView('itinerary');
@@ -1260,7 +1331,7 @@
       
       document.getElementById('btn-export').addEventListener('click', window.handleExport);
       document.getElementById('btn-import').addEventListener('click', () => {
-        if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
+        if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
         document.getElementById('input-import-file').click();
       });
       document.getElementById('input-import-file').addEventListener('change', window.handleImport);
@@ -1313,8 +1384,16 @@
           plan.itinerary[state.activeDay].push(data); 
         }
         
-        await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: plan.itinerary });
-        window.closeAllModals(); showToast("已同步至雲端！");
+        if(state.isGuest) {
+            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId);
+            state.plans[planIdx].itinerary = plan.itinerary;
+            localStorage.setItem('guest_plans', JSON.stringify(state.plans));
+            window.closeAllModals(); showToast("已暫存至本機！");
+            renderItinerary();
+        } else {
+            await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: plan.itinerary });
+            window.closeAllModals(); showToast("已同步至雲端！");
+        }
       });
 
       document.getElementById('btn-option-edit').addEventListener('click', () => {
@@ -1335,8 +1414,17 @@
 
       document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
         state.tripData.itinerary[state.activeDay] = state.tripData.itinerary[state.activeDay].filter(i => i.id !== state.editingId);
-        await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: state.tripData.itinerary });
-        window.closeAllModals(); showToast("已刪除項目");
+        
+        if(state.isGuest) {
+            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId);
+            state.plans[planIdx].itinerary = state.tripData.itinerary;
+            localStorage.setItem('guest_plans', JSON.stringify(state.plans));
+            window.closeAllModals(); showToast("已刪除項目");
+            renderItinerary();
+        } else {
+            await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: state.tripData.itinerary });
+            window.closeAllModals(); showToast("已刪除項目");
+        }
       });
     }
 
