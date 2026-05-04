@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>旅遊行程規劃</title>
+  <title>趣旅行 - 探索與規劃</title>
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -51,12 +51,11 @@
     .overlay.open { opacity: 1; pointer-events: auto; }
     .overlay.closed { opacity: 0; pointer-events: none; }
     textarea { resize: none; overflow: hidden; }
-    .timeline-line { width: 3px; }
     
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-    /* 全新表單 UI 樣式 */
+    /* 表單 UI 樣式 */
     .form-card { background: #FFFFFF; border-radius: 20px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid rgba(230,235,239,0.8); }
     .form-input { width: 100%; background: #F8FAFC; border: 1px solid transparent; border-radius: 12px; padding: 12px 16px; font-size: 15px; font-weight: 700; color: #2C3E50; outline: none; transition: all 0.2s ease; }
     .form-input::placeholder { color: #94A3B8; font-weight: 500; }
@@ -74,18 +73,20 @@
 
   <div id="app" class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
 
-    <header id="header-standard" class="hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+    <!-- 標準 Header -->
+    <header id="header-standard" class="hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
       <div>
-        <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">My Trip</p>
+        <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Welcome</p>
         <h1 id="header-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">載入中...</h1>
       </div>
       <button id="btn-header-action" class="w-10 h-10 flex items-center justify-center bg-white border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all">
-        <i class="fa-solid fa-gear text-lg"></i>
+        <i class="fa-solid fa-bell text-lg"></i>
       </button>
     </header>
 
+    <!-- 行程專用 Header -->
     <header id="header-itinerary" class="hidden bg-brand-bg pt-safe pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
-      <button id="btn-itinerary-back" class="w-10 h-10 mt-2 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
+      <button onclick="window.switchView('plans')" class="w-10 h-10 mt-2 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
         <i class="fa-solid fa-chevron-left text-xl"></i>
       </button>
       <div class="flex-1 mt-2 flex flex-col items-center justify-center text-center px-1 truncate">
@@ -96,26 +97,77 @@
         <button id="btn-itinerary-edit" onclick="window.toggleEditMode()" class="w-9 h-9 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors rounded-full">
           <i class="fa-solid fa-pen text-[16px]"></i>
         </button>
-        <button id="btn-itinerary-setup" onclick="window.handleSetupClick()" class="w-9 h-9 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors rounded-full">
+        <button onclick="window.handleSetupClick()" class="w-9 h-9 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors rounded-full">
           <i class="fa-solid fa-gear text-[18px]"></i>
         </button>
       </div>
     </header>
 
-    <div id="view-plans" class="hidden flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar">
+    <!-- VIEW 1: HOME (首頁) -->
+    <div id="view-home" class="hidden flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar relative bg-brand-bg pt-6">
+       <div class="bg-brand-primary text-white rounded-[24px] p-6 shadow-md mb-6 relative overflow-hidden">
+          <!-- 裝飾 -->
+          <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+          <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-[#3E5C76] opacity-30 rounded-full blur-xl"></div>
+          
+          <h2 class="text-2xl font-extrabold mb-1 relative z-10">早安，旅行者！</h2>
+          <p class="text-white/80 font-bold text-[13px] relative z-10">探索新景點，規劃下一趟完美旅程</p>
+       </div>
+       
+       <div class="grid grid-cols-2 gap-4 mb-8">
+          <button onclick="window.switchView('explore')" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all">
+             <div class="w-14 h-14 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-2xl"><i class="fa-solid fa-earth-americas"></i></div>
+             <span class="font-extrabold text-brand-dark">探索景點</span>
+          </button>
+          <button onclick="window.switchView('plans')" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all">
+             <div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl"><i class="fa-solid fa-suitcase-rolling"></i></div>
+             <span class="font-extrabold text-brand-dark">我的行程</span>
+          </button>
+       </div>
+       
+       <div>
+         <div class="flex justify-between items-center mb-4">
+           <h3 class="text-[15px] font-extrabold text-brand-dark">近期熱門探索</h3>
+           <button onclick="window.switchView('explore')" class="text-[12px] font-bold text-brand-primary">查看全部</button>
+         </div>
+         <div id="home-trending-spots" class="flex overflow-x-auto gap-4 hide-scrollbar snap-x pb-4">
+            <!-- 推薦景點動態載入 -->
+         </div>
+       </div>
+    </div>
+
+    <!-- VIEW 2: EXPLORE (探索 - 公共景點庫) -->
+    <div id="view-explore" class="hidden flex-1 flex flex-col bg-brand-bg relative overflow-hidden">
+       <div class="px-6 pt-4 pb-2 shrink-0 bg-brand-bg z-10">
+          <div class="relative">
+             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
+             <input type="text" id="input-explore-search" placeholder="搜尋大家建立的景點..." class="w-full bg-white rounded-2xl py-3 pl-11 pr-4 shadow-sm border border-brand-light/80 outline-none focus:border-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark placeholder-brand-textSub/50">
+          </div>
+       </div>
+       <div id="explore-list" class="flex-1 overflow-y-auto px-6 py-4 hide-scrollbar space-y-3 pb-24">
+          <!-- 公共景點列表動態載入 -->
+       </div>
+       <button onclick="window.openAddPublicSpot()" class="absolute bottom-6 right-6 w-14 h-14 bg-[#D5896F] text-white rounded-full shadow-lg shadow-[#D5896F]/30 flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all z-20">
+         <i class="fa-solid fa-plus"></i>
+       </button>
+    </div>
+
+    <!-- VIEW 3: PLANS (我的行程列表) -->
+    <div id="view-plans" class="hidden flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar relative">
       <div id="plans-list" class="space-y-4 mt-6"></div>
       <button onclick="createNewPlanInit()" class="w-full mt-6 py-4 border-2 border-dashed border-brand-primary text-brand-primary font-bold rounded-[20px] hover:bg-brand-light transition-all flex justify-center items-center gap-2">
         <i class="fa-solid fa-plus"></i> 建立新行程
       </button>
     </div>
 
+    <!-- VIEW 4: PROFILE (會員中心) -->
     <div id="view-profile" class="hidden flex-1 overflow-y-auto px-6 hide-scrollbar flex flex-col items-center pt-12 pb-6">
       <div id="profile-unauth" class="w-full flex flex-col items-center mt-6">
         <div class="w-20 h-20 bg-brand-primary rounded-3xl flex items-center justify-center mb-6 shadow-md shadow-brand-primary/20">
           <i class="fa-solid fa-compass text-white text-4xl"></i>
         </div>
         <h2 class="text-2xl font-bold text-brand-dark mb-2">登入或試用</h2>
-        <p class="text-brand-textSub mb-8 text-sm text-center">登入可跨裝置同步行程資料<br>或使用本機試用模式體驗功能</p>
+        <p class="text-brand-textSub mb-8 text-sm text-center">登入可與社群共享探索景點<br>或使用本機試用模式體驗功能</p>
         <div class="w-full space-y-3">
           <button id="btn-login-google" class="w-full bg-white border-2 border-brand-light text-brand-textMain font-bold py-4 rounded-[20px] shadow-sm hover:bg-brand-bg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
             <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -135,15 +187,15 @@
         <h2 id="profile-name" class="text-2xl font-bold text-brand-dark mb-1">User</h2>
         <p id="profile-email" class="text-sm font-bold text-brand-textSub mb-8">email@example.com</p>
         <button onclick="window.handleSignOut()" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-lg py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-auto">
-          <i class="fa-solid fa-right-from-bracket"></i> 登出 / 離開試用
+          <i class="fa-solid fa-right-from-bracket"></i> 登出 / 離開
         </button>
       </div>
     </div>
 
-    <!-- VIEW: SETUP -->
-    <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar">
+    <!-- VIEW 5: SETUP (建立/編輯行程設定) -->
+    <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar bg-brand-bg">
       <form id="form-setup" class="space-y-6 mt-4">
-        
+        <!-- 行程基礎設定 -->
         <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm space-y-3">
           <div>
             <label class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">行程名稱 <span class="text-brand-primary">*</span></label>
@@ -162,11 +214,13 @@
           </div>
         </div>
 
+        <!-- 航班設定 -->
         <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm">
           <h3 class="text-[14px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[12px]"></i></div> 航班資訊
           </h3>
           <div class="space-y-4">
+            <!-- 去程 -->
             <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
               <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-departure mr-1"></i>去程</label>
               <div class="grid grid-cols-2 gap-2.5">
@@ -175,25 +229,7 @@
                   <div class="relative">
                     <select id="setup-flight-out-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
                       <option value="" disabled selected>請選擇航空公司</option>
-                      <option value="中華航空">中華航空</option>
-                      <option value="長榮航空">長榮航空</option>
-                      <option value="星宇航空">星宇航空</option>
-                      <option value="華信航空">華信航空</option>
-                      <option value="台灣虎航">台灣虎航</option>
-                      <option value="全日空">全日空</option>
-                      <option value="日本航空">日本航空</option>
-                      <option value="日本越洋航空">日本越洋航空</option>
-                      <option value="星悅航空">星悅航空</option>
-                      <option value="國泰航空">國泰航空</option>
-                      <option value="聯合航空">聯合航空</option>
-                      <option value="菲律賓航空">菲律賓航空</option>
-                      <option value="樂桃航空">樂桃航空</option>
-                      <option value="捷星日本">捷星日本</option>
-                      <option value="酷航">酷航</option>
-                      <option value="亞洲航空">亞洲航空</option>
-                      <option value="泰國獅子航空">泰國獅子航空</option>
-                      <option value="泰越捷航空">泰越捷航空</option>
-                      <option value="峇迪航空">峇迪航空</option>
+                      <option value="中華航空">中華航空</option><option value="長榮航空">長榮航空</option><option value="星宇航空">星宇航空</option><option value="台灣虎航">台灣虎航</option><option value="日本航空">日本航空</option><option value="樂桃航空">樂桃航空</option>
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
                   </div>
@@ -222,7 +258,7 @@
                 </div>
               </div>
             </div>
-
+            <!-- 回程 -->
             <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
               <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-arrival mr-1"></i>回程</label>
               <div class="grid grid-cols-2 gap-2.5">
@@ -231,25 +267,7 @@
                   <div class="relative">
                     <select id="setup-flight-ret-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
                       <option value="" disabled selected>請選擇航空公司</option>
-                      <option value="中華航空">中華航空</option>
-                      <option value="長榮航空">長榮航空</option>
-                      <option value="星宇航空">星宇航空</option>
-                      <option value="華信航空">華信航空</option>
-                      <option value="台灣虎航">台灣虎航</option>
-                      <option value="全日空">全日空</option>
-                      <option value="日本航空">日本航空</option>
-                      <option value="日本越洋航空">日本越洋航空</option>
-                      <option value="星悅航空">星悅航空</option>
-                      <option value="國泰航空">國泰航空</option>
-                      <option value="聯合航空">聯合航空</option>
-                      <option value="菲律賓航空">菲律賓航空</option>
-                      <option value="樂桃航空">樂桃航空</option>
-                      <option value="捷星日本">捷星日本</option>
-                      <option value="酷航">酷航</option>
-                      <option value="亞洲航空">亞洲航空</option>
-                      <option value="泰國獅子航空">泰國獅子航空</option>
-                      <option value="泰越捷航空">泰越捷航空</option>
-                      <option value="峇迪航空">峇迪航空</option>
+                      <option value="中華航空">中華航空</option><option value="長榮航空">長榮航空</option><option value="星宇航空">星宇航空</option><option value="台灣虎航">台灣虎航</option><option value="日本航空">日本航空</option><option value="樂桃航空">樂桃航空</option>
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
                   </div>
@@ -299,6 +317,7 @@
         </button>
       </form>
 
+      <!-- 加入匯出匯入功能區塊 -->
       <div class="mt-8 mb-8 border-t border-brand-light pt-6">
         <label class="block text-xs font-bold text-brand-textSub mb-3 pl-1">資料備份與分享</label>
         <div class="flex gap-3">
@@ -313,7 +332,7 @@
       </div>
     </div>
 
-    <!-- VIEW: ITINERARY -->
+    <!-- VIEW 6: ITINERARY (詳細行程表) -->
     <div id="view-itinerary" class="hidden flex-1 flex flex-col h-full overflow-hidden bg-brand-card relative">
       <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
         <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
@@ -328,12 +347,20 @@
       </div>
     </div>
 
-    <!-- 底部導覽列 -->
-    <nav id="bottom-nav" class="hidden bg-brand-card border-t border-brand-light shrink-0 z-40 pb-safe">
-      <div class="flex justify-around items-center h-[60px]">
-        <button id="nav-btn-plans" onclick="window.switchView('plans')" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors">
+    <!-- 底部導覽列 (4 分頁) -->
+    <nav id="bottom-nav" class="hidden bg-white border-t border-brand-light shrink-0 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+      <div class="flex justify-around items-center h-[65px]">
+        <button id="nav-btn-home" onclick="window.switchView('home')" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-house mb-1 text-[18px]"></i>
           <span class="text-[10px] font-bold">首頁</span>
+        </button>
+        <button id="nav-btn-explore" onclick="window.switchView('explore')" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">探索</span>
+        </button>
+        <button id="nav-btn-plans" onclick="window.switchView('plans')" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">行程</span>
         </button>
         <button id="nav-btn-profile" onclick="window.switchView('profile')" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-user mb-1 text-[18px]"></i>
@@ -344,16 +371,16 @@
 
   </div>
 
-  <!-- ================= MODALS ================= -->
-  <div id="modal-overlay" class="overlay closed fixed inset-0 z-[50] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
+  <!-- ================= MODALS & SHEETS ================= -->
+  <div id="modal-overlay" onclick="window.closeAllModals()" class="overlay closed fixed inset-0 z-[50] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
 
-  <!-- 多層級新增選單 -->
+  <!-- 1. 新增項目多層級選單 (行程表內點擊 FAB) -->
   <div id="sheet-add-menu" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe max-h-[85vh]">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
       <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
         <h3 id="sheet-add-title" class="text-[18px] font-bold text-brand-dark">選擇新增項目</h3>
-        <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-brand-textMain shadow-sm transition-colors">
+        <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-brand-textMain shadow-sm transition-colors">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -361,35 +388,68 @@
     </div>
   </div>
 
-  <!-- ✅ 全新設計：表單 Modal (卡片群組式 UI) -->
-  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[53] flex flex-col justify-end pointer-events-none">
+  <!-- 2. 全新：搜尋並挑選公共景點 (行程表加入地點用) -->
+  <div id="sheet-spot-selector" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[54] flex flex-col justify-end pointer-events-none">
+    <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col h-[85vh]">
+      <div class="shrink-0 bg-brand-bg rounded-t-[32px] z-10 border-b border-brand-light/80 pb-3">
+        <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
+        <div class="px-6 py-2 flex justify-between items-center mb-3">
+          <h3 class="text-[18px] font-bold text-brand-dark">選擇景點</h3>
+          <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white shadow-sm rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <div class="px-6 relative">
+           <i class="fa-solid fa-magnifying-glass absolute left-10 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
+           <input type="text" id="input-select-spot-search" placeholder="搜尋公共景點庫..." class="w-full bg-white rounded-2xl py-3 pl-11 pr-4 shadow-sm border border-brand-light/80 outline-none focus:border-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark">
+        </div>
+      </div>
+      <div id="selector-spot-list" class="flex-1 overflow-y-auto px-6 py-4 hide-scrollbar space-y-3">
+        <!-- JS 渲染選擇列表 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 新增/編輯 表單 Modal -->
+  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[55] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col h-[90vh]">
       
-      <!-- 表單頭部 -->
       <div class="shrink-0 bg-brand-bg rounded-t-[32px] z-10 border-b border-brand-light/80 pb-2">
         <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
         <div class="px-6 py-2 flex justify-between items-center">
           <h3 id="form-modal-title" class="text-[18px] font-bold text-brand-dark">新增項目</h3>
-          <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-white shadow-sm rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+          <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white shadow-sm rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
             <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </div>
       </div>
       
-      <!-- 表單滾動內容區 (淺灰底 + 白卡片) -->
       <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
         
-        <!-- 時間卡片 (全新樣式解決破圖問題) -->
-        <div class="bg-[#F8FAFC] border border-brand-light/80 rounded-[16px] p-4 shadow-sm">
-          <span class="block text-[13px] font-bold text-brand-textSub mb-2 pl-1">時間 <span class="text-brand-primary">*</span></span>
-          <div class="flex items-center justify-center gap-4">
-            <input type="time" id="input-time-start" class="bg-transparent text-[22px] font-extrabold text-brand-dark outline-none text-center appearance-none w-[130px]">
-            <span class="text-brand-textSub/60 font-extrabold text-xl">-</span>
-            <input type="time" id="input-time-end" class="bg-transparent text-[22px] font-extrabold text-brand-dark outline-none text-center appearance-none w-[130px]">
+        <!-- 已選定的鎖定地點卡片 (從公共庫帶入) -->
+        <div id="group-selected-spot" class="hidden bg-brand-primary/5 border border-brand-primary/20 rounded-[20px] p-4 relative overflow-hidden">
+            <span class="block text-[12px] font-bold text-brand-primary mb-2 pl-1">已選定景點</span>
+            <div class="flex items-center gap-3">
+                <div id="display-spot-icon" class="w-10 h-10 rounded-full bg-white text-brand-primary flex items-center justify-center shrink-0 shadow-sm text-lg"></div>
+                <div class="flex-1 overflow-hidden">
+                   <div id="display-spot-name" class="text-[16px] font-extrabold text-brand-dark truncate leading-tight"></div>
+                   <div id="display-spot-sub" class="text-[12px] font-bold text-brand-textSub truncate mt-1"></div>
+                </div>
+            </div>
+            <i class="fa-solid fa-lock absolute right-4 top-4 text-brand-primary/20 text-3xl"></i>
+        </div>
+
+        <!-- 時間卡片 -->
+        <div class="form-card">
+          <span class="form-label mb-2">預計時間 <span class="text-brand-primary">*</span></span>
+          <div class="flex items-center gap-2 bg-[#F8FAFC] rounded-xl px-3 border border-brand-light/80 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all h-[46px]">
+            <input type="time" id="input-time-start" class="flex-1 w-full text-[15px] font-bold text-brand-dark outline-none bg-transparent text-center">
+            <span class="text-[15px] text-brand-textSub font-bold shrink-0">-</span>
+            <input type="time" id="input-time-end" class="flex-1 w-full text-[15px] font-bold text-brand-dark outline-none bg-transparent text-center">
           </div>
         </div>
 
-        <!-- 轉乘站 / 免換乘 專屬選擇 -->
+        <!-- 以下為其他類型欄位，與之前相同 -->
         <div id="group-transfer-type" class="hidden form-card">
            <span class="form-label mb-2">轉換方式</span>
            <div class="flex bg-brand-bg rounded-[12px] p-1 relative">
@@ -408,37 +468,33 @@
            </div>
         </div>
 
-        <!-- 類型選擇卡片 (地點) -->
-        <div id="group-location-mode" class="hidden form-card">
-          <span class="form-label mb-2">地點類型</span>
-          <div id="location-modes-grid" class="grid grid-cols-5 gap-2"></div>
-        </div>
-
-        <!-- 類型選擇卡片 (交通) -->
         <div id="group-transport-mode" class="hidden form-card">
           <span class="form-label mb-2">交通工具</span>
           <div id="transport-modes-grid" class="grid grid-cols-4 gap-2"></div>
         </div>
         
-        <!-- 輸入欄位卡片 (根據類型顯示) -->
-        <div id="group-dynamic-fields" class="form-card">
+        <div id="group-dynamic-fields" class="form-card hidden">
             
-            <!-- 轉車專屬 -->
             <div id="group-transfer-fields" class="hidden flex flex-col gap-3 relative">
                <div class="form-row">
                   <div><span class="form-label">原本搭乘路線</span><input type="text" id="input-trans-lineA" placeholder="例: 南海電鐵" class="form-input"></div>
+                  <div><span class="form-label">轉乘搭乘路線</span><input type="text" id="input-trans-lineB" placeholder="例: 大阪地鐵" class="form-input"></div>
+               </div>
+               <div class="form-row">
                   <div><span class="form-label">下車站名</span><input type="text" id="input-trans-staA" placeholder="例: 南海難波" class="form-input"></div>
+                  <div><span class="form-label">上車站名</span><input type="text" id="input-trans-staB" placeholder="例: なんば" class="form-input"></div>
                </div>
-               <div class="flex justify-center -my-3 z-10 relative">
-                 <div class="bg-[#E76F51] text-white rounded-full w-7 h-7 flex items-center justify-center text-[12px] border-[3px] border-white shadow-sm"><i class="fa-solid fa-arrow-down"></i></div>
-               </div>
-               <div class="form-row bg-[#E76F51]/5 p-2 rounded-xl border border-[#E76F51]/10">
-                  <div><span class="form-label !text-[#E76F51]/80">轉乘搭乘路線</span><input type="text" id="input-trans-lineB" placeholder="例: 大阪地鐵" class="form-input !bg-white text-[#E76F51]"></div>
-                  <div><span class="form-label !text-[#E76F51]/80">上車站名</span><input type="text" id="input-trans-staB" placeholder="例: なんば" class="form-input !bg-white text-[#E76F51]"></div>
+               <div>
+                  <span class="form-label">轉乘時間 (選填)</span>
+                  <input type="text" id="input-trans-wait" placeholder="例: 10分鐘" class="form-input">
                </div>
             </div>
 
-            <!-- 航班專屬 -->
+            <div id="group-through-fields" class="hidden flex flex-col gap-3 relative">
+               <div><span class="form-label">經過車站名 <span class="text-brand-primary">*</span></span><input type="text" id="input-through-sta" placeholder="例: 日根野" class="form-input"></div>
+               <div><span class="form-label">等待/停車時間 (選填)</span><input type="text" id="input-through-wait" placeholder="例: 5分鐘" class="form-input"></div>
+            </div>
+
             <div id="group-flight-fields" class="space-y-3 hidden">
               <div class="form-row">
                 <div>
@@ -446,25 +502,7 @@
                   <div class="relative">
                     <select id="input-flight-airline" class="form-input appearance-none pr-8">
                       <option value="" disabled selected>請選擇</option>
-                      <option value="中華航空">中華航空</option>
-                      <option value="長榮航空">長榮航空</option>
-                      <option value="星宇航空">星宇航空</option>
-                      <option value="華信航空">華信航空</option>
-                      <option value="台灣虎航">台灣虎航</option>
-                      <option value="全日空">全日空</option>
-                      <option value="日本航空">日本航空</option>
-                      <option value="日本越洋航空">日本越洋航空</option>
-                      <option value="星悅航空">星悅航空</option>
-                      <option value="國泰航空">國泰航空</option>
-                      <option value="聯合航空">聯合航空</option>
-                      <option value="菲律賓航空">菲律賓航空</option>
-                      <option value="樂桃航空">樂桃航空</option>
-                      <option value="捷星日本">捷星日本</option>
-                      <option value="酷航">酷航</option>
-                      <option value="亞洲航空">亞洲航空</option>
-                      <option value="泰國獅子航空">泰國獅子航空</option>
-                      <option value="泰越捷航空">泰越捷航空</option>
-                      <option value="峇迪航空">峇迪航空</option>
+                      <option value="中華航空">中華航空</option><option value="長榮航空">長榮航空</option><option value="星宇航空">星宇航空</option><option value="台灣虎航">台灣虎航</option><option value="日本航空">日本航空</option><option value="樂桃航空">樂桃航空</option>
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
                   </div>
@@ -477,7 +515,6 @@
               </div>
             </div>
 
-            <!-- 交通專屬 -->
             <div id="group-transport-fields" class="space-y-3 hidden">
               <div class="form-row">
                 <div><span class="form-label">業者名稱</span><input type="text" id="input-operator" placeholder="例: JR西日本" class="form-input"></div>
@@ -485,13 +522,18 @@
               </div>
               <div><span class="form-label text-brand-primary">路線名稱 *</span><input type="text" id="input-route-name" placeholder="例: 關西機場線" class="form-input"></div>
               <div><span class="form-label">方向 (選填)</span><input type="text" id="input-direction" placeholder="例: 往天王寺" class="form-input"></div>
+              
+              <div class="form-row">
+                <div><span class="form-label">上車站名</span><input type="text" id="input-transport-dept" placeholder="例: 新大阪" class="form-input"></div>
+                <div><span class="form-label">下車站名</span><input type="text" id="input-transport-arr" placeholder="例: 京都" class="form-input"></div>
+              </div>
+              
               <div class="form-row">
                 <div><span class="form-label">花費時間</span><input type="text" id="input-duration" placeholder="例: 1時4分" class="form-input"></div>
                 <div><span class="form-label">經過站數</span><input type="text" id="input-extraInfo" placeholder="例: 9站" class="form-input"></div>
               </div>
             </div>
 
-            <!-- 住宿專屬 -->
             <div id="group-hotel-fields" class="space-y-3 hidden">
               <div>
                 <span class="form-label text-brand-primary">住宿名稱 *</span>
@@ -504,18 +546,6 @@
               <div>
                 <span class="form-label">詳細地址</span>
                 <textarea id="input-hotel-address" placeholder="可填寫地址..." rows="2" class="form-input"></textarea>
-              </div>
-            </div>
-
-            <!-- 地點專屬 -->
-            <div id="group-location-fields" class="space-y-3 hidden">
-              <div>
-                <span id="label-loc-name" class="form-label text-brand-primary">名稱 *</span>
-                <textarea id="input-loc-name" placeholder="請輸入地點或名稱" rows="1" class="form-input"></textarea>
-              </div>
-              <div>
-                <span class="form-label">備註 / 地址</span>
-                <textarea id="input-loc-subtitle" placeholder="可填寫備註事項..." rows="2" class="form-input"></textarea>
               </div>
             </div>
 
@@ -535,7 +565,6 @@
         
       </div>
       
-      <!-- 絕對置底的完成按鈕 -->
       <div class="p-4 border-t border-brand-light/50 bg-white shrink-0 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
         <button id="btn-save-item" class="w-full bg-brand-primary text-brand-card font-bold text-[16px] py-4 rounded-[16px] shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex justify-center items-center gap-2">
           完成
@@ -545,26 +574,69 @@
     </div>
   </div>
 
-  <!-- 詳細視窗 (Transit Detail) -->
-  <div id="sheet-transit-detail" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
-    <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe max-h-[85vh]">
-      <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
-      <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
-        <h3 class="text-[18px] font-bold text-brand-dark">詳細交通路線</h3>
-        <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-brand-textMain shadow-sm transition-colors">
-          <i class="fa-solid fa-xmark text-lg"></i>
+  <!-- 4. 新增公共景點 (探索頁面用) -->
+  <div id="sheet-add-public-spot" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[56] flex flex-col justify-end pointer-events-none">
+    <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col h-[85vh]">
+      <div class="shrink-0 bg-brand-bg rounded-t-[32px] z-10 border-b border-brand-light/80 pb-2">
+        <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
+        <div class="px-6 py-2 flex justify-between items-center">
+          <h3 class="text-[18px] font-bold text-brand-dark">分享新景點</h3>
+          <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white shadow-sm rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
+        <div class="bg-brand-primary/10 rounded-2xl p-4 text-center border border-brand-primary/20">
+          <i class="fa-solid fa-earth-asia text-2xl text-brand-primary mb-2"></i>
+          <p class="text-[13px] font-bold text-brand-dark">在此新增的景點將會發佈至公共資料庫<br>讓所有熱愛旅遊的人都能搜尋與使用！</p>
+        </div>
+
+        <div class="form-card">
+          <span class="form-label mb-2">選擇分類</span>
+          <div id="public-spot-modes-grid" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="form-card space-y-3">
+          <div>
+            <span class="form-label text-brand-primary">景點名稱 <span class="text-[#E63946]">*</span></span>
+            <input type="text" id="input-public-name" placeholder="請輸入準確的地標名稱" class="form-input">
+          </div>
+          <div>
+            <span class="form-label">地址或備註資訊</span>
+            <textarea id="input-public-sub" placeholder="例：東京鐵塔、或簡易地址" rows="2" class="form-input"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-brand-light/50 bg-white shrink-0 pb-safe">
+        <button id="btn-save-public-spot" class="w-full bg-[#D5896F] text-white font-bold text-[16px] py-4 rounded-[16px] shadow-lg shadow-[#D5896F]/30 active:scale-95 transition-all flex justify-center items-center gap-2">
+          發佈至公共庫
         </button>
       </div>
-      <div id="transit-detail-container" class="px-4 py-4 overflow-y-auto hide-scrollbar"></div>
     </div>
   </div>
 
-  <div id="sheet-options" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[54] flex flex-col justify-end pointer-events-none">
+  <!-- 詳細交通視窗 -->
+  <div id="sheet-transit-detail" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
+    <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe max-h-[85vh]">
+      <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2 shrink-0 z-20"></div>
+      <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50 z-20 bg-brand-bg rounded-t-[32px]">
+        <h3 class="text-[18px] font-bold text-brand-dark">詳細交通路線</h3>
+        <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-brand-textMain shadow-sm transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="transit-detail-container" class="px-4 py-4 overflow-y-auto hide-scrollbar relative"></div>
+    </div>
+  </div>
+
+  <!-- 選項視窗 -->
+  <div id="sheet-options" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[56] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
       <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
         <h3 class="text-[16px] font-bold text-brand-dark">選項</h3>
-        <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-brand-bg rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+        <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-brand-bg rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -580,7 +652,7 @@
   </div>
 
   <div id="modal-delete" class="overlay closed fixed inset-0 z-[60] flex items-center justify-center px-6">
-    <div class="absolute inset-0 bg-brand-textMain/60 backdrop-blur-sm btn-close-modal"></div>
+    <div class="absolute inset-0 bg-brand-textMain/60 backdrop-blur-sm" onclick="window.closeAllModals()"></div>
     <div class="relative bg-brand-card border border-brand-light rounded-[24px] p-8 w-full max-w-sm shadow-2xl transition-transform transform scale-95 opacity-0" id="delete-dialog-content">
       <div class="w-16 h-16 bg-[#FFE5E5] rounded-full flex items-center justify-center mx-auto mb-4">
         <i class="fa-solid fa-trash-can text-2xl text-[#E63946]"></i>
@@ -588,7 +660,7 @@
       <h3 class="text-xl font-bold text-brand-textMain text-center mb-2">確認刪除</h3>
       <p class="text-brand-textSub text-center mb-8 text-sm">刪除後將無法還原，確定要繼續嗎？</p>
       <div class="flex gap-4">
-        <button id="btn-cancel-delete" class="btn-close-modal flex-1 py-3.5 bg-brand-bg text-brand-dark font-bold rounded-[16px] hover:bg-brand-light transition-colors shadow-sm">取消</button>
+        <button id="btn-cancel-delete" onclick="window.closeAllModals()" class="flex-1 py-3.5 bg-brand-bg text-brand-dark font-bold rounded-[16px] hover:bg-brand-light transition-colors shadow-sm">取消</button>
         <button id="btn-confirm-delete" class="flex-1 py-3.5 bg-[#E63946] text-brand-card font-bold rounded-[16px] shadow-lg shadow-[#E63946]/20 active:scale-95 transition-all">確認刪除</button>
       </div>
     </div>
@@ -596,11 +668,15 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    const firebaseConfig = { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
-    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = "travel-platform-v1";
+    // Firebase Init
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
+    const app = initializeApp(firebaseConfig); 
+    const auth = getAuth(app); 
+    const db = getFirestore(app); 
+    const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
 
     const TRANSPORT_MODES = [
       { id: 'flight', label: '航班', icon: 'fa-solid fa-plane' },
@@ -625,17 +701,38 @@
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
+    // 預設公共景點 (給訪客或全新資料庫打底)
+    const DEFAULT_PUBLIC_SPOTS = [
+       { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', createdAt: Date.now() },
+       { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', createdAt: Date.now() },
+       { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', createdAt: Date.now() },
+       { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', createdAt: Date.now() },
+       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', createdAt: Date.now() }
+    ];
+
     let state = {
-      user: null, isGuest: false, plans: [], currentPlanId: null, activeDay: 0, editingId: null,
-      isEditMode: false, tempTimeRef: '',
-      itemType: 'location', subType: null,
-      formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false, isTransfer: false },
-      tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} }
+      user: null, isGuest: false, plans: [], publicSpots: [], currentPlanId: null, activeDay: 0, editingId: null,
+      isEditMode: false, tempTimeRef: '', itemType: 'location', subType: null,
+      formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false, isTransfer: false, deptLoc: '', arrLoc: '' },
+      tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} },
+      addSpotMode: 'spot'
     };
 
-    function init() {
+    let plansUnsubscribe = null;
+    let spotsUnsubscribe = null;
+
+    async function init() {
       setupEventListeners();
-      window.switchView('plans');
+      window.switchView('home');
+
+      // Firebase Auth Flow (Rule 3)
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+           await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+           await signInAnonymously(auth);
+        }
+      } catch (e) { console.log('Auth Init Fallback', e); }
     }
 
     function showToast(msg) {
@@ -649,25 +746,14 @@
       }, 3000);
     }
 
-    function safeSet(id, val) {
-        const el = document.getElementById(id);
-        if (el) { el.value = val; }
-    }
-
-    // 防護舊有資料的 Select 更新方法
+    function safeSet(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
     function safeSetSelect(id, val) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (val && !Array.from(el.options).some(opt => opt.value === val)) {
-            el.add(new Option(val, val)); // 允許舊有的自訂航空顯示
-        }
+        const el = document.getElementById(id); if (!el) return;
+        if (val && !Array.from(el.options).some(opt => opt.value === val)) el.add(new Option(val, val)); 
         el.value = val || '';
     }
 
-    window.toggleEditMode = function() {
-        state.isEditMode = !state.isEditMode;
-        renderItinerary();
-    };
+    window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; renderItinerary(); };
 
     window.handleGuestLogin = () => {
       state.isGuest = true;
@@ -676,23 +762,24 @@
       document.getElementById('profile-name').innerText = '訪客模式'; document.getElementById('profile-email').innerText = '僅儲存於此瀏覽器，不會同步至雲端';
       document.getElementById('profile-pic').classList.add('hidden'); document.getElementById('profile-icon').classList.remove('hidden');
 
-      const localData = localStorage.getItem('guest_plans');
-      state.plans = localData ? JSON.parse(localData) : [];
+      const localPlans = localStorage.getItem('guest_plans'); state.plans = localPlans ? JSON.parse(localPlans) : [];
+      const localSpots = localStorage.getItem('guest_spots'); state.publicSpots = localSpots ? JSON.parse(localSpots) : DEFAULT_PUBLIC_SPOTS;
+      if (!localSpots) localStorage.setItem('guest_spots', JSON.stringify(DEFAULT_PUBLIC_SPOTS));
+      
       showToast("已進入免登入試用模式");
-      window.switchView('plans'); renderPlansList();
+      window.switchView('home'); 
+      renderPlansList(); renderExploreList(); renderHomeTrending();
     };
 
     window.handleSignOut = () => {
       if (state.isGuest) {
           state.isGuest = false; state.user = null; state.plans = [];
           document.getElementById('profile-auth').classList.add('hidden'); document.getElementById('profile-unauth').classList.remove('hidden');
-          showToast("已離開試用模式"); window.switchView('plans'); renderPlansList();
-      } else {
-          signOut(auth).then(() => { showToast("已登出帳號"); });
-      }
+          showToast("已離開試用模式"); window.switchView('home'); renderPlansList();
+      } else { signOut(auth).then(() => showToast("已登出帳號")); }
     };
 
-    window.handleSetupClick = () => { window.openSetup(state.currentPlanId); };
+    window.handleSetupClick = () => window.openSetup(state.currentPlanId);
 
     window.addSetupHotel = () => {
       const container = document.getElementById('hotel-list-container');
@@ -701,7 +788,7 @@
         <div class="hotel-item bg-brand-bg/60 p-3 rounded-[16px] border border-brand-light/80 relative mb-3 shadow-sm">
           <div class="flex justify-between items-center mb-2">
             <h4 class="text-[13px] font-extrabold text-brand-dark flex items-center gap-1 pl-1"><i class="fa-solid fa-bed text-brand-accent text-[11px]"></i> 住宿 ${index + 1}</h4>
-            <button type="button" onclick="this.closest('.hotel-item').remove()" class="w-6 h-6 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-[#E63946] border border-brand-light shadow-sm transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+            <button type="button" onclick="this.closest('.hotel-item').remove()" class="w-6 h-6 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-[#E63946] shadow-sm transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
           </div>
           <div class="space-y-2">
             <div><input type="text" class="hotel-name w-full text-[13px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm" placeholder="中文或常用名稱 (必填)"></div>
@@ -720,14 +807,12 @@
     };
 
     window.renderSetupHotels = (accommodations = []) => {
-      const container = document.getElementById('hotel-list-container');
-      container.innerHTML = '';
-      if (!accommodations || accommodations.length === 0) { window.addSetupHotel(); } 
+      const container = document.getElementById('hotel-list-container'); container.innerHTML = '';
+      if (!accommodations || accommodations.length === 0) window.addSetupHotel(); 
       else {
         accommodations.forEach(h => {
           window.addSetupHotel();
-          const items = container.querySelectorAll('.hotel-item');
-          const lastItem = items[items.length - 1];
+          const items = container.querySelectorAll('.hotel-item'); const lastItem = items[items.length - 1];
           lastItem.querySelector('.hotel-name').value = h.name || '';
           lastItem.querySelector('.hotel-foreign').value = h.foreignName || '';
           lastItem.querySelector('.hotel-address').value = h.address || '';
@@ -747,17 +832,20 @@
             document.getElementById('profile-pic').src = user.photoURL;
             document.getElementById('profile-pic').classList.remove('hidden'); document.getElementById('profile-icon').classList.add('hidden');
         }
-        listenToPlans();
+        listenToData();
       } else {
         document.getElementById('profile-auth').classList.add('hidden'); document.getElementById('profile-unauth').classList.remove('hidden');
         closeAllModals(); state.plans = []; renderPlansList();
       }
     });
 
-    function listenToPlans() {
+    function listenToData() {
       if (!state.user || state.isGuest) return;
-      const q = collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans');
-      onSnapshot(q, (snapshot) => {
+      
+      // 1. Listen Plans
+      if(plansUnsubscribe) plansUnsubscribe();
+      const qPlans = collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans');
+      plansUnsubscribe = onSnapshot(qPlans, (snapshot) => {
         state.plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderPlansList();
         if (state.currentPlanId) {
@@ -767,34 +855,55 @@
             if (!document.getElementById('view-itinerary').classList.contains('hidden')) renderItinerary();
           } else { window.switchView('plans'); }
         }
-      });
+      }, err => console.error(err));
+
+      // 2. Listen Public Spots
+      if(spotsUnsubscribe) spotsUnsubscribe();
+      const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+      spotsUnsubscribe = onSnapshot(qSpots, (snapshot) => {
+        state.publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if(state.publicSpots.length === 0) {
+            // Seed defaults
+            DEFAULT_PUBLIC_SPOTS.forEach(s => addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), s));
+        }
+        renderExploreList(); renderHomeTrending();
+      }, err => console.error(err));
     }
 
     window.switchView = function(v) {
-      ['plans', 'setup', 'itinerary', 'profile'].forEach(id => document.getElementById(`view-${id}`)?.classList.add('hidden'));
+      ['home', 'explore', 'plans', 'setup', 'itinerary', 'profile'].forEach(id => document.getElementById(`view-${id}`)?.classList.add('hidden'));
       document.getElementById(`view-${v}`)?.classList.remove('hidden');
       
       const headerStandard = document.getElementById('header-standard'); const headerItinerary = document.getElementById('header-itinerary');
       const title = document.getElementById('header-title'); const sub = document.getElementById('header-subtitle');
       const btnAction = document.getElementById('btn-header-action');
       const bottomNav = document.getElementById('bottom-nav');
-      const navBtnPlans = document.getElementById('nav-btn-plans'); const navBtnProfile = document.getElementById('nav-btn-profile');
-
-      if (v === 'plans' || v === 'profile' || v === 'itinerary') {
+      
+      // 導覽列 UI 狀態更新
+      if (['home', 'explore', 'plans', 'profile'].includes(v)) {
          bottomNav.classList.remove('hidden');
-         if(v === 'profile') {
-             navBtnProfile.classList.add('text-brand-primary'); navBtnProfile.classList.remove('text-brand-textSub');
-             navBtnPlans.classList.add('text-brand-textSub'); navBtnPlans.classList.remove('text-brand-primary');
-         } else {
-             navBtnPlans.classList.add('text-brand-primary'); navBtnPlans.classList.remove('text-brand-textSub');
-             navBtnProfile.classList.add('text-brand-textSub'); navBtnProfile.classList.remove('text-brand-primary');
-         }
+         ['home', 'explore', 'plans', 'profile'].forEach(tab => {
+             const btn = document.getElementById(`nav-btn-${tab}`);
+             if(btn) {
+                 if(tab === v) { btn.classList.add('text-brand-primary'); btn.classList.remove('text-brand-textSub'); }
+                 else { btn.classList.add('text-brand-textSub'); btn.classList.remove('text-brand-primary'); }
+             }
+         });
       } else { bottomNav.classList.add('hidden'); }
 
-      if (v === 'plans') {
+      // 標題狀態更新
+      if (v === 'home') {
         headerItinerary.classList.add('hidden'); headerStandard.classList.remove('hidden');
-        sub.innerText = state.user?.displayName ? `Hi, ${state.user.displayName}` : 'Welcome'; title.innerText = '我的計畫';
+        sub.innerText = 'Explore & Plan'; title.innerText = '趣旅行';
         btnAction.innerHTML = '<i class="fa-solid fa-bell text-lg"></i>'; btnAction.onclick = () => showToast('目前沒有新通知');
+      } else if (v === 'explore') {
+        headerItinerary.classList.add('hidden'); headerStandard.classList.remove('hidden');
+        sub.innerText = 'Discover'; title.innerText = '探索景點';
+        btnAction.innerHTML = '<i class="fa-solid fa-fire text-lg text-[#D5896F]"></i>'; btnAction.onclick = () => showToast('發掘熱門景點');
+      } else if (v === 'plans') {
+        headerItinerary.classList.add('hidden'); headerStandard.classList.remove('hidden');
+        sub.innerText = state.user?.displayName ? `Hi, ${state.user.displayName}` : 'Welcome'; title.innerText = '我的行程';
+        btnAction.innerHTML = '<i class="fa-solid fa-calendar-check text-lg"></i>'; btnAction.onclick = () => showToast('即將到來的行程');
       } else if (v === 'profile') {
         headerItinerary.classList.add('hidden'); headerStandard.classList.remove('hidden');
         sub.innerText = 'Account'; title.innerText = '會員中心';
@@ -811,11 +920,140 @@
       }
     };
 
+    function renderHomeTrending() {
+      const container = document.getElementById('home-trending-spots');
+      if (!state.publicSpots || state.publicSpots.length === 0) {
+          container.innerHTML = `<div class="text-brand-textSub text-sm pl-2 py-4">尚無熱門景點</div>`; return;
+      }
+      // 隨機取 4 個當作推薦
+      const shuffled = [...state.publicSpots].sort(() => 0.5 - Math.random()).slice(0, 4);
+      container.innerHTML = shuffled.map(spot => {
+          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+          return `
+          <div class="snap-start shrink-0 w-40 bg-white rounded-[20px] p-4 border border-brand-light shadow-sm flex flex-col justify-between" onclick="window.switchView('explore')">
+            <div class="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center mb-3">
+              <i class="${locObj.icon}"></i>
+            </div>
+            <div>
+              <h4 class="font-extrabold text-[14px] text-brand-dark leading-snug line-clamp-2">${spot.name}</h4>
+              <p class="text-[11px] font-bold text-brand-textSub mt-1 line-clamp-1">${spot.subtitle || locObj.label}</p>
+            </div>
+          </div>
+          `;
+      }).join('');
+    }
+
+    function renderExploreList(filter = '') {
+      const container = document.getElementById('explore-list');
+      const spotContainer = document.getElementById('selector-spot-list');
+      let spots = state.publicSpots;
+      
+      if(filter) {
+          const kw = filter.toLowerCase();
+          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw) || (s.subtitle || '').toLowerCase().includes(kw));
+      }
+
+      const generateSpotHTML = (spot, isSelector) => {
+          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+          const actionHTML = isSelector 
+              ? `<button class="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0"><i class="fa-solid fa-plus text-[12px]"></i></button>`
+              : `<div class="text-[11px] font-bold text-brand-textSub/60 bg-brand-bg px-2 py-1 rounded-lg">共創景點</div>`;
+          const clickAction = isSelector ? `onclick="window.selectSpotForItinerary('${spot.id}')"` : '';
+
+          return `
+          <div ${clickAction} class="bg-white p-4 rounded-[20px] border border-brand-light shadow-sm flex items-center gap-3 ${isSelector ? 'cursor-pointer active:scale-95 transition-all' : ''}">
+             <div class="w-12 h-12 rounded-full bg-brand-bg text-brand-primary flex items-center justify-center text-xl shrink-0"><i class="${locObj.icon}"></i></div>
+             <div class="flex-1 overflow-hidden">
+                <div class="text-[16px] font-extrabold text-brand-dark truncate">${spot.name}</div>
+                <div class="text-[12px] font-bold text-brand-textSub mt-0.5 truncate flex items-center gap-1.5">
+                   <span class="text-brand-primary/80">${locObj.label}</span>
+                   ${spot.subtitle ? `<i class="fa-solid fa-circle text-[3px] opacity-50"></i> <span class="truncate">${spot.subtitle}</span>` : ''}
+                </div>
+             </div>
+             ${actionHTML}
+          </div>
+          `;
+      };
+
+      if(spots.length === 0) {
+          const emptyStr = `<div class="py-12 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-ghost text-4xl mb-4"></i><p class="font-bold text-sm">找不到相關景點</p></div>`;
+          if(container) container.innerHTML = emptyStr;
+          if(spotContainer) spotContainer.innerHTML = emptyStr;
+          return;
+      }
+
+      // 排列：新的在前
+      const sorted = [...spots].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+      
+      if(container) container.innerHTML = sorted.map(s => generateSpotHTML(s, false)).join('');
+      if(spotContainer) spotContainer.innerHTML = sorted.map(s => generateSpotHTML(s, true)).join('');
+    }
+
+    document.getElementById('input-explore-search').addEventListener('input', (e) => renderExploreList(e.target.value));
+    document.getElementById('input-select-spot-search').addEventListener('input', (e) => renderExploreList(e.target.value));
+
+    // 打開新增公共景點的表單
+    window.openAddPublicSpot = function() {
+       state.addSpotMode = 'spot';
+       safeSet('input-public-name', ''); safeSet('input-public-sub', '');
+       const el = document.getElementById('public-spot-modes-grid');
+       el.innerHTML = LOCATION_MODES.filter(m => m.id !== 'station' && m.id !== 'airport' && m.id !== 'hotel').map(mode => `
+            <button type="button" onclick="state.addSpotMode='${mode.id}'; window.renderPublicSpotModes()"
+              class="mode-public-btn py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
+                state.addSpotMode === mode.id ? 'bg-[#D5896F] text-white border-[#D5896F] shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent'
+              }"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
+       `).join('');
+       
+       document.getElementById('modal-overlay').classList.remove('closed'); document.getElementById('modal-overlay').classList.add('open');
+       document.getElementById('sheet-add-public-spot').classList.remove('closed'); document.getElementById('sheet-add-public-spot').classList.add('open');
+    };
+
+    window.renderPublicSpotModes = function() {
+       document.querySelectorAll('.mode-public-btn').forEach((btn, idx) => {
+           const modes = LOCATION_MODES.filter(m => m.id !== 'station' && m.id !== 'airport' && m.id !== 'hotel');
+           if (modes[idx].id === state.addSpotMode) {
+               btn.classList.add('bg-[#D5896F]', 'text-white', 'border-[#D5896F]', 'shadow-sm');
+               btn.classList.remove('bg-brand-bg', 'text-brand-textSub', 'border-transparent');
+           } else {
+               btn.classList.remove('bg-[#D5896F]', 'text-white', 'border-[#D5896F]', 'shadow-sm');
+               btn.classList.add('bg-brand-bg', 'text-brand-textSub', 'border-transparent');
+           }
+       });
+    };
+
+    document.getElementById('btn-save-public-spot').addEventListener('click', async () => {
+        const name = document.getElementById('input-public-name').value.trim();
+        const sub = document.getElementById('input-public-sub').value.trim();
+        if(!name) { showToast("請輸入景點名稱"); return; }
+        
+        const spotData = { name: name, subtitle: sub, locMode: state.addSpotMode, createdAt: Date.now(), creatorId: state.user?.uid || 'guest' };
+
+        if(state.isGuest) {
+            state.publicSpots.push({ id: Date.now().toString(), ...spotData });
+            localStorage.setItem('guest_spots', JSON.stringify(state.publicSpots));
+            window.closeAllModals(); showToast("已發佈至公共庫！");
+            renderExploreList(); renderHomeTrending();
+        } else {
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
+            window.closeAllModals(); showToast("已發佈至公共庫！");
+        }
+    });
+
+    // 選擇景點加入行程的流程
+    window.openSpotSelector = function() {
+        document.getElementById('sheet-add-menu').classList.remove('open'); document.getElementById('sheet-add-menu').classList.add('closed');
+        safeSet('input-select-spot-search', ''); renderExploreList();
+        document.getElementById('sheet-spot-selector').classList.remove('closed'); document.getElementById('sheet-spot-selector').classList.add('open');
+    };
+
+    window.selectSpotForItinerary = function(spotId) {
+        window.openFormModal('location', null, spotId);
+    };
+
     function renderPlansList() {
       const container = document.getElementById('plans-list');
       if (!state.user) {
-        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-compass text-6xl mb-6"></i><p class="font-bold mt-2 text-[14px]">請先至會員中心登入<br>或使用免登入試用模式</p></div>`;
-        return;
+        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-compass text-6xl mb-6"></i><p class="font-bold mt-2 text-[14px]">請先登入或試用</p></div>`; return;
       }
       if (state.plans.length === 0) { 
         container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-map-location-dot text-6xl mb-6"></i><p class="font-bold">尚無任何行程</p></div>`; return; 
@@ -832,7 +1070,7 @@
     }
 
     window.openPlan = (id) => { 
-      if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入'); return; }
       state.currentPlanId = id; state.activeDay = 0; state.isEditMode = false;
       state.tripData = state.plans.find(p => p.id === id) || state.tripData;
       renderItinerary(); window.switchView('itinerary'); 
@@ -886,44 +1124,28 @@
 
     function calcDurationStr(startStr, endStr) {
       if (!startStr || !endStr) return '';
-      let [sh, sm] = startStr.split(':').map(Number);
-      let [eh, em] = endStr.split(':').map(Number);
+      let [sh, sm] = startStr.split(':').map(Number); let [eh, em] = endStr.split(':').map(Number);
       if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return '';
-      let startMin = sh * 60 + sm;
-      let endMin = eh * 60 + em;
+      let startMin = sh * 60 + sm; let endMin = eh * 60 + em;
       if (endMin < startMin) endMin += 24 * 60; 
-      let diff = endMin - startMin;
-      let h = Math.floor(diff / 60);
-      let m = diff % 60;
-      if (h > 0 && m > 0) return `${h}時${m}分`;
-      if (h > 0) return `${h}時`;
-      return `${m}分`;
+      let diff = endMin - startMin; let h = Math.floor(diff / 60); let m = diff % 60;
+      if (h > 0 && m > 0) return `${h}時${m}分`; if (h > 0) return `${h}時`; return `${m}分`;
     }
 
-    // 將時間字串格式化，將 "時" 後面插入換行
-    function formatDurationHTML(str) {
-      if (!str) return '';
-      return str.replace(/(小時|時)(?!\s*$)/g, '$1<br>');
-    }
+    function formatDurationHTML(str) { if (!str) return ''; return str.replace(/(小時|時)(?!\s*$)/g, '$1<br>'); }
 
     function getTransitSummary(items) {
-        let hasFlight = false;
-        let hasTrainBus = false;
-        let hasCar = false;
-        let hasWalk = false;
-
+        let hasFlight = false; let hasTrainBus = false; let hasCar = false; let hasWalk = false;
         items.forEach(i => {
             if (i.mode === 'flight') hasFlight = true;
             else if (['train', 'bus', 'ship'].includes(i.mode)) hasTrainBus = true;
             else if (['car', 'taxi', 'charter'].includes(i.mode)) hasCar = true;
             else if (i.mode === 'walk') hasWalk = true;
         });
-
         if (hasFlight) return { cat: '飛行', icon: 'fa-solid fa-plane', colorClass: 'bg-[#2A9D8F]/10 text-[#2A9D8F]' };
         if (hasTrainBus) return { cat: '大眾運輸', icon: 'fa-solid fa-train-tram', colorClass: 'bg-brand-accent/10 text-brand-accent' };
         if (hasCar) return { cat: '開車', icon: 'fa-solid fa-car', colorClass: 'bg-[#E9C46A]/20 text-[#D4A33B]' };
         if (hasWalk) return { cat: '步行', icon: 'fa-solid fa-person-walking', colorClass: 'bg-brand-textSub/10 text-brand-textSub' };
-        
         return { cat: '大眾運輸', icon: 'fa-solid fa-train-tram', colorClass: 'bg-brand-accent/10 text-brand-accent' };
     }
 
@@ -934,26 +1156,21 @@
       
       const editBtn = document.getElementById('btn-itinerary-edit');
       if (state.isEditMode) {
-          editBtn.innerHTML = '<i class="fa-solid fa-check text-lg text-brand-primary"></i>';
-          editBtn.classList.add('bg-brand-primary/10');
+          editBtn.innerHTML = '<i class="fa-solid fa-check text-lg text-brand-primary"></i>'; editBtn.classList.add('bg-brand-primary/10');
       } else {
-          editBtn.innerHTML = '<i class="fa-solid fa-pen text-[15px]"></i>';
-          editBtn.classList.remove('bg-brand-primary/10');
+          editBtn.innerHTML = '<i class="fa-solid fa-pen text-[15px]"></i>'; editBtn.classList.remove('bg-brand-primary/10');
       }
-      
       renderDaysTabs(); renderTimeline();
     }
 
     function getDayDateString(dayIndex) {
       if (!state.tripData.startDate) return `Day ${dayIndex}`;
-      const date = new Date(state.tripData.startDate);
-      date.setDate(date.getDate() + dayIndex - 1);
+      const date = new Date(state.tripData.startDate); date.setDate(date.getDate() + dayIndex - 1);
       return `${date.getMonth() + 1}/${date.getDate()}`;
     }
 
     function renderDaysTabs() {
       const tabs = document.getElementById('days-tabs'); tabs.innerHTML = '';
-      
       const isOverview = state.activeDay === 0;
       const btnOverview = document.createElement('button');
       btnOverview.className = `snap-start shrink-0 px-5 py-2.5 rounded-full font-bold transition-all duration-200 border ${
@@ -974,16 +1191,12 @@
     }
 
     function renderCost(cost, curr) {
-      if (!cost) return '';
-      const symbol = curr === 'TWD' ? '$' : '¥';
+      if (!cost) return ''; const symbol = curr === 'TWD' ? '$' : '¥';
       return `<div class="text-[13px] font-medium text-brand-textSub mt-1.5">費用：${symbol}${cost}</div>`;
     }
 
-    // 地點節點 (非交通群組)
     function generateItemHtml(item, index, items, isEdit) {
-        const isLast = index === items.length - 1; 
-        const isFirst = index === 0; 
-        const isOnly = items.length === 1;
+        const isLast = index === items.length - 1; const isFirst = index === 0; const isOnly = items.length === 1;
         const costHtml = renderCost(item.cost, item.currency);
         const editClick = isEdit ? `onclick="window.openOptions('${item.id}')"` : '';
         const cursorClass = isEdit ? 'cursor-pointer hover:bg-brand-bg/30 rounded-2xl' : '';
@@ -1027,34 +1240,32 @@
           </div>`;
     }
 
-    // 交通群組詳細資訊 Modal
     window.viewTransit = function(itemsJson) {
         const items = JSON.parse(decodeURIComponent(itemsJson));
-        const container = document.getElementById('transit-detail-container');
-        const isEdit = state.isEditMode;
+        const container = document.getElementById('transit-detail-container'); const isEdit = state.isEditMode;
         
-        let html = '<div class="flex flex-col relative pb-4 pt-2">';
+        let html = '<div class="flex flex-col relative pb-4 pt-2 z-0">';
+        html += '<div class="absolute top-[32px] bottom-[28px] w-[2px] bg-brand-light left-[67px] z-0"></div>';
         
         items.forEach((item, index) => {
             const isLast = index === items.length - 1;
             const modeObj = TRANSPORT_MODES.find(m => m.id === item.mode) || TRANSPORT_MODES[1];
             
-            // 轉乘或免換乘
             if (item.type === 'location' && (item.isTransfer || item.isThrough)) {
                 let typeColorClass = item.isTransfer ? 'text-[#E76F51]' : 'text-brand-primary';
                 let bgLightClass = item.isTransfer ? 'bg-[#E76F51]/10' : 'bg-brand-primary/10';
                 let icon = item.isTransfer ? 'fa-person-walking-arrow-right' : 'fa-angles-down';
                 let labelText = item.isTransfer ? '換乘' : '直通';
-                let editBtn = isEdit ? `<button onclick="window.openOptions('${item.id}')" class="ml-auto w-8 h-8 flex items-center justify-center text-brand-textSub hover:bg-brand-light rounded-full transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>` : '';
+                let titleText = item.isTransfer ? `${item.name || '下車站'} <i class="fa-solid fa-arrow-right mx-1.5 opacity-50 text-[10px]"></i> ${item.subtitle || '上車站'}` : `${item.name || ''}`;
+                
+                let durText = item.duration ? `<div class="text-[11px] font-bold text-brand-accent mt-0.5 ml-1">轉乘/等待時間: ${item.duration}</div>` : '';
+                let editBtn = isEdit ? `<button onclick="window.openOptions('${item.id}')" class="ml-auto w-8 h-8 flex items-center justify-center text-brand-textSub hover:bg-brand-light rounded-full transition-colors relative z-20"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>` : '';
 
                 html += `
-                <div class="flex relative items-center py-2 group">
-                  <div class="w-[56px] shrink-0 text-right pr-3">
-                     <span class="text-[12px] font-bold font-mono text-brand-textSub">${item.timeStart || ''}</span>
-                  </div>
-                  <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">
-                    <div class="absolute top-0 bottom-0 w-[2px] bg-brand-light z-0"></div>
-                    <div class="w-5 h-5 rounded-full bg-white border-[1.5px] border-brand-light flex items-center justify-center z-10 ${typeColorClass} absolute top-1/2 -translate-y-1/2 shadow-sm">
+                <div class="flex relative items-center py-2 group z-10">
+                  <div class="w-[56px] shrink-0 text-right pr-3"></div>
+                  <div class="w-6 shrink-0 flex flex-col items-center justify-center relative self-stretch">
+                    <div class="w-5 h-5 rounded-full bg-white border-[1.5px] border-brand-light flex items-center justify-center z-10 ${typeColorClass} shadow-sm">
                        <i class="fa-solid ${icon} text-[9px]"></i>
                     </div>
                   </div>
@@ -1062,51 +1273,52 @@
                      <div class="flex-1 pr-2">
                          <div class="flex items-center gap-2">
                             <span class="text-[10px] font-bold ${typeColorClass} ${bgLightClass} px-1.5 py-0.5 rounded shrink-0">${labelText}</span>
-                            <span class="text-[13px] font-bold text-brand-dark">${item.name || ''}</span>
+                            <span class="text-[13px] font-bold text-brand-dark">${titleText}</span>
                          </div>
-                         ${item.subtitle ? `<div class="text-[11px] font-medium text-brand-textSub mt-0.5 ml-1">${item.subtitle}</div>` : ''}
+                         ${durText}
                      </div>
                      ${editBtn}
                   </div>
                 </div>
                 `;
             } 
-            // 實際交通工具
             else {
                 let titleLine = `${item.operator || ''} ${item.vehicleNo || ''}`.trim();
                 let routeStr = item.name ? item.name.replace(/\n/g, ' ') : '';
                 
-                // 判斷若為航班，將降落機場一起帶出
-                if (item.mode === 'flight') {
-                    if (item.subtitle) {
-                        routeStr += ` <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${item.subtitle}`;
-                    }
-                } else {
-                    if(item.direction) routeStr += ` (${item.direction})`;
-                }
+                if (item.mode === 'flight') { if (item.subtitle) routeStr += ` <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${item.subtitle}`; } 
+                else { if (item.direction) routeStr += ` (${item.direction})`; }
 
                 if(!titleLine && !routeStr) titleLine = '未命名交通';
 
                 let extraHtml = item.extraInfo ? `<div class="text-[11px] font-bold text-brand-accent mt-1">${item.extraInfo}</div>` : '';
                 let costHtml = item.cost ? `<div class="text-[11px] font-bold text-brand-textSub mt-1">費用: ${item.currency === 'TWD' ? '$' : '¥'}${item.cost}</div>` : '';
                 let durFormatted = formatDurationHTML(item.duration);
-                let editBtn = isEdit ? `<button onclick="window.openOptions('${item.id}')" class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-brand-textSub hover:bg-brand-bg rounded-full transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>` : '';
+                let editBtn = isEdit ? `<button onclick="window.openOptions('${item.id}')" class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-brand-textSub hover:bg-brand-bg rounded-full transition-colors z-20"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>` : '';
 
                 let iconColor = 'bg-brand-accent/10 text-brand-accent';
                 if(item.mode === 'flight') iconColor = 'bg-[#2A9D8F]/10 text-[#2A9D8F]';
                 else if(['car', 'taxi', 'charter'].includes(item.mode)) iconColor = 'bg-[#E9C46A]/20 text-[#D4A33B]';
                 else if(item.mode === 'walk') iconColor = 'bg-brand-textSub/10 text-brand-textSub';
 
+                let locHtml = '';
+                if (item.deptLoc || item.arrLoc) {
+                   locHtml = `<div class="text-[13px] font-bold text-brand-dark mt-1 pl-[38px] pr-6 flex items-center gap-1.5">
+                                <span class="bg-brand-bg px-2 py-0.5 rounded border border-brand-light/50 text-[12px]">${item.deptLoc || '上車站'}</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] opacity-50"></i>
+                                <span class="bg-brand-bg px-2 py-0.5 rounded border border-brand-light/50 text-[12px]">${item.arrLoc || '下車站'}</span>
+                              </div>`;
+                }
+
                 html += `
-                <div class="flex relative group">
-                  <div class="w-[56px] shrink-0 text-right pr-3 flex flex-col justify-between py-4">
+                <div class="flex relative group z-10">
+                  <div class="w-[56px] shrink-0 text-right pr-3 flex flex-col justify-between py-5">
                      <span class="text-[13px] font-bold font-mono text-brand-dark leading-none">${item.timeStart || ''}</span>
                      <span class="text-[13px] font-bold font-mono text-brand-dark leading-none ${isLast && !item.timeEnd ? 'opacity-0' : ''}">${item.timeEnd || ''}</span>
                   </div>
-                  <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">
-                    <div class="absolute top-0 bottom-0 w-[2px] bg-brand-light z-0"></div>
+                  <div class="w-6 shrink-0 flex flex-col items-center justify-center relative self-stretch">
                     ${durFormatted ? `
-                      <div class="absolute top-1/2 -translate-y-1/2 bg-white px-1.5 py-0.5 rounded text-[10px] font-bold text-brand-textSub border border-brand-light/80 z-10 shadow-sm text-center leading-tight">
+                      <div class="bg-white px-1.5 py-0.5 rounded text-[10px] font-bold text-brand-textSub border border-brand-light/80 z-10 shadow-sm text-center leading-tight mt-1 mb-1">
                         ${durFormatted}
                       </div>
                     ` : ''}
@@ -1114,12 +1326,13 @@
                   <div class="flex-1 pl-3 pr-2 py-2">
                      <div class="bg-white border border-brand-light shadow-sm rounded-[16px] p-3 relative">
                         <div class="flex items-center gap-2.5 mb-1.5 pr-6">
-                           <div class="w-7 h-7 rounded-full ${iconColor} flex items-center justify-center text-[13px] shrink-0">
+                           <div class="w-7 h-7 rounded-full ${iconColor} flex items-center justify-center text-[13px] shrink-0 z-10">
                              <i class="${modeObj.icon}"></i>
                            </div>
                            <div class="text-[14px] font-extrabold text-brand-dark leading-tight">${titleLine || modeObj.label}</div>
                         </div>
                         ${routeStr ? `<div class="text-[13px] font-bold text-brand-textMain pl-[38px] pr-6">${routeStr}</div>` : ''}
+                        ${locHtml}
                         <div class="pl-[38px]">
                            ${extraHtml}
                            ${costHtml}
@@ -1135,15 +1348,14 @@
         if (isEdit) {
             let lastTimeRef = items.length > 0 ? (items[items.length - 1].timeEnd || items[items.length - 1].timeStart || '') : '';
             html += `
-            <div class="flex relative pt-2">
+            <div class="flex relative pt-2 z-10">
                <div class="w-[56px] shrink-0"></div>
                <div class="w-6 shrink-0 flex justify-center relative">
-                  <div class="w-[2px] h-6 bg-brand-light z-0 opacity-50"></div>
-                  <div class="w-5 h-5 bg-white border-[1.5px] border-brand-primary text-brand-primary rounded-full flex items-center justify-center z-10 absolute top-0 shadow-sm">
+                  <div class="w-5 h-5 bg-white border-[1.5px] border-brand-primary text-brand-primary rounded-full flex items-center justify-center z-10 shadow-sm">
                      <i class="fa-solid fa-plus text-[9px]"></i>
                   </div>
                </div>
-               <div class="flex-1 pl-3 flex items-start cursor-pointer" onclick="window.closeAllModals(); setTimeout(()=>window.showAddMenu('transit', '${lastTimeRef}'), 300)">
+               <div class="flex-1 pl-3 flex items-start cursor-pointer z-10" onclick="window.closeAllModals(); setTimeout(()=>window.showAddMenu('transit', '${lastTimeRef}'), 300)">
                   <span class="text-[12px] font-bold text-brand-primary/80 hover:text-brand-primary transition-colors py-0.5">＋ 繼續新增交通</span>
                </div>
             </div>`;
@@ -1157,11 +1369,8 @@
 
     function renderTimeline() {
       const container = document.getElementById('timeline-container');
-      const plan = state.tripData;
-      const isEdit = state.isEditMode;
-      const fabBtn = document.getElementById('fab-container');
+      const plan = state.tripData; const isEdit = state.isEditMode; const fabBtn = document.getElementById('fab-container');
       
-      // 總覽
       if (state.activeDay === 0) {
         fabBtn.classList.add('hidden'); fabBtn.classList.remove('scale-100');
         
@@ -1220,9 +1429,7 @@
                 `;
             });
             accommodationsHtml += `</div>`;
-        } else {
-            accommodationsHtml = `<div class="text-center py-6 text-brand-textSub bg-brand-bg rounded-[16px] border border-brand-light/50"><p class="text-[13px] font-bold">尚未設定住宿</p></div>`;
-        }
+        } else { accommodationsHtml = `<div class="text-center py-6 text-brand-textSub bg-brand-bg rounded-[16px] border border-brand-light/50"><p class="text-[13px] font-bold">尚未設定住宿</p></div>`; }
 
         let hotelHtml = `
           <div class="bg-white border border-brand-light rounded-[24px] p-5 shadow-sm mb-6">
@@ -1232,16 +1439,12 @@
              ${accommodationsHtml}
           </div>
         `;
-
         container.innerHTML = `<div class="px-2 py-2">${flightHtml}${hotelHtml}</div>`;
         return;
       }
 
-      if (isEdit) {
-          fabBtn.classList.remove('hidden'); setTimeout(() => fabBtn.classList.add('scale-100'), 10);
-      } else {
-          fabBtn.classList.remove('scale-100'); setTimeout(() => fabBtn.classList.add('hidden'), 300);
-      }
+      if (isEdit) { fabBtn.classList.remove('hidden'); setTimeout(() => fabBtn.classList.add('scale-100'), 10); } 
+      else { fabBtn.classList.remove('scale-100'); setTimeout(() => fabBtn.classList.add('hidden'), 300); }
 
       let flatItems = [...(plan.itinerary[state.activeDay] || [])];
       flatItems.sort((a, b) => (a.timeStart || '').localeCompare(b.timeStart || ''));
@@ -1252,24 +1455,15 @@
         return;
       }
 
-      const grouped = [];
-      let currentTransit = [];
-      
+      const grouped = []; let currentTransit = [];
       flatItems.forEach(item => {
           const isMainLoc = item.type === 'location' && !item.isTransfer && !item.isThrough;
           if (isMainLoc) {
-              if (currentTransit.length > 0) {
-                  grouped.push({ isGroup: true, items: currentTransit });
-                  currentTransit = [];
-              }
+              if (currentTransit.length > 0) { grouped.push({ isGroup: true, items: currentTransit }); currentTransit = []; }
               grouped.push(item);
-          } else {
-              currentTransit.push(item);
-          }
+          } else { currentTransit.push(item); }
       });
-      if (currentTransit.length > 0) {
-          grouped.push({ isGroup: true, items: currentTransit });
-      }
+      if (currentTransit.length > 0) { grouped.push({ isGroup: true, items: currentTransit }); }
 
       let html = '<div class="relative pl-1 pr-1 pt-4 pb-4">';
       
@@ -1279,13 +1473,9 @@
           
           if (groupOrItem.isGroup) {
               const gItems = groupOrItem.items;
-              let startTime = gItems[0].timeStart || '';
-              let endTime = gItems[gItems.length - 1].timeEnd || '';
+              let startTime = gItems[0].timeStart || ''; let endTime = gItems[gItems.length - 1].timeEnd || '';
               let durationStr = calcDurationStr(startTime, endTime);
-              if (!durationStr) {
-                 const firstWithDur = gItems.find(i => i.duration);
-                 durationStr = firstWithDur ? firstWithDur.duration : '';
-              }
+              if (!durationStr) { const firstWithDur = gItems.find(i => i.duration); durationStr = firstWithDur ? firstWithDur.duration : ''; }
               const summary = getTransitSummary(gItems);
 
               if (!isOnly) {
@@ -1296,20 +1486,16 @@
 
               html += `
               <div class="relative flex group cursor-pointer" onclick="window.viewTransit('${encodeURIComponent(JSON.stringify(gItems))}')">
-                <div class="w-[68px] shrink-0 text-right pr-3 flex flex-col justify-center gap-0.5">
+                <div class="w-[68px] shrink-0 text-right pr-3 flex flex-col justify-center items-end py-2">
                   <span class="text-[13px] font-bold font-mono text-brand-textSub leading-none">${startTime}</span>
-                  ${startTime && endTime ? `<span class="text-[10px] text-brand-textSub/40 leading-none">|</span>` : ''}
+                  ${startTime && endTime ? `<div class="text-[10px] text-brand-textSub/40 font-mono my-1 mr-[2px]">|</div>` : ''}
                   <span class="text-[13px] font-bold font-mono text-brand-textSub leading-none">${endTime}</span>
                 </div>
-                <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">
-                  ${lineHtml}
-                </div>
+                <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}</div>
                 <div class="flex-1 pt-[8px] pb-[8px] pl-2 relative pr-6">
                    <div class="bg-white border border-brand-light/80 rounded-[16px] p-3 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex justify-between items-center active:scale-[0.98] transition-transform">
                       <div class="flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-full ${summary.colorClass} flex items-center justify-center text-[14px]">
-                           <i class="${summary.icon}"></i>
-                         </div>
+                         <div class="w-8 h-8 rounded-full ${summary.colorClass} flex items-center justify-center text-[14px]"><i class="${summary.icon}"></i></div>
                          <div>
                             <div class="text-[14px] font-extrabold text-brand-dark leading-tight">${summary.cat}</div>
                             ${durationStr ? `<div class="text-[11px] font-bold text-brand-textSub mt-0.5">${formatDurationHTML(durationStr).replace(/<br>/g, ' ')}</div>` : ''}
@@ -1319,9 +1505,7 @@
                    </div>
                 </div>
               </div>`;
-          } else {
-              html += generateItemHtml(groupOrItem, index, grouped, isEdit);
-          }
+          } else { html += generateItemHtml(groupOrItem, index, grouped, isEdit); }
           
           let isCurrentLoc = !groupOrItem.isGroup && groupOrItem.type === 'location' && !groupOrItem.isTransfer && !groupOrItem.isThrough;
           let nextItem = grouped[index+1];
@@ -1334,9 +1518,7 @@
                   <div class="w-[68px] shrink-0"></div>
                   <div class="w-6 shrink-0 flex justify-center relative">
                      <div class="absolute top-0 bottom-0 w-[3px] bg-transparent border-l-[3px] border-dashed border-brand-primary/40 z-0 opacity-60"></div>
-                     <div class="w-5 h-5 bg-brand-bg border-[1.5px] border-brand-primary text-brand-primary rounded-full flex items-center justify-center z-10 transition-colors group-hover:bg-brand-primary group-hover:text-white shadow-sm">
-                        <i class="fa-solid fa-plus text-[9px]"></i>
-                     </div>
+                     <div class="w-5 h-5 bg-brand-bg border-[1.5px] border-brand-primary text-brand-primary rounded-full flex items-center justify-center z-10 transition-colors group-hover:bg-brand-primary group-hover:text-white shadow-sm"><i class="fa-solid fa-plus text-[9px]"></i></div>
                   </div>
                   <div class="flex-1 flex items-center pl-3">
                      <span class="text-[12px] font-bold text-brand-primary/80 group-hover:text-brand-primary transition-colors">加入交通安排</span>
@@ -1345,14 +1527,11 @@
               `;
           }
       });
-
-      html += '</div>';
-      container.innerHTML = html;
+      html += '</div>'; container.innerHTML = html;
     }
 
     window.showAddMenu = function(type = 'main') {
-        const titleEl = document.getElementById('sheet-add-title');
-        const contentEl = document.getElementById('sheet-add-content');
+        const titleEl = document.getElementById('sheet-add-title'); const contentEl = document.getElementById('sheet-add-content');
         const plan = state.tripData;
         
         document.getElementById('modal-overlay').classList.remove('closed'); document.getElementById('modal-overlay').classList.add('open');
@@ -1360,13 +1539,14 @@
         
         if (type === 'main') {
             titleEl.innerText = '選擇新增項目';
+            // ★ 修改核心：取消手動新增，改為打開搜尋(Spot Selector)
             contentEl.innerHTML = `
                 <div class="flex flex-col gap-3 pb-6">
-                  <button onclick="window.openFormModal('location')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-brand-primary/30 transition-all text-left">
+                  <button onclick="window.openSpotSelector()" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-brand-primary/30 transition-all text-left">
                     <div class="w-12 h-12 shrink-0 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl"><i class="fa-solid fa-location-dot"></i></div>
                     <div class="flex-1">
                        <div class="text-[16px] font-extrabold text-brand-dark">新增地點</div>
-                       <div class="text-[12px] font-bold text-brand-textSub mt-0.5">景點、餐廳、購物、一般行程</div>
+                       <div class="text-[12px] font-bold text-brand-textSub mt-0.5">從公共景點庫搜尋並加入</div>
                     </div>
                     <i class="fa-solid fa-chevron-right text-brand-textSub/50"></i>
                   </button>
@@ -1381,40 +1561,28 @@
                 </div>
             `;
         } else if (type === 'transit') {
-            titleEl.innerText = '新增交通安排';
-            state.tempTimeRef = arguments[1] || '';
-            
+            titleEl.innerText = '新增交通安排'; state.tempTimeRef = arguments[1] || '';
             contentEl.innerHTML = `
                 <div class="flex flex-col gap-3 pb-6">
                   <button onclick="window.openFormModal('transport', null, 'autoTime')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-brand-accent/30 transition-all text-left">
                     <div class="w-12 h-12 shrink-0 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl"><i class="fa-solid fa-train-tram"></i></div>
-                    <div class="flex-1">
-                       <div class="text-[16px] font-extrabold text-brand-dark">新增交通</div>
-                       <div class="text-[12px] font-bold text-brand-textSub mt-0.5">電車、公車、計程車、自駕等</div>
-                    </div>
+                    <div class="flex-1"><div class="text-[16px] font-extrabold text-brand-dark">新增交通</div><div class="text-[12px] font-bold text-brand-textSub mt-0.5">電車、公車、計程車、自駕等</div></div>
                     <i class="fa-solid fa-chevron-right text-brand-textSub/50"></i>
                   </button>
                   <button onclick="window.showAddMenu('flight', '${state.tempTimeRef}')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-[#2A9D8F]/30 transition-all text-left">
                     <div class="w-12 h-12 shrink-0 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-xl"><i class="fa-solid fa-plane"></i></div>
-                    <div class="flex-1">
-                       <div class="text-[16px] font-extrabold text-brand-dark">新增航班</div>
-                       <div class="text-[12px] font-bold text-brand-textSub mt-0.5">載入設定或新增自訂航班</div>
-                    </div>
+                    <div class="flex-1"><div class="text-[16px] font-extrabold text-brand-dark">新增航班</div><div class="text-[12px] font-bold text-brand-textSub mt-0.5">載入設定或新增自訂航班</div></div>
                     <i class="fa-solid fa-chevron-right text-brand-textSub/50"></i>
                   </button>
                   <button onclick="window.openFormModal('transfer', null, 'autoTime')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-[#E76F51]/30 transition-all text-left">
                     <div class="w-12 h-12 shrink-0 rounded-full bg-[#E76F51]/10 text-[#E76F51] flex items-center justify-center text-xl"><i class="fa-solid fa-person-walking-arrow-right"></i></div>
-                    <div class="flex-1">
-                       <div class="text-[16px] font-extrabold text-brand-dark">轉乘 / 免換乘</div>
-                       <div class="text-[12px] font-bold text-brand-textSub mt-0.5">站內轉乘換線、原車直通</div>
-                    </div>
+                    <div class="flex-1"><div class="text-[16px] font-extrabold text-brand-dark">轉乘 / 免換乘</div><div class="text-[12px] font-bold text-brand-textSub mt-0.5">站內轉乘換線、原車直通</div></div>
                     <i class="fa-solid fa-chevron-right text-brand-textSub/50"></i>
                   </button>
                 </div>
             `;
         } else if (type === 'flight') {
-            titleEl.innerText = '載入或新增航班';
-            state.tempTimeRef = arguments[1] || state.tempTimeRef || '';
+            titleEl.innerText = '載入或新增航班'; state.tempTimeRef = arguments[1] || state.tempTimeRef || '';
             let html = '<div class="flex flex-col gap-3 pb-6">';
             html += `<button onclick="window.showAddMenu('transit', '${state.tempTimeRef}')" class="mb-2 text-[13px] font-bold text-brand-textSub hover:text-brand-primary transition-colors flex items-center gap-1.5"><i class="fa-solid fa-arrow-left"></i> 返回交通選單</button>`;
             
@@ -1424,10 +1592,7 @@
                 html += `
                   <button onclick="window.openFormModal('flight', null, 'outbound')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-[#2A9D8F]/30 transition-all text-left group">
                     <div class="w-10 h-10 shrink-0 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-lg"><i class="fa-solid fa-plane-departure"></i></div>
-                    <div class="flex-1 overflow-hidden">
-                       <div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入去程設定</div>
-                       <div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#2A9D8F]">${text}</div>
-                    </div>
+                    <div class="flex-1 overflow-hidden"><div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入去程設定</div><div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#2A9D8F]">${text}</div></div>
                   </button>`;
                 hasFlight = true;
             }
@@ -1436,59 +1601,40 @@
                 html += `
                   <button onclick="window.openFormModal('flight', null, 'return')" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-[#2A9D8F]/30 transition-all text-left group">
                     <div class="w-10 h-10 shrink-0 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-lg"><i class="fa-solid fa-plane-arrival"></i></div>
-                    <div class="flex-1 overflow-hidden">
-                       <div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入回程設定</div>
-                       <div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#2A9D8F]">${text}</div>
-                    </div>
+                    <div class="flex-1 overflow-hidden"><div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入回程設定</div><div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#2A9D8F]">${text}</div></div>
                   </button>`;
                 hasFlight = true;
             }
             if(!hasFlight) html += `<div class="text-center py-6 bg-white border border-dashed border-brand-light rounded-[20px] shadow-sm"><p class="text-[13px] font-bold text-brand-textSub">設定中沒有預設航班</p></div>`;
             html += `<button onclick="window.openFormModal('flight', null, 'autoTime')" class="w-full mt-2 bg-brand-bg text-[#2A9D8F] font-bold text-[15px] py-4 rounded-[20px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> 新增自訂航班</button>`;
-            html += '</div>';
-            contentEl.innerHTML = html;
+            html += '</div>'; contentEl.innerHTML = html;
         } else if (type === 'hotel') {
-            titleEl.innerText = '載入或新增住宿';
-            let html = '<div class="flex flex-col gap-3 pb-6">';
+            titleEl.innerText = '載入或新增住宿'; let html = '<div class="flex flex-col gap-3 pb-6">';
             html += `<button onclick="window.showAddMenu('main')" class="mb-2 text-[13px] font-bold text-brand-textSub hover:text-brand-primary transition-colors flex items-center gap-1.5"><i class="fa-solid fa-arrow-left"></i> 返回主選單</button>`;
-            
             if (plan.accommodations && plan.accommodations.length > 0) {
                 plan.accommodations.forEach((h, idx) => {
                     if(h.name) {
                        html += `
                         <button onclick="window.openFormModal('hotel', null, ${idx})" class="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-brand-light/50 active:border-[#D4A33B]/30 transition-all text-left group">
                           <div class="w-10 h-10 shrink-0 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-lg"><i class="fa-solid fa-bed"></i></div>
-                          <div class="flex-1 overflow-hidden">
-                             <div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入住宿設定</div>
-                             <div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#D4A33B]">${h.name}</div>
-                          </div>
+                          <div class="flex-1 overflow-hidden"><div class="text-[11px] font-bold text-brand-textSub mb-0.5">載入住宿設定</div><div class="text-[15px] font-extrabold text-brand-dark truncate group-active:text-[#D4A33B]">${h.name}</div></div>
                         </button>`;
                     }
                 });
-            } else {
-                html += `<div class="text-center py-6 bg-white border border-dashed border-brand-light rounded-[20px] shadow-sm"><p class="text-[13px] font-bold text-brand-textSub">設定中沒有預設住宿</p></div>`;
-            }
-            html += `<button onclick="window.openFormModal('hotel')" class="w-full mt-2 bg-brand-bg text-[#D4A33B] font-bold text-[15px] py-4 rounded-[20px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> 新增自訂住宿</button>`;
-            html += '</div>';
+            } else { html += `<div class="text-center py-6 bg-white border border-dashed border-brand-light rounded-[20px] shadow-sm"><p class="text-[13px] font-bold text-brand-textSub">設定中沒有預設住宿</p></div>`; }
+            html += `<button onclick="window.openFormModal('hotel')" class="w-full mt-2 bg-brand-bg text-[#D4A33B] font-bold text-[15px] py-4 rounded-[20px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> 新增自訂住宿</button></div>`;
             contentEl.innerHTML = html;
         }
     };
 
     window.toggleTransferUI = function() {
-        const radio = document.querySelector('input[name="transfer_type"]:checked');
-        if(!radio) return;
+        const radio = document.querySelector('input[name="transfer_type"]:checked'); if(!radio) return;
         const val = radio.value;
-        const groupTrans = document.getElementById('group-transfer-fields');
-        const groupLoc = document.getElementById('group-location-fields');
-        const labelLocName = document.getElementById('label-loc-name');
-        
+        const groupTrans = document.getElementById('group-transfer-fields'); const groupThrough = document.getElementById('group-through-fields');
         if(val === 'transfer') {
-            if(groupTrans) groupTrans.classList.remove('hidden');
-            if(groupLoc) groupLoc.classList.add('hidden');
+            if(groupTrans) groupTrans.classList.remove('hidden'); if(groupThrough) groupThrough.classList.add('hidden');
         } else {
-            if(groupTrans) groupTrans.classList.add('hidden');
-            if(groupLoc) groupLoc.classList.remove('hidden');
-            if(labelLocName) labelLocName.innerHTML = '車站名稱 <span class="text-brand-primary">*</span>';
+            if(groupTrans) groupTrans.classList.add('hidden'); if(groupThrough) groupThrough.classList.remove('hidden');
         }
     };
 
@@ -1497,107 +1643,91 @@
       state.itemType = baseType; state.subType = subType; state.editingId = itemId;
       const plan = state.tripData;
       
-      ['group-location-mode', 'group-location-fields', 'group-transport-mode', 'group-transport-fields', 'group-flight-fields', 'group-hotel-fields', 'group-transfer-type', 'group-transfer-fields']
+      ['group-location-mode', 'group-location-fields', 'group-transport-mode', 'group-transport-fields', 'group-flight-fields', 'group-hotel-fields', 'group-transfer-type', 'group-transfer-fields', 'group-through-fields', 'group-selected-spot']
         .forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
       
       let titleStr = '新增項目';
       
       if (subType === 'location') {
          titleStr = itemId ? '編輯地點' : '新增地點';
-         document.getElementById('group-location-mode')?.classList.remove('hidden');
-         document.getElementById('group-location-fields')?.classList.remove('hidden');
-         const lbl = document.getElementById('label-loc-name'); if(lbl) lbl.innerHTML = '名稱 <span class="text-brand-primary">*</span>';
-         renderLocationModes();
+         // ★ 取消原先的手動編輯景點卡片，改顯示鎖定的共用景點卡片
+         document.getElementById('group-selected-spot')?.classList.remove('hidden');
       } else if (subType === 'hotel') {
-         titleStr = itemId ? '編輯住宿' : '新增住宿';
-         document.getElementById('group-hotel-fields')?.classList.remove('hidden');
+         titleStr = itemId ? '編輯住宿' : '新增住宿'; document.getElementById('group-hotel-fields')?.classList.remove('hidden');
       } else if (subType === 'transfer') {
-         titleStr = itemId ? '編輯轉乘' : '轉乘 / 免換乘';
-         document.getElementById('group-transfer-type')?.classList.remove('hidden');
-         window.toggleTransferUI();
+         titleStr = itemId ? '編輯轉乘' : '轉乘 / 免換乘'; document.getElementById('group-transfer-type')?.classList.remove('hidden'); window.toggleTransferUI();
       } else if (subType === 'transport') {
-         titleStr = itemId ? '編輯交通' : '新增交通';
-         document.getElementById('group-transport-mode')?.classList.remove('hidden');
-         document.getElementById('group-transport-fields')?.classList.remove('hidden');
-         renderTransportModes();
+         titleStr = itemId ? '編輯交通' : '新增交通'; document.getElementById('group-transport-mode')?.classList.remove('hidden'); document.getElementById('group-transport-fields')?.classList.remove('hidden'); renderTransportModes();
       } else if (subType === 'flight') {
-         titleStr = itemId ? '編輯航班' : '新增航班';
-         document.getElementById('group-flight-fields')?.classList.remove('hidden');
+         titleStr = itemId ? '編輯航班' : '新增航班'; document.getElementById('group-flight-fields')?.classList.remove('hidden');
       }
-      const titleEl = document.getElementById('form-modal-title');
-      if(titleEl) titleEl.innerText = titleStr;
+      const titleEl = document.getElementById('form-modal-title'); if(titleEl) titleEl.innerText = titleStr;
 
-      state.formData = { 
-        timeStart: '', timeEnd: '', name: '', subtitle: '', 
-        mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', 
-        direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', 
-        isThrough: false, isTransfer: false
-      };
+      state.formData = { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false, isTransfer: false, deptLoc: '', arrLoc: '' };
 
       if (itemId) {
-         const item = plan.itinerary[state.activeDay].find(i => i.id === itemId);
-         state.formData = { ...item };
+         const item = plan.itinerary[state.activeDay].find(i => i.id === itemId); state.formData = { ...item };
+         
+         // 編輯已建立的地點，將資料餵進鎖定卡片
+         if (subType === 'location') {
+             const locObj = LOCATION_MODES.find(m => m.id === state.formData.locMode) || LOCATION_MODES[0];
+             document.getElementById('display-spot-icon').innerHTML = `<i class="${locObj.icon}"></i>`;
+             document.getElementById('display-spot-name').innerText = state.formData.name || '';
+             document.getElementById('display-spot-sub').innerText = state.formData.subtitle || locObj.label;
+         }
+
       } else {
          if (subType === 'flight') state.formData.mode = 'flight';
          if (subType === 'hotel') state.formData.locMode = 'hotel';
          if (subType === 'transfer') state.formData.locMode = 'station';
          
-         if(subType === 'flight' && autoFillData) {
+         // 從公共資料庫帶入景點
+         if (subType === 'location' && autoFillData) {
+             const spot = state.publicSpots.find(s => s.id === autoFillData);
+             if (spot) {
+                 state.formData.name = spot.name; state.formData.subtitle = spot.subtitle; state.formData.locMode = spot.locMode;
+                 const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+                 document.getElementById('display-spot-icon').innerHTML = `<i class="${locObj.icon}"></i>`;
+                 document.getElementById('display-spot-name').innerText = spot.name || '';
+                 document.getElementById('display-spot-sub').innerText = spot.subtitle || locObj.label;
+             }
+         } else if(subType === 'flight' && autoFillData) {
              if(autoFillData === 'outbound') {
-                 state.formData.operator = plan.flightOutAirline || ''; state.formData.vehicleNo = plan.flightOutNo || '';
-                 state.formData.name = plan.flightOutDeptLoc || ''; state.formData.subtitle = plan.flightOutArrLoc || '';
-                 state.formData.timeStart = plan.flightOutDeptTime || ''; state.formData.timeEnd = plan.flightOutArrTime || '';
+                 state.formData.operator = plan.flightOutAirline || ''; state.formData.vehicleNo = plan.flightOutNo || ''; state.formData.name = plan.flightOutDeptLoc || ''; state.formData.subtitle = plan.flightOutArrLoc || ''; state.formData.timeStart = plan.flightOutDeptTime || ''; state.formData.timeEnd = plan.flightOutArrTime || '';
              } else if(autoFillData === 'return') {
-                 state.formData.operator = plan.flightRetAirline || ''; state.formData.vehicleNo = plan.flightRetNo || '';
-                 state.formData.name = plan.flightRetDeptLoc || ''; state.formData.subtitle = plan.flightRetArrLoc || '';
-                 state.formData.timeStart = plan.flightRetDeptTime || ''; state.formData.timeEnd = plan.flightRetArrTime || '';
+                 state.formData.operator = plan.flightRetAirline || ''; state.formData.vehicleNo = plan.flightRetNo || ''; state.formData.name = plan.flightRetDeptLoc || ''; state.formData.subtitle = plan.flightRetArrLoc || ''; state.formData.timeStart = plan.flightRetDeptTime || ''; state.formData.timeEnd = plan.flightRetArrTime || '';
              }
          } else if (subType === 'hotel' && typeof autoFillData === 'number') {
              const h = plan.accommodations[autoFillData];
-             if(h) {
-                 state.formData.name = h.name || ''; state.formData.operator = h.foreignName || ''; state.formData.subtitle = h.address || '';
-             }
+             if(h) { state.formData.name = h.name || ''; state.formData.operator = h.foreignName || ''; state.formData.subtitle = h.address || ''; }
          }
-         
-         if (autoFillData === 'autoTime' && state.tempTimeRef) {
-             state.formData.timeStart = state.tempTimeRef;
-         }
+         if (autoFillData === 'autoTime' && state.tempTimeRef) { state.formData.timeStart = state.tempTimeRef; }
       }
       
-      safeSet('input-time-start', state.formData.timeStart || '');
-      safeSet('input-time-end', state.formData.timeEnd || '');
-      safeSet('input-cost', state.formData.cost || '');
+      safeSet('input-time-start', state.formData.timeStart || ''); safeSet('input-time-end', state.formData.timeEnd || ''); safeSet('input-cost', state.formData.cost || '');
       
-      if (subType === 'location') {
-         safeSet('input-loc-name', state.formData.name || ''); safeSet('input-loc-subtitle', state.formData.subtitle || '');
-      } else if (subType === 'hotel') {
+      if (subType === 'hotel') {
          safeSet('input-hotel-name', state.formData.name || ''); safeSet('input-hotel-foreign', state.formData.operator || ''); safeSet('input-hotel-address', state.formData.subtitle || '');
       } else if (subType === 'flight') {
-         safeSetSelect('input-flight-airline', state.formData.operator || ''); safeSet('input-flight-no', state.formData.vehicleNo || '');
-         safeSet('input-flight-dept', state.formData.name || ''); safeSet('input-flight-arr', state.formData.subtitle || '');
+         safeSetSelect('input-flight-airline', state.formData.operator || ''); safeSet('input-flight-no', state.formData.vehicleNo || ''); safeSet('input-flight-dept', state.formData.name || ''); safeSet('input-flight-arr', state.formData.subtitle || '');
       } else if (subType === 'transport') {
-         safeSet('input-operator', state.formData.operator || ''); safeSet('input-vehicle-no', state.formData.vehicleNo || '');
-         safeSet('input-route-name', state.formData.name || ''); safeSet('input-direction', state.formData.direction || '');
-         safeSet('input-duration', state.formData.duration || ''); safeSet('input-extraInfo', state.formData.extraInfo || '');
+         safeSet('input-operator', state.formData.operator || ''); safeSet('input-vehicle-no', state.formData.vehicleNo || ''); safeSet('input-route-name', state.formData.name || ''); safeSet('input-direction', state.formData.direction || ''); safeSet('input-duration', state.formData.duration || ''); safeSet('input-extraInfo', state.formData.extraInfo || ''); safeSet('input-transport-dept', state.formData.deptLoc || ''); safeSet('input-transport-arr', state.formData.arrLoc || '');
       } else if (subType === 'transfer') {
          const radios = document.getElementsByName('transfer_type');
          if(radios && radios.length > 1) {
              if(state.formData.isThrough) { 
-                radios[1].checked = true;
-                safeSet('input-loc-name', state.formData.name || ''); safeSet('input-loc-subtitle', state.formData.subtitle || '');
+                radios[1].checked = true; safeSet('input-through-sta', state.formData.name || ''); safeSet('input-through-wait', state.formData.duration || '');
              } else { 
-                radios[0].checked = true;
-                safeSet('input-trans-lineA', state.formData.operator || ''); safeSet('input-trans-staA', state.formData.name || '');
-                safeSet('input-trans-lineB', state.formData.direction || ''); safeSet('input-trans-staB', state.formData.subtitle || '');
+                radios[0].checked = true; safeSet('input-trans-lineA', state.formData.operator || ''); safeSet('input-trans-staA', state.formData.name || ''); safeSet('input-trans-lineB', state.formData.direction || ''); safeSet('input-trans-staB', state.formData.subtitle || ''); safeSet('input-trans-wait', state.formData.duration || '');
              }
              window.toggleTransferUI();
          }
       }
       
       window.selectCurrency(state.formData.currency || 'JPY');
-      
       setTimeout(() => { document.querySelectorAll('textarea').forEach(t => { if(t) { t.style.height = ''; t.style.height = t.scrollHeight + 'px'; } }); }, 10);
       
+      document.getElementById('sheet-spot-selector')?.classList.remove('open'); document.getElementById('sheet-spot-selector')?.classList.add('closed');
       document.getElementById('sheet-add-menu')?.classList.remove('open'); document.getElementById('sheet-add-menu')?.classList.add('closed');
       document.getElementById('modal-overlay')?.classList.remove('closed'); document.getElementById('modal-overlay')?.classList.add('open');
       document.getElementById('sheet-form')?.classList.remove('closed'); document.getElementById('sheet-form')?.classList.add('open');
@@ -1608,35 +1738,20 @@
       if(el) {
           el.innerHTML = TRANSPORT_MODES.map(mode => `
             <button type="button" onclick="window.selectTransportMode('${mode.id}')"
-              class="mode-btn py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
-                state.formData.mode === mode.id ? 'bg-brand-accent text-white border-brand-accent shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent hover:bg-brand-light/50'
-              }"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
+              class="mode-btn py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${state.formData.mode === mode.id ? 'bg-brand-accent text-white border-brand-accent shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent hover:bg-brand-light/50'}"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
           `).join('');
       }
     }
-
-    function renderLocationModes() {
-      const el = document.getElementById('location-modes-grid');
-      if(el) {
-          el.innerHTML = LOCATION_MODES.map(mode => `
-            <button type="button" onclick="window.selectLocationMode('${mode.id}')"
-              class="mode-btn py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
-                state.formData.locMode === mode.id ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent hover:bg-brand-light/50'
-              }"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
-          `).join('');
-      }
-    }
+    
+    window.selectTransportMode = function(modeId) {
+        state.formData.mode = modeId; renderTransportModes();
+    };
 
     window.selectCurrency = function(val) {
-      state.formData.currency = val;
-      const el = document.getElementById('display-curr-symbol');
-      if(el) el.innerText = val === 'TWD' ? '$' : '¥';
+      state.formData.currency = val; const el = document.getElementById('display-curr-symbol'); if(el) el.innerText = val === 'TWD' ? '$' : '¥';
       document.querySelectorAll('.curr-btn').forEach(btn => {
-        if (btn.dataset.val === val) {
-          btn.classList.add('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.remove('text-brand-textSub', 'bg-transparent');
-        } else {
-          btn.classList.remove('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.add('text-brand-textSub', 'bg-transparent');
-        }
+        if (btn.dataset.val === val) { btn.classList.add('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.remove('text-brand-textSub', 'bg-transparent'); } 
+        else { btn.classList.remove('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.add('text-brand-textSub', 'bg-transparent'); }
       });
     };
 
@@ -1648,33 +1763,28 @@
     };
 
     window.closeAllModals = function() {
-      ['modal-overlay', 'sheet-add-menu', 'sheet-form', 'sheet-options', 'modal-delete', 'sheet-transit-detail'].forEach(id => {
-          const el = document.getElementById(id);
-          if(el) { el.classList.remove('open'); el.classList.add('closed'); }
+      ['modal-overlay', 'sheet-add-menu', 'sheet-form', 'sheet-options', 'modal-delete', 'sheet-transit-detail', 'sheet-spot-selector', 'sheet-add-public-spot'].forEach(id => {
+          const el = document.getElementById(id); if(el) { el.classList.remove('open'); el.classList.add('closed'); }
       });
       const delContent = document.getElementById('delete-dialog-content');
       if(delContent) { delContent.classList.add('scale-95', 'opacity-0'); delContent.classList.remove('scale-100', 'opacity-100'); }
     }
 
     window.handleExport = () => {
-      if(!state.user) { showToast('請先登入'); window.switchView('profile'); return; }
-      const dataStr = JSON.stringify(state.plans, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `趣旅行_備份.json`; a.click();
+      if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
+      const dataStr = JSON.stringify(state.plans, null, 2); const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `趣旅行_備份.json`; a.click();
       URL.revokeObjectURL(url); showToast('已匯出 JSON 行程檔！');
     };
 
     window.handleImport = (e) => {
-      if(!state.user) { showToast('請先登入'); window.switchView('profile'); return; }
+      if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
-          const imported = JSON.parse(event.target.result);
-          const plansToImport = (imported && imported.title && !Array.isArray(imported)) ? [imported] : imported;
+          const imported = JSON.parse(event.target.result); const plansToImport = (imported && imported.title && !Array.isArray(imported)) ? [imported] : imported;
           if (!Array.isArray(plansToImport)) throw new Error("Invalid format");
-          
           for (let p of plansToImport) {
             const cleanPlan = { 
               title: p.title || "未命名行程", startDate: p.startDate || new Date().toISOString().split('T')[0], days: p.days || 1, 
@@ -1682,16 +1792,11 @@
               flightRetAirline: p.flightRetAirline || "", flightRetNo: p.flightRetNo || "", flightRetDeptLoc: p.flightRetDeptLoc || "", flightRetArrLoc: p.flightRetArrLoc || "", flightRetDeptTime: p.flightRetDeptTime || "", flightRetArrTime: p.flightRetArrTime || "",
               accommodations: p.accommodations || [], itinerary: p.itinerary || {}, createdAt: serverTimestamp() 
             };
-            if(state.isGuest) {
-                cleanPlan.id = Date.now().toString() + Math.random().toString(36).substring(7);
-                state.plans.push(cleanPlan);
-            } else {
-                await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
-            }
+            if(state.isGuest) { cleanPlan.id = Date.now().toString() + Math.random().toString(36).substring(7); state.plans.push(cleanPlan); } 
+            else { await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan); }
           }
           if(state.isGuest) localStorage.setItem('guest_plans', JSON.stringify(state.plans));
-          showToast('成功匯入行程！'); window.switchView('plans');
-          if(state.isGuest) renderPlansList();
+          showToast('成功匯入行程！'); window.switchView('plans'); if(state.isGuest) renderPlansList();
         } catch (err) { alert('檔案格式錯誤，請確認這是由本系統匯出的 JSON 行程檔。'); }
         document.getElementById('input-import-file').value = '';
       };
@@ -1702,19 +1807,11 @@
       
       document.getElementById('form-setup').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const hotelItems = document.querySelectorAll('#hotel-list-container .hotel-item');
-        const accommodations = [];
+        const hotelItems = document.querySelectorAll('#hotel-list-container .hotel-item'); const accommodations = [];
         hotelItems.forEach(item => {
             const name = item.querySelector('.hotel-name').value;
-            if(name) {
-                accommodations.push({
-                    name: name, foreignName: item.querySelector('.hotel-foreign').value,
-                    address: item.querySelector('.hotel-address').value, nights: parseInt(item.querySelector('.hotel-nights').value) || 1
-                });
-            }
+            if(name) { accommodations.push({ name: name, foreignName: item.querySelector('.hotel-foreign').value, address: item.querySelector('.hotel-address').value, nights: parseInt(item.querySelector('.hotel-nights').value) || 1 }); }
         });
-
         const planData = {
           title: document.getElementById('setup-title').value, startDate: document.getElementById('setup-start-date').value, days: parseInt(document.getElementById('setup-days').value) || 1,
           flightOutAirline: document.getElementById('setup-flight-out-airline').value, flightOutNo: document.getElementById('setup-flight-out-no').value, flightOutDeptLoc: document.getElementById('setup-flight-out-dept-loc').value, flightOutArrLoc: document.getElementById('setup-flight-out-arr-loc').value, flightOutDeptTime: document.getElementById('setup-flight-out-dept-time').value, flightOutArrTime: document.getElementById('setup-flight-out-arr-time').value,
@@ -1724,14 +1821,11 @@
         
         if (state.isGuest) {
             if (state.currentPlanId) {
-                const idx = state.plans.findIndex(p => p.id === state.currentPlanId);
-                state.plans[idx] = { ...state.plans[idx], ...planData };
-                localStorage.setItem('guest_plans', JSON.stringify(state.plans));
-                showToast("已暫存設定"); window.switchView('itinerary'); state.tripData = state.plans[idx]; renderItinerary();
+                const idx = state.plans.findIndex(p => p.id === state.currentPlanId); state.plans[idx] = { ...state.plans[idx], ...planData };
+                localStorage.setItem('guest_plans', JSON.stringify(state.plans)); showToast("已暫存設定"); window.switchView('itinerary'); state.tripData = state.plans[idx]; renderItinerary();
             } else {
                 planData.id = Date.now().toString(); planData.itinerary = {}; planData.createdAt = Date.now();
-                state.plans.push(planData); localStorage.setItem('guest_plans', JSON.stringify(state.plans));
-                window.openPlan(planData.id); showToast("已建立新行程");
+                state.plans.push(planData); localStorage.setItem('guest_plans', JSON.stringify(state.plans)); window.openPlan(planData.id); showToast("已建立新行程");
             }
             return;
         }
@@ -1750,23 +1844,22 @@
          signInWithPopup(auth, new GoogleAuthProvider()).catch(err => { console.error(err); showToast("登入失敗：" + err.message); });
       };
       
-      document.getElementById('btn-export').addEventListener('click', window.handleExport);
-      document.getElementById('btn-import').addEventListener('click', () => {
+      const btnExport = document.getElementById('btn-export');
+      if(btnExport) btnExport.addEventListener('click', window.handleExport);
+      
+      const btnImport = document.getElementById('btn-import');
+      if(btnImport) btnImport.addEventListener('click', () => {
         if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
-        document.getElementById('input-import-file').click();
+        const fileInput = document.getElementById('input-import-file');
+        if(fileInput) fileInput.click();
       });
-      document.getElementById('input-import-file').addEventListener('change', window.handleImport);
-
-      document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', window.closeAllModals));
-      document.getElementById('modal-overlay').addEventListener('click', window.closeAllModals);
+      
+      const inputImportFile = document.getElementById('input-import-file');
+      if(inputImportFile) inputImportFile.addEventListener('change', window.handleImport);
 
       document.getElementById('btn-save-item').addEventListener('click', async () => {
-        const plan = state.tripData;
-        if (!plan.itinerary[state.activeDay]) plan.itinerary[state.activeDay] = [];
-        
-        const baseType = state.itemType;
-        const subType = state.subType;
-        
+        const plan = state.tripData; if (!plan.itinerary[state.activeDay]) plan.itinerary[state.activeDay] = [];
+        const baseType = state.itemType; const subType = state.subType;
         const data = { 
           id: state.editingId || Date.now().toString(), type: baseType, 
           timeStart: document.getElementById('input-time-start').value, timeEnd: document.getElementById('input-time-end').value, 
@@ -1774,56 +1867,31 @@
         };
         
         if (subType === 'location') { 
+          // 景點強制由共用 DB 提供資料，不開放修改名稱與類型
           data.locMode = state.formData.locMode; 
-          data.name = document.getElementById('input-loc-name').value; 
-          data.subtitle = document.getElementById('input-loc-subtitle').value; 
+          data.name = state.formData.name; 
+          data.subtitle = state.formData.subtitle; 
           data.isThrough = false; data.isTransfer = false;
         } else if (subType === 'hotel') {
-          data.locMode = 'hotel'; 
-          data.name = document.getElementById('input-hotel-name').value; 
-          data.operator = document.getElementById('input-hotel-foreign').value; 
-          data.subtitle = document.getElementById('input-hotel-address').value; 
-          data.isThrough = false; data.isTransfer = false;
+          data.locMode = 'hotel'; data.name = document.getElementById('input-hotel-name').value; data.operator = document.getElementById('input-hotel-foreign').value; data.subtitle = document.getElementById('input-hotel-address').value; data.isThrough = false; data.isTransfer = false;
         } else if (subType === 'transfer') {
-          data.locMode = 'station';
-          const val = document.querySelector('input[name="transfer_type"]:checked').value;
-          data.isTransfer = (val === 'transfer');
-          data.isThrough = (val === 'through');
+          data.locMode = 'station'; const val = document.querySelector('input[name="transfer_type"]:checked').value; data.isTransfer = (val === 'transfer'); data.isThrough = (val === 'through');
           if(data.isTransfer) {
-              data.operator = document.getElementById('input-trans-lineA').value;
-              data.name = document.getElementById('input-trans-staA').value;
-              data.direction = document.getElementById('input-trans-lineB').value;
-              data.subtitle = document.getElementById('input-trans-staB').value;
-          } else {
-              data.name = document.getElementById('input-loc-name').value;
-              data.subtitle = document.getElementById('input-loc-subtitle').value;
-          }
+              data.operator = document.getElementById('input-trans-lineA').value; data.name = document.getElementById('input-trans-staA').value; data.direction = document.getElementById('input-trans-lineB').value; data.subtitle = document.getElementById('input-trans-staB').value; data.duration = document.getElementById('input-trans-wait').value;
+          } else { data.name = document.getElementById('input-through-sta').value; data.duration = document.getElementById('input-through-wait').value; }
         } else if (subType === 'flight') {
-          data.mode = 'flight'; 
-          data.operator = document.getElementById('input-flight-airline').value; 
-          data.vehicleNo = document.getElementById('input-flight-no').value; 
-          data.name = document.getElementById('input-flight-dept').value; 
-          data.subtitle = document.getElementById('input-flight-arr').value; 
+          data.mode = 'flight'; data.operator = document.getElementById('input-flight-airline').value; data.vehicleNo = document.getElementById('input-flight-no').value; data.name = document.getElementById('input-flight-dept').value; data.subtitle = document.getElementById('input-flight-arr').value; 
         } else if (subType === 'transport') {
-          data.mode = state.formData.mode; data.operator = document.getElementById('input-operator').value; 
-          data.vehicleNo = document.getElementById('input-vehicle-no').value; data.name = document.getElementById('input-route-name').value; 
-          data.direction = document.getElementById('input-direction').value; data.duration = document.getElementById('input-duration').value; 
-          data.extraInfo = document.getElementById('input-extraInfo').value; 
+          data.mode = state.formData.mode; data.operator = document.getElementById('input-operator').value; data.vehicleNo = document.getElementById('input-vehicle-no').value; data.name = document.getElementById('input-route-name').value; data.direction = document.getElementById('input-direction').value; data.duration = document.getElementById('input-duration').value; data.extraInfo = document.getElementById('input-extraInfo').value; data.deptLoc = document.getElementById('input-transport-dept').value; data.arrLoc = document.getElementById('input-transport-arr').value;
         }
         
-        if (state.editingId) { 
-          const idx = plan.itinerary[state.activeDay].findIndex(i => i.id === state.editingId); 
-          plan.itinerary[state.activeDay][idx] = data; 
-        } else { 
-          plan.itinerary[state.activeDay].push(data); 
-        }
+        if (state.editingId) { const idx = plan.itinerary[state.activeDay].findIndex(i => i.id === state.editingId); plan.itinerary[state.activeDay][idx] = data; } 
+        else { plan.itinerary[state.activeDay].push(data); }
         
         if(state.isGuest) {
-            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId);
-            state.plans[planIdx].itinerary = plan.itinerary;
+            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId); state.plans[planIdx].itinerary = plan.itinerary;
             localStorage.setItem('guest_plans', JSON.stringify(state.plans));
-            window.closeAllModals(); showToast("已暫存至本機！");
-            renderItinerary();
+            window.closeAllModals(); showToast("已暫存至本機！"); renderItinerary();
         } else {
             await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: plan.itinerary });
             window.closeAllModals(); showToast("已同步至雲端！");
@@ -1854,13 +1922,10 @@
 
       document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
         state.tripData.itinerary[state.activeDay] = state.tripData.itinerary[state.activeDay].filter(i => i.id !== state.editingId);
-        
         if(state.isGuest) {
-            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId);
-            state.plans[planIdx].itinerary = state.tripData.itinerary;
+            const planIdx = state.plans.findIndex(p => p.id === state.currentPlanId); state.plans[planIdx].itinerary = state.tripData.itinerary;
             localStorage.setItem('guest_plans', JSON.stringify(state.plans));
-            window.closeAllModals(); showToast("已刪除項目");
-            renderItinerary();
+            window.closeAllModals(); showToast("已刪除項目"); renderItinerary();
         } else {
             await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: state.tripData.itinerary });
             window.closeAllModals(); showToast("已刪除項目");
