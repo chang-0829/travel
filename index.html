@@ -85,14 +85,28 @@
       </div>
     </div>
 
-    <!-- 共用 HEADER -->
-    <header id="main-header" class="hidden bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+    <!-- 共用 HEADER (首頁 / 會員 / 設定) -->
+    <header id="header-standard" class="hidden bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
       <div>
         <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest">My Trip</p>
         <h1 id="header-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">載入中...</h1>
       </div>
       <button id="btn-header-action" class="w-10 h-10 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all">
         <i class="fa-solid fa-gear text-lg"></i>
+      </button>
+    </header>
+
+    <!-- 行程專屬 HEADER (居中設計) -->
+    <header id="header-itinerary" class="hidden bg-brand-bg pt-12 pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
+      <button onclick="switchView('plans')" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
+        <i class="fa-solid fa-chevron-left text-xl"></i>
+      </button>
+      <div class="flex-1 flex flex-col items-center justify-center text-center px-2 truncate">
+        <h1 id="header-itinerary-title" class="text-[18px] font-extrabold text-brand-dark tracking-tight truncate w-full">載入中...</h1>
+        <p id="header-itinerary-subtitle" class="text-[12px] font-bold text-brand-textSub mt-0.5">--</p>
+      </div>
+      <button onclick="openSetup(state.currentPlanId)" class="w-10 h-10 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
+        <i class="fa-solid fa-gear text-xl"></i>
       </button>
     </header>
 
@@ -200,16 +214,13 @@
       <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
         <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
       </div>
-      <!-- 修正 pb-20：縮減底部空白 -->
       <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-20 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       </div>
-      <!-- 修正 bottom-4：讓浮動按鈕更貼齊底部 -->
-      <div class="absolute bottom-4 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none">
-        <button id="btn-add-location" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-dark text-brand-card font-bold h-14 px-6 rounded-full shadow-lg shadow-brand-dark/20 hover:bg-brand-textMain active:scale-95 transition-all">
-          <i class="fa-solid fa-location-dot"></i> <span class="text-sm">地點</span>
-        </button>
-        <button id="btn-add-transport" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-accent text-brand-card font-bold h-14 px-6 rounded-full shadow-lg shadow-brand-accent/30 hover:bg-brand-textMain active:scale-95 transition-all">
-          <i class="fa-solid fa-train-tram"></i> <span class="text-sm">交通</span>
+      
+      <!-- 合併後的 FAB (Floating Action Button) 浮動按鈕 -->
+      <div class="absolute bottom-6 right-6 z-20 pointer-events-none">
+        <button id="btn-fab-add" class="pointer-events-auto w-14 h-14 bg-brand-primary text-brand-card rounded-full shadow-lg shadow-brand-primary/30 flex items-center justify-center text-2xl hover:bg-brand-dark active:scale-95 transition-all">
+          <i class="fa-solid fa-plus"></i>
         </button>
       </div>
     </div>
@@ -233,7 +244,36 @@
   <!-- ================= MODALS ================= -->
   <div id="modal-overlay" class="overlay closed fixed inset-0 z-[50] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
 
-  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[51] flex flex-col justify-end pointer-events-none">
+  <!-- 新增：點擊 + 號後選擇項目類型的 Bottom Sheet -->
+  <div id="sheet-add-type" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
+    <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe">
+      <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
+      <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
+        <h3 class="text-xl font-bold text-brand-dark">選擇要新增的項目</h3>
+        <button class="btn-close-modal w-8 h-8 flex items-center justify-center bg-brand-bg rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="px-6 py-6 flex gap-4">
+        <!-- 選擇地點 -->
+        <button id="btn-choose-location" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
+          <div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          新增地點
+        </button>
+        <!-- 選擇交通 -->
+        <button id="btn-choose-transport" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
+          <div class="w-14 h-14 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-train-tram"></i>
+          </div>
+          新增交通
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[53] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col max-h-[90vh]">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
       <div class="px-6 py-4 flex justify-between items-center shrink-0">
@@ -349,7 +389,7 @@
     </div>
   </div>
 
-  <div id="sheet-options" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
+  <div id="sheet-options" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[54] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
       <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
@@ -493,7 +533,8 @@
       });
       document.getElementById(`view-${v}`)?.classList.remove('hidden');
       
-      const header = document.getElementById('main-header');
+      const headerStandard = document.getElementById('header-standard');
+      const headerItinerary = document.getElementById('header-itinerary');
       const title = document.getElementById('header-title');
       const sub = document.getElementById('header-subtitle');
       const btnAction = document.getElementById('btn-header-action');
@@ -502,14 +543,12 @@
       const navBtnPlans = document.getElementById('nav-btn-plans');
       const navBtnProfile = document.getElementById('nav-btn-profile');
 
-      // 修正：行程頁面 (itinerary) 也顯示導覽列
       if (v === 'plans' || v === 'profile' || v === 'itinerary') {
          bottomNav.classList.remove('hidden');
          if(v === 'profile') {
              navBtnProfile.classList.add('text-brand-primary'); navBtnProfile.classList.remove('text-brand-textSub');
              navBtnPlans.classList.add('text-brand-textSub'); navBtnPlans.classList.remove('text-brand-primary');
          } else {
-             // plans 和 itinerary 都在「首頁」範圍內，所以亮起首頁圖示
              navBtnPlans.classList.add('text-brand-primary'); navBtnPlans.classList.remove('text-brand-textSub');
              navBtnProfile.classList.add('text-brand-textSub'); navBtnProfile.classList.remove('text-brand-primary');
          }
@@ -518,31 +557,37 @@
       }
 
       if (v === 'login') {
-        header.classList.add('hidden');
+        headerStandard.classList.add('hidden');
+        headerItinerary.classList.add('hidden');
       } else if (v === 'plans') {
-        header.classList.remove('hidden');
+        headerItinerary.classList.add('hidden');
+        headerStandard.classList.remove('hidden');
         sub.innerText = state.user?.displayName ? `Hi, ${state.user.displayName}` : 'Welcome';
         title.innerText = '我的計畫';
         btnAction.innerHTML = '<i class="fa-solid fa-bell text-lg"></i>';
         btnAction.onclick = () => showToast('目前沒有新通知');
       } else if (v === 'profile') {
-        header.classList.remove('hidden');
+        headerItinerary.classList.add('hidden');
+        headerStandard.classList.remove('hidden');
         sub.innerText = 'Account';
         title.innerText = '會員中心';
         btnAction.innerHTML = '<i class="fa-solid fa-gear text-lg"></i>';
         btnAction.onclick = () => showToast('設定功能建置中');
       } else if (v === 'setup') {
-        header.classList.remove('hidden');
+        headerItinerary.classList.add('hidden');
+        headerStandard.classList.remove('hidden');
         sub.innerText = 'My Trip';
         title.innerText = state.currentPlanId ? '行程設定' : '建立新行程';
         btnAction.innerHTML = '<i class="fa-solid fa-xmark text-xl"></i>';
         btnAction.onclick = () => switchView(state.currentPlanId ? 'itinerary' : 'plans');
       } else if (v === 'itinerary') {
-        header.classList.remove('hidden');
-        sub.innerText = 'My Trip';
-        title.innerText = state.tripData.title || '行程表';
-        btnAction.innerHTML = '<i class="fa-solid fa-gear text-lg"></i>';
-        btnAction.onclick = () => openSetup(state.currentPlanId);
+        headerStandard.classList.add('hidden');
+        headerItinerary.classList.remove('hidden');
+        
+        // 設定行程專用 Header 的內容
+        const formattedDate = (state.tripData.startDate || '').replace(/-/g, '/');
+        document.getElementById('header-itinerary-title').innerText = state.tripData.title || '行程表';
+        document.getElementById('header-itinerary-subtitle').innerText = `${formattedDate} · ${state.tripData.days || 1}天`;
       }
     };
 
@@ -610,7 +655,11 @@
 
     // --- Itinerary View ---
     function renderItinerary() {
-      document.getElementById('header-title').innerText = state.tripData.title;
+      // 更新行程專屬頁首內容
+      const formattedDate = (state.tripData.startDate || '').replace(/-/g, '/');
+      document.getElementById('header-itinerary-title').innerText = state.tripData.title || '行程表';
+      document.getElementById('header-itinerary-subtitle').innerText = `${formattedDate} · ${state.tripData.days || 1}天`;
+      
       renderDaysTabs();
       renderTimeline();
     }
@@ -659,7 +708,6 @@
         return;
       }
 
-      // 修正：將內層的 pb-12 改為 pb-4 減少空白
       let html = '<div class="relative pl-1 pr-1 pt-4 pb-4">';
       items.sort((a, b) => a.timeStart.localeCompare(b.timeStart)).forEach((item, index) => {
         const isLast = index === items.length - 1; const isFirst = index === 0; const isOnly = items.length === 1;
@@ -888,6 +936,7 @@
 
     window.closeAllModals = function() {
       document.getElementById('modal-overlay').classList.remove('open'); document.getElementById('modal-overlay').classList.add('closed');
+      document.getElementById('sheet-add-type').classList.remove('open'); document.getElementById('sheet-add-type').classList.add('closed');
       document.getElementById('sheet-form').classList.remove('open'); document.getElementById('sheet-form').classList.add('closed');
       document.getElementById('sheet-options').classList.remove('open'); document.getElementById('sheet-options').classList.add('closed');
       document.getElementById('modal-delete').classList.remove('open'); document.getElementById('modal-delete').classList.add('closed');
@@ -963,8 +1012,24 @@
       document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeAllModals));
       document.getElementById('modal-overlay').addEventListener('click', closeAllModals);
 
-      document.getElementById('btn-add-location').addEventListener('click', () => openFormModal('location'));
-      document.getElementById('btn-add-transport').addEventListener('click', () => openFormModal('transport'));
+      // --- FAB 新增項目邏輯 ---
+      document.getElementById('btn-fab-add').addEventListener('click', () => {
+        document.getElementById('modal-overlay').classList.remove('closed');
+        document.getElementById('modal-overlay').classList.add('open');
+        document.getElementById('sheet-add-type').classList.remove('closed');
+        document.getElementById('sheet-add-type').classList.add('open');
+      });
+
+      document.getElementById('btn-choose-location').addEventListener('click', () => {
+        closeAllModals();
+        setTimeout(() => openFormModal('location'), 300);
+      });
+
+      document.getElementById('btn-choose-transport').addEventListener('click', () => {
+        closeAllModals();
+        setTimeout(() => openFormModal('transport'), 300);
+      });
+      // -------------------------
 
       document.getElementById('btn-save-item').addEventListener('click', async () => {
         const plan = state.tripData;
