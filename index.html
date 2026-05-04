@@ -57,51 +57,22 @@
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-    /* ==========================================
-       極簡無框線表單設計 (Filled Input Design)
-       ========================================== */
-    .input-group {
-      background-color: #F1F5F9; /* 極淺灰底 */
-      border-radius: 12px;
-      padding: 8px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: background-color 0.2s, box-shadow 0.2s;
+    /* 表單區塊的極簡輸入框設計 */
+    .flat-input {
+        width: 100%;
+        background-color: #F1F5F9; /* 極淺灰底 */
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #2C3E50;
+        outline: none;
+        transition: all 0.2s;
     }
-    .input-group:focus-within {
-      background-color: #E2E8F0;
-    }
-    .input-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748B; /* 標籤文字顏色 */
-      margin-bottom: 2px;
-    }
-    .input-field {
-      background: transparent;
-      font-weight: 700;
-      color: #1E293B;
-      font-size: 15px;
-      outline: none;
-      width: 100%;
-    }
-    .input-field::placeholder {
-      color: #94A3B8;
-      font-weight: 500;
-    }
-    .input-textarea {
-      background: transparent;
-      font-weight: 700;
-      color: #1E293B;
-      font-size: 15px;
-      outline: none;
-      width: 100%;
-      resize: none;
-      line-height: 1.4;
-      margin-top: 2px;
-    }
-    .input-textarea::placeholder { color: #94A3B8; font-weight: 500; }
+    .flat-input::placeholder { color: #94A3B8; font-weight: 500; }
+    .flat-input:focus { border-color: #748CAB; background-color: #FFFFFF; box-shadow: 0 0 0 2px rgba(116, 140, 171, 0.1); }
+    .flat-label { display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 6px; padding-left: 4px; }
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
@@ -130,13 +101,19 @@
       <button id="btn-itinerary-back" class="w-10 h-10 mt-2 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
         <i class="fa-solid fa-chevron-left text-xl"></i>
       </button>
-      <div class="flex-1 mt-2 flex flex-col items-center justify-center text-center px-2 truncate">
+      <div class="flex-1 mt-2 flex flex-col items-center justify-center text-center px-1 truncate">
         <h1 id="header-itinerary-title" class="text-[16px] font-extrabold text-brand-dark tracking-tight truncate w-full">載入中...</h1>
         <p id="header-itinerary-subtitle" class="text-[11px] font-bold text-brand-textSub mt-0.5">--</p>
       </div>
-      <button id="btn-itinerary-setup" onclick="window.handleSetupClick()" class="w-10 h-10 mt-2 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
-        <i class="fa-solid fa-gear text-xl"></i>
-      </button>
+      <div class="flex items-center gap-0.5 mt-2">
+        <!-- 新增：編輯模式切換按鈕 -->
+        <button id="btn-itinerary-edit" onclick="window.toggleEditMode()" class="w-9 h-9 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors rounded-full">
+          <i class="fa-solid fa-pen text-[16px]"></i>
+        </button>
+        <button id="btn-itinerary-setup" onclick="window.handleSetupClick()" class="w-9 h-9 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors rounded-full">
+          <i class="fa-solid fa-gear text-[18px]"></i>
+        </button>
+      </div>
     </header>
 
     <!-- VIEW: 首頁 / 計畫列表 -->
@@ -203,54 +180,92 @@
           </div>
         </div>
 
-        <!-- 航班設定 -->
+        <!-- 航班資訊 -->
         <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm">
           <h3 class="text-[14px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[12px]"></i></div> 航班資訊
           </h3>
           <div class="space-y-4">
-            <div class="p-3 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-2 shadow-sm">
+            
+            <!-- 去程 -->
+            <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
               <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-departure mr-1"></i>去程</label>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">航空公司</span><input type="text" id="setup-flight-out-airline" placeholder="例: 長榮" class="input-field"></div>
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">航班編號</span><input type="text" id="setup-flight-out-no" placeholder="例: BR192" class="input-field"></div>
+              
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-out-airline" placeholder="例: 長榮" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-out-no" placeholder="例: BR192" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">起飛地</span><input type="text" id="setup-flight-out-dept-loc" placeholder="例: 桃園" class="input-field"></div>
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">降落地</span><input type="text" id="setup-flight-out-arr-loc" placeholder="例: 關西" class="input-field"></div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-out-dept-loc" placeholder="例: 桃園" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-out-arr-loc" placeholder="例: 關西" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
-              <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-gray-100 focus-within:border-brand-primary/50 transition-all h-[42px] shadow-sm">
-                 <input type="time" id="setup-flight-out-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
-                 <span class="text-[14px] text-brand-textSub font-bold">-</span>
-                 <input type="time" id="setup-flight-out-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+              <div>
+                <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班時間</label>
+                <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-brand-light/50 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all shadow-sm h-[44px]">
+                  <input type="time" id="setup-flight-out-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                  <span class="text-[14px] text-brand-textSub font-bold shrink-0">-</span>
+                  <input type="time" id="setup-flight-out-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                </div>
               </div>
             </div>
 
-            <div class="p-3 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-2 shadow-sm">
+            <!-- 回程 -->
+            <div class="p-3.5 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
               <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/80 pb-1.5 mb-1"><i class="fa-solid fa-plane-arrival mr-1"></i>回程</label>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">航空公司</span><input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇" class="input-field"></div>
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">航班編號</span><input type="text" id="setup-flight-ret-no" placeholder="例: JX803" class="input-field"></div>
+              
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-ret-no" placeholder="例: JX803" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">起飛地</span><input type="text" id="setup-flight-ret-dept-loc" placeholder="例: 關西" class="input-field"></div>
-                <div class="input-group !bg-white border border-gray-100 !py-1.5"><span class="input-label">降落地</span><input type="text" id="setup-flight-ret-arr-loc" placeholder="例: 桃園" class="input-field"></div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-ret-dept-loc" placeholder="例: 關西" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-ret-arr-loc" placeholder="例: 桃園" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 placeholder-brand-textSub/40 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
-              <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-gray-100 focus-within:border-brand-primary/50 transition-all h-[42px] shadow-sm">
-                 <input type="time" id="setup-flight-ret-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
-                 <span class="text-[14px] text-brand-textSub font-bold">-</span>
-                 <input type="time" id="setup-flight-ret-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+              <div>
+                <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航班時間</label>
+                <div class="flex items-center gap-2 bg-white rounded-xl px-3 border border-brand-light/50 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all shadow-sm h-[44px]">
+                  <input type="time" id="setup-flight-ret-dept-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                  <span class="text-[14px] text-brand-textSub font-bold shrink-0">-</span>
+                  <input type="time" id="setup-flight-ret-arr-time" class="flex-1 w-full text-[14px] font-bold text-brand-dark outline-none bg-transparent text-center">
+                </div>
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- 住宿設定 -->
+        <!-- 住宿資訊 -->
         <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm relative">
           <h3 class="text-[14px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center"><i class="fa-solid fa-hotel text-[12px]"></i></div> 住宿安排
           </h3>
+          
           <div id="hotel-list-container" class="space-y-3"></div>
+
           <button type="button" onclick="window.addSetupHotel()" class="w-full mt-3 py-3 bg-brand-bg border border-brand-light/80 text-brand-accent font-bold rounded-[16px] hover:bg-brand-accent/5 active:scale-95 transition-all flex justify-center items-center gap-2 text-[13px] shadow-sm">
             <i class="fa-solid fa-plus"></i> 新增住宿
           </button>
@@ -259,6 +274,7 @@
         <button type="submit" class="w-full bg-brand-primary text-brand-card font-bold text-[16px] py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all mt-6 flex justify-center items-center gap-2">
           <i class="fa-solid fa-cloud-arrow-up text-lg"></i> 儲存行程設定
         </button>
+        
         <button type="button" id="btn-delete-plan" class="hidden w-full bg-[#FFE5E5] text-[#E63946] font-bold text-[15px] py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all mt-4 flex justify-center items-center gap-2">
           <i class="fa-solid fa-trash-can"></i> 刪除此行程計畫
         </button>
@@ -279,7 +295,7 @@
       </div>
     </div>
 
-    <!-- VIEW: ITINERARY (行程總覽與時間軸) -->
+    <!-- VIEW: ITINERARY -->
     <div id="view-itinerary" class="hidden flex-1 flex flex-col h-full overflow-hidden bg-brand-card relative">
       <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
         <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
@@ -287,7 +303,8 @@
       <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-24 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       </div>
       
-      <div id="fab-container" class="absolute bottom-6 right-6 z-20 pointer-events-none">
+      <!-- 浮動按鈕 FAB (僅在編輯模式顯示) -->
+      <div id="fab-container" class="absolute bottom-6 right-6 z-20 pointer-events-none hidden transition-transform scale-0 duration-300">
         <button onclick="window.showAddMenu('main')" class="pointer-events-auto w-14 h-14 bg-brand-primary text-brand-card rounded-full shadow-lg shadow-brand-primary/30 flex items-center justify-center text-2xl hover:bg-brand-dark active:scale-95 transition-all">
           <i class="fa-solid fa-plus"></i>
         </button>
@@ -313,7 +330,7 @@
   <!-- ================= MODALS ================= -->
   <div id="modal-overlay" class="overlay closed fixed inset-0 z-[50] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
 
-  <!-- 多層級新增選單 (5大選項 & 航班住宿子選單) -->
+  <!-- 多層級新增選單 -->
   <div id="sheet-add-menu" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[52] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-brand-card w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe max-h-[85vh]">
       <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
@@ -323,16 +340,14 @@
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <!-- 動態載入選單內容 -->
       <div id="sheet-add-content" class="px-6 py-6 overflow-y-auto hide-scrollbar"></div>
     </div>
   </div>
 
-  <!-- ✅ 全新極簡扁平化表單 + 絕對置底完成按鈕 -->
+  <!-- ✅ 極簡無框線表單 + 絕對置底完成按鈕 -->
   <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[53] flex flex-col justify-end pointer-events-none">
     <div class="pointer-events-auto relative bg-white w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col h-[90vh]">
       
-      <!-- 表單頭部 -->
       <div class="shrink-0 bg-white rounded-t-[32px] z-10 border-b border-brand-light/50 pb-2">
         <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
         <div class="px-6 py-2 flex justify-between items-center">
@@ -343,10 +358,10 @@
         </div>
       </div>
       
-      <!-- 表單滾動內容區 (去除所有多餘框線) -->
+      <!-- 表單滾動內容區 -->
       <div class="px-6 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-5 bg-white">
         
-        <!-- 共用時間 -->
+        <!-- 時間 -->
         <div class="flex items-center gap-3">
           <div class="input-group flex-1">
             <span class="input-label">開始時間</span>
@@ -361,7 +376,7 @@
 
         <div id="quick-fill-container" class="hidden flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6"></div>
 
-        <!-- 轉乘站 / 免換乘 專屬選擇 -->
+        <!-- 轉乘站 / 免換乘 -->
         <div id="group-transfer-type" class="hidden space-y-3 pb-3 border-b border-brand-light/50">
            <label class="input-label pl-1">轉換方式</label>
            <div class="flex bg-brand-bg rounded-xl p-1 relative">
@@ -380,47 +395,36 @@
            </div>
         </div>
 
-        <!-- 轉車專屬輸入欄位 (A站轉B站) -->
+        <!-- 轉車專屬輸入欄位 -->
         <div id="group-transfer-fields" class="hidden flex flex-col gap-2 relative">
            <div class="grid grid-cols-2 gap-3">
-              <div class="input-group">
-                 <span class="input-label">原本搭乘路線</span>
-                 <input type="text" id="input-trans-lineA" placeholder="例: 南海電鐵" class="input-field">
-              </div>
-              <div class="input-group">
-                 <span class="input-label">下車站名</span>
-                 <input type="text" id="input-trans-staA" placeholder="例: 南海難波" class="input-field">
-              </div>
+              <div class="input-group"><span class="input-label">原本搭乘路線</span><input type="text" id="input-trans-lineA" placeholder="例: 南海電鐵" class="input-field"></div>
+              <div class="input-group"><span class="input-label">下車站名</span><input type="text" id="input-trans-staA" placeholder="例: 南海難波" class="input-field"></div>
            </div>
-           
            <div class="flex justify-center -my-2.5 z-10 relative">
              <div class="bg-[#E76F51] text-white rounded-full w-7 h-7 flex items-center justify-center text-[12px] border-4 border-white shadow-sm"><i class="fa-solid fa-arrow-down"></i></div>
            </div>
-           
            <div class="grid grid-cols-2 gap-3">
               <div class="input-group !bg-[#E76F51]/5 focus-within:!bg-[#E76F51]/10 border border-[#E76F51]/10">
-                 <span class="input-label !text-[#E76F51]/80">轉乘搭乘路線</span>
-                 <input type="text" id="input-trans-lineB" placeholder="例: 大阪地鐵" class="input-field text-[#E76F51]">
+                 <span class="input-label !text-[#E76F51]/80">轉乘搭乘路線</span><input type="text" id="input-trans-lineB" placeholder="例: 大阪地鐵" class="input-field text-[#E76F51]">
               </div>
               <div class="input-group !bg-[#E76F51]/5 focus-within:!bg-[#E76F51]/10 border border-[#E76F51]/10">
-                 <span class="input-label !text-[#E76F51]/80">上車站名</span>
-                 <input type="text" id="input-trans-staB" placeholder="例: なんば" class="input-field text-[#E76F51]">
+                 <span class="input-label !text-[#E76F51]/80">上車站名</span><input type="text" id="input-trans-staB" placeholder="例: なんば" class="input-field text-[#E76F51]">
               </div>
            </div>
         </div>
 
-        <!-- 網格選擇 (地點/交通) -->
+        <!-- 網格選擇 -->
         <div id="group-location-mode" class="hidden">
           <label class="input-label pl-1 mb-2">地點類型</label>
           <div id="location-modes-grid" class="grid grid-cols-5 gap-2"></div>
         </div>
-
         <div id="group-transport-mode" class="hidden">
           <label class="input-label pl-1 mb-2">交通工具</label>
           <div id="transport-modes-grid" class="grid grid-cols-4 gap-2"></div>
         </div>
         
-        <!-- 航班專屬欄位 -->
+        <!-- 航班專屬 -->
         <div id="group-flight-fields" class="space-y-3 hidden">
           <div class="grid grid-cols-2 gap-3">
             <div class="input-group"><span class="input-label">航空公司</span><input type="text" id="input-flight-airline" placeholder="例: 長榮" class="input-field"></div>
@@ -432,7 +436,7 @@
           </div>
         </div>
 
-        <!-- 交通專屬欄位 (非航班) -->
+        <!-- 交通專屬 -->
         <div id="group-transport-fields" class="space-y-3 hidden">
           <div class="grid grid-cols-2 gap-3">
             <div class="input-group"><span class="input-label">業者名稱</span><input type="text" id="input-operator" placeholder="例: JR西日本" class="input-field"></div>
@@ -446,7 +450,7 @@
           </div>
         </div>
 
-        <!-- 住宿專屬欄位 -->
+        <!-- 住宿專屬 -->
         <div id="group-hotel-fields" class="space-y-3 hidden">
           <div class="input-group">
             <span class="input-label text-brand-primary">住宿名稱 *</span>
@@ -462,7 +466,7 @@
           </div>
         </div>
 
-        <!-- 地點一般欄位 (包含直通免下車) -->
+        <!-- 地點一般 -->
         <div id="group-location-fields" class="space-y-3 hidden">
           <div class="input-group">
             <span id="label-loc-name" class="input-label text-brand-primary">名稱 *</span>
@@ -474,7 +478,7 @@
           </div>
         </div>
 
-        <!-- 費用 (共用) -->
+        <!-- 費用 -->
         <div class="input-group flex-row items-center justify-between !p-1.5 mt-2">
            <div class="flex items-center gap-2 pl-3 flex-1">
               <span id="display-curr-symbol" class="text-[16px] font-bold text-brand-textSub">¥</span>
@@ -566,6 +570,7 @@
 
     let state = {
       user: null, isGuest: false, plans: [], currentPlanId: null, activeDay: 0, editingId: null,
+      isEditMode: false, // 編輯模式控制
       itemType: 'location', subType: null,
       formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false, isTransfer: false },
       tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} }
@@ -590,10 +595,15 @@
     // 安全設值函數，避免 DOM 找不到時報錯
     function safeSet(id, val) {
         const el = document.getElementById(id);
-        if (el) el.value = val;
+        if (el) { el.value = val; }
     }
 
-    // --- 訪客模式登入 ---
+    // 切換編輯/瀏覽模式
+    window.toggleEditMode = function() {
+        state.isEditMode = !state.isEditMode;
+        renderItinerary();
+    };
+
     window.handleGuestLogin = () => {
       state.isGuest = true;
       state.user = { uid: 'guest', displayName: '訪客', email: '僅儲存於此裝置瀏覽器' };
@@ -730,9 +740,6 @@
         btnAction.innerHTML = '<i class="fa-solid fa-xmark text-xl"></i>'; btnAction.onclick = () => window.switchView(state.currentPlanId ? 'itinerary' : 'plans');
       } else if (v === 'itinerary') {
         headerStandard.classList.add('hidden'); headerItinerary.classList.remove('hidden');
-        const formattedDate = (state.tripData.startDate || '').replace(/-/g, '/');
-        document.getElementById('header-itinerary-title').innerText = state.tripData.title || '行程表';
-        document.getElementById('header-itinerary-subtitle').innerText = `${formattedDate} · ${state.tripData.days || 1}天`;
       }
     };
 
@@ -759,6 +766,7 @@
     window.openPlan = (id) => { 
       if(!state.user) { showToast('請先登入或試用'); window.switchView('profile'); return; }
       state.currentPlanId = id; state.activeDay = 0; 
+      state.isEditMode = false; // 每次進入預設為瀏覽模式
       state.tripData = state.plans.find(p => p.id === id) || state.tripData;
       renderItinerary(); window.switchView('itinerary'); 
     };
@@ -815,6 +823,17 @@
       const formattedDate = (state.tripData.startDate || '').replace(/-/g, '/');
       document.getElementById('header-itinerary-title').innerText = state.tripData.title || '行程表';
       document.getElementById('header-itinerary-subtitle').innerText = `${formattedDate} · ${state.tripData.days || 1}天`;
+      
+      // 更新編輯按鈕UI
+      const editBtn = document.getElementById('btn-itinerary-edit');
+      if (state.isEditMode) {
+          editBtn.innerHTML = '<i class="fa-solid fa-check text-lg text-brand-primary"></i>';
+          editBtn.classList.add('bg-brand-primary/10');
+      } else {
+          editBtn.innerHTML = '<i class="fa-solid fa-pen text-lg"></i>';
+          editBtn.classList.remove('bg-brand-primary/10');
+      }
+      
       renderDaysTabs(); renderTimeline();
     }
 
@@ -863,10 +882,14 @@
     function renderTimeline() {
       const container = document.getElementById('timeline-container');
       const plan = state.tripData;
+      const isEdit = state.isEditMode;
+      
+      const fabBtn = document.getElementById('fab-container');
       
       // 總覽
       if (state.activeDay === 0) {
-        document.getElementById('fab-container').classList.add('hidden');
+        fabBtn.classList.add('hidden');
+        fabBtn.classList.remove('scale-100');
         
         let flightOutTitle = plan.flightOutAirline || plan.flightOutNo ? `${plan.flightOutAirline || ''} ${plan.flightOutNo || ''}`.trim() : '未設定出發航班';
         let flightOutRoute = plan.flightOutDeptLoc || plan.flightOutArrLoc ? `${plan.flightOutDeptLoc || '出發地'} <i class="fa-solid fa-plane text-[10px] mx-1.5 opacity-50"></i> ${plan.flightOutArrLoc || '降落地'}` : '';
@@ -941,7 +964,14 @@
       }
 
       // 一般行程
-      document.getElementById('fab-container').classList.remove('hidden'); 
+      if (isEdit) {
+          fabBtn.classList.remove('hidden');
+          setTimeout(() => fabBtn.classList.add('scale-100'), 10);
+      } else {
+          fabBtn.classList.remove('scale-100');
+          setTimeout(() => fabBtn.classList.add('hidden'), 300);
+      }
+
       const items = plan.itinerary[state.activeDay] || [];
       container.innerHTML = '';
 
@@ -954,6 +984,10 @@
       items.sort((a, b) => (a.timeStart || '').localeCompare(b.timeStart || '')).forEach((item, index) => {
         const isLast = index === items.length - 1; const isFirst = index === 0; const isOnly = items.length === 1;
         const costHtml = renderCost(item.cost, item.currency);
+
+        const editClick = isEdit ? `onclick="window.openOptions('${item.id}')"` : '';
+        const cursorClass = isEdit ? 'cursor-pointer hover:bg-brand-bg/30 rounded-2xl' : '';
+        const ellipsisBtn = isEdit ? `<button class="absolute right-0 top-3 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>` : '';
 
         let lineHtml = '';
         if (!isOnly) {
@@ -978,7 +1012,7 @@
           }
 
           html += `
-            <div class="relative flex group cursor-pointer" onclick="window.openOptions('${item.id}')">
+            <div class="relative flex group ${cursorClass} transition-colors" ${editClick}>
               <div class="w-[68px] shrink-0 text-right pr-3 pt-[20px]">${timeHtml}</div>
               <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}${nodeDot}</div>
               <div class="flex-1 pt-[16px] pb-6 pl-2 relative pr-8">
@@ -994,7 +1028,7 @@
                 ${item.isThrough ? `<div class="mt-1.5 ml-[34px]"><span class="text-[9px] font-bold text-white bg-brand-primary/90 px-1.5 py-0.5 rounded">免下車直通</span></div>` : ''}
                 ${subHtml ? `<div class="text-[13px] font-medium text-brand-textMain mt-1.5 ml-[34px] leading-relaxed">${subHtml}</div>` : ''}
                 <div class="ml-[34px]">${costHtml}</div>
-                <button class="absolute right-0 top-3 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+                ${ellipsisBtn}
               </div>
             </div>`;
         } else {
@@ -1021,7 +1055,7 @@
           const titleLine = `${opStr} ${vehStr}`.trim();
 
           html += `
-            <div class="relative flex items-stretch group cursor-pointer" onclick="window.openOptions('${item.id}')">
+            <div class="relative flex items-stretch group ${cursorClass} transition-colors" ${editClick}>
               ${timeColHtml}
               <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}</div>
               <div class="flex-1 pl-2 pr-0 py-[20px] relative">
@@ -1035,7 +1069,7 @@
                    ${routeStr ? `<div class="text-[14px] font-extrabold text-brand-textMain leading-snug pr-6 ml-[34px]">${routeStr}${dirStr}</div>` : ''}
                    <div class="ml-[34px]">${costHtml}</div>
                  </div>
-                 <button class="absolute right-1 top-4 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                 ${ellipsisBtn}
               </div>
             </div>`;
         }
@@ -1116,13 +1150,13 @@
             } else {
                 html += `<div class="text-center py-6 bg-brand-bg/50 rounded-[16px]"><p class="text-[13px] font-bold text-brand-textSub">目前設定中沒有預設住宿</p></div>`;
             }
+            
             html += `<button onclick="window.openFormModal('hotel')" class="w-full mt-2 bg-white text-[#D4A33B] border border-brand-light/80 font-bold text-[15px] py-4 rounded-[16px] shadow-sm hover:bg-brand-bg active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> 新增自訂住宿</button>`;
             html += '</div>';
             contentEl.innerHTML = html;
         }
     };
 
-    // 切換轉乘 UI
     window.toggleTransferUI = function() {
         const val = document.querySelector('input[name="transfer_type"]:checked').value;
         const groupTrans = document.getElementById('group-transfer-fields');
@@ -1139,18 +1173,15 @@
         }
     };
 
-    // --- 極致扁平化表單開啟邏輯 ---
+    // --- 極簡扁平表單 ---
     window.openFormModal = function(subType, itemId = null, autoFillData = null) {
       let baseType = (subType === 'transport' || subType === 'flight') ? 'transport' : 'location';
       
-      state.itemType = baseType;
-      state.subType = subType;
-      state.editingId = itemId;
+      state.itemType = baseType; state.subType = subType; state.editingId = itemId;
       const plan = state.tripData;
       
-      // 1. 隱藏所有選填與切換區塊
-      const blocks = ['group-location-mode', 'group-location-fields', 'group-transport-mode', 'group-transport-fields', 'group-flight-fields', 'group-hotel-fields', 'group-transfer-type', 'group-transfer-fields'];
-      blocks.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+      ['group-location-mode', 'group-location-fields', 'group-transport-mode', 'group-transport-fields', 'group-flight-fields', 'group-hotel-fields', 'group-transfer-type', 'group-transfer-fields']
+        .forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
       
       let titleStr = '新增項目';
       
@@ -1180,7 +1211,7 @@
       const titleEl = document.getElementById('form-modal-title');
       if(titleEl) titleEl.innerText = titleStr;
 
-      // 2. 資料準備 (清除預設時間)
+      // 不帶預設時間
       state.formData = { 
         timeStart: '', timeEnd: '', name: '', subtitle: '', 
         mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', 
@@ -1196,70 +1227,49 @@
          if (subType === 'hotel') state.formData.locMode = 'hotel';
          if (subType === 'transfer') state.formData.locMode = 'station';
          
-         // 處理快填資料
          if(subType === 'flight' && autoFillData) {
              if(autoFillData === 'outbound') {
-                 state.formData.operator = plan.flightOutAirline || '';
-                 state.formData.vehicleNo = plan.flightOutNo || '';
-                 state.formData.name = plan.flightOutDeptLoc || '';
-                 state.formData.subtitle = plan.flightOutArrLoc || '';
-                 state.formData.timeStart = plan.flightOutDeptTime || '';
-                 state.formData.timeEnd = plan.flightOutArrTime || '';
+                 state.formData.operator = plan.flightOutAirline || ''; state.formData.vehicleNo = plan.flightOutNo || '';
+                 state.formData.name = plan.flightOutDeptLoc || ''; state.formData.subtitle = plan.flightOutArrLoc || '';
+                 state.formData.timeStart = plan.flightOutDeptTime || ''; state.formData.timeEnd = plan.flightOutArrTime || '';
              } else if(autoFillData === 'return') {
-                 state.formData.operator = plan.flightRetAirline || '';
-                 state.formData.vehicleNo = plan.flightRetNo || '';
-                 state.formData.name = plan.flightRetDeptLoc || '';
-                 state.formData.subtitle = plan.flightRetArrLoc || '';
-                 state.formData.timeStart = plan.flightRetDeptTime || '';
-                 state.formData.timeEnd = plan.flightRetArrTime || '';
+                 state.formData.operator = plan.flightRetAirline || ''; state.formData.vehicleNo = plan.flightRetNo || '';
+                 state.formData.name = plan.flightRetDeptLoc || ''; state.formData.subtitle = plan.flightRetArrLoc || '';
+                 state.formData.timeStart = plan.flightRetDeptTime || ''; state.formData.timeEnd = plan.flightRetArrTime || '';
              }
          } else if (subType === 'hotel' && autoFillData !== null) {
              const h = plan.accommodations[autoFillData];
              if(h) {
-                 state.formData.name = h.name || '';
-                 state.formData.operator = h.foreignName || ''; // 借用 operator
-                 state.formData.subtitle = h.address || '';
+                 state.formData.name = h.name || ''; state.formData.operator = h.foreignName || ''; state.formData.subtitle = h.address || '';
              }
          }
       }
       
-      // 3. 畫面填值 (安全機制)
       safeSet('input-time-start', state.formData.timeStart || '');
       safeSet('input-time-end', state.formData.timeEnd || '');
       safeSet('input-cost', state.formData.cost || '');
       
       if (subType === 'location') {
-         safeSet('input-loc-name', state.formData.name || '');
-         safeSet('input-loc-subtitle', state.formData.subtitle || '');
+         safeSet('input-loc-name', state.formData.name || ''); safeSet('input-loc-subtitle', state.formData.subtitle || '');
       } else if (subType === 'hotel') {
-         safeSet('input-hotel-name', state.formData.name || '');
-         safeSet('input-hotel-foreign', state.formData.operator || '');
-         safeSet('input-hotel-address', state.formData.subtitle || '');
+         safeSet('input-hotel-name', state.formData.name || ''); safeSet('input-hotel-foreign', state.formData.operator || ''); safeSet('input-hotel-address', state.formData.subtitle || '');
       } else if (subType === 'flight') {
-         safeSet('input-flight-airline', state.formData.operator || '');
-         safeSet('input-flight-no', state.formData.vehicleNo || '');
-         safeSet('input-flight-dept', state.formData.name || '');
-         safeSet('input-flight-arr', state.formData.subtitle || '');
+         safeSet('input-flight-airline', state.formData.operator || ''); safeSet('input-flight-no', state.formData.vehicleNo || '');
+         safeSet('input-flight-dept', state.formData.name || ''); safeSet('input-flight-arr', state.formData.subtitle || '');
       } else if (subType === 'transport') {
-         safeSet('input-operator', state.formData.operator || '');
-         safeSet('input-vehicle-no', state.formData.vehicleNo || '');
-         safeSet('input-route-name', state.formData.name || '');
-         safeSet('input-direction', state.formData.direction || '');
-         safeSet('input-duration', state.formData.duration || '');
-         safeSet('input-extraInfo', state.formData.extraInfo || '');
+         safeSet('input-operator', state.formData.operator || ''); safeSet('input-vehicle-no', state.formData.vehicleNo || '');
+         safeSet('input-route-name', state.formData.name || ''); safeSet('input-direction', state.formData.direction || '');
+         safeSet('input-duration', state.formData.duration || ''); safeSet('input-extraInfo', state.formData.extraInfo || '');
       } else if (subType === 'transfer') {
          const radios = document.getElementsByName('transfer_type');
          if(radios && radios.length > 1) {
              if(state.formData.isThrough) { 
                 radios[1].checked = true;
-                safeSet('input-loc-name', state.formData.name || '');
-                safeSet('input-loc-subtitle', state.formData.subtitle || '');
+                safeSet('input-loc-name', state.formData.name || ''); safeSet('input-loc-subtitle', state.formData.subtitle || '');
              } else { 
                 radios[0].checked = true;
-                safeSet('input-trans-lineA', state.formData.operator || '');
-                safeSet('input-trans-staA', state.formData.name || '');
-                safeSet('input-trans-lineB', state.formData.direction || '');
-                safeSet('input-trans-staB', state.formData.subtitle || '');
+                safeSet('input-trans-lineA', state.formData.operator || ''); safeSet('input-trans-staA', state.formData.name || '');
+                safeSet('input-trans-lineB', state.formData.direction || ''); safeSet('input-trans-staB', state.formData.subtitle || '');
              }
              window.toggleTransferUI();
          }
@@ -1267,18 +1277,11 @@
       
       window.selectCurrency(state.formData.currency || 'JPY');
       
-      setTimeout(() => {
-        const textareas = document.querySelectorAll('textarea');
-        textareas.forEach(t => { if(t) { t.style.height = ''; t.style.height = t.scrollHeight + 'px'; } });
-      }, 10);
+      setTimeout(() => { document.querySelectorAll('textarea').forEach(t => { if(t) { t.style.height = ''; t.style.height = t.scrollHeight + 'px'; } }); }, 10);
       
-      // 4. 打開表單
-      document.getElementById('sheet-add-menu')?.classList.remove('open');
-      document.getElementById('sheet-add-menu')?.classList.add('closed');
-      document.getElementById('modal-overlay')?.classList.remove('closed');
-      document.getElementById('modal-overlay')?.classList.add('open');
-      document.getElementById('sheet-form')?.classList.remove('closed');
-      document.getElementById('sheet-form')?.classList.add('open');
+      document.getElementById('sheet-add-menu')?.classList.remove('open'); document.getElementById('sheet-add-menu')?.classList.add('closed');
+      document.getElementById('modal-overlay')?.classList.remove('closed'); document.getElementById('modal-overlay')?.classList.add('open');
+      document.getElementById('sheet-form')?.classList.remove('closed'); document.getElementById('sheet-form')?.classList.add('open');
     }
 
     function renderTransportModes() {
@@ -1319,6 +1322,7 @@
     };
 
     window.openOptions = function(id) {
+      if(!state.isEditMode) return; // 安全阻擋：非編輯模式不允許叫出選單
       state.editingId = id;
       document.getElementById('modal-overlay').classList.remove('closed'); document.getElementById('modal-overlay').classList.add('open');
       document.getElementById('sheet-options').classList.remove('closed'); document.getElementById('sheet-options').classList.add('open');
@@ -1440,7 +1444,6 @@
       document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', window.closeAllModals));
       document.getElementById('modal-overlay').addEventListener('click', window.closeAllModals);
 
-      // --- 儲存表單項目 ---
       document.getElementById('btn-save-item').addEventListener('click', async () => {
         const plan = state.tripData;
         if (!plan.itinerary[state.activeDay]) plan.itinerary[state.activeDay] = [];
