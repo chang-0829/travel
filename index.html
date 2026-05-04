@@ -28,7 +28,7 @@
             sans: ['"LINE Seed TW"', 'system-ui', '-apple-system', 'sans-serif'],
           },
           boxShadow: {
-            'subtle-card': '0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
+            'subtle-card': '0 4px 15px -1px rgba(0, 0, 0, 0.03), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
             'floating-sheet': '0 -10px 40px -10px rgba(0, 0, 0, 0.1)'
           }
         }
@@ -37,11 +37,19 @@
   </script>
 
   <style>
-    /* --- LINE Seed TW 字體整合 --- */
+    /* --- LINE Seed TW 字體整合 (調整權重) --- */
+    @font-face {
+      font-family: 'LINE Seed TW';
+      src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2');
+      font-weight: 300; /* Thin */
+      font-style: normal;
+      font-display: swap;
+    }
+
     @font-face {
       font-family: 'LINE Seed TW';
       src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2');
-      font-weight: 400;
+      font-weight: 400; /* Regular */
       font-style: normal;
       font-display: swap;
     }
@@ -49,15 +57,7 @@
     @font-face {
       font-family: 'LINE Seed TW';
       src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2');
-      font-weight: 700;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    @font-face {
-      font-family: 'LINE Seed TW';
-      src: url('./fonts/LINESeedTW_OTF_Eb.woff2') format('woff2');
-      font-weight: 800;
+      font-weight: 700; /* Bold */
       font-style: normal;
       font-display: swap;
     }
@@ -72,11 +72,12 @@
     
     .login-view-bg { background-color: #F1F5F9; }
 
-    /* Desktop Layout Adjustment */
+    /* 全寬佈局調整 */
     @media (min-width: 768px) {
-      #app-inner { max-width: 1024px; margin: 0 auto; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; }
-      #bottom-nav { width: 420px; left: 50% !important; transform: translateX(-50%); border-radius: 24px 24px 0 0; }
-      #login-card { max-width: 400px; }
+      #app-inner { max-width: 100%; margin: 0; border: none; }
+      #bottom-nav { width: 480px; left: 50% !important; transform: translateX(-50%); border-radius: 24px 24px 0 0; }
+      #login-card { max-width: 420px; }
+      .content-width { max-width: 1200px; margin: 0 auto; width: 100%; }
     }
   </style>
 </head>
@@ -86,7 +87,7 @@
   <div id="app" class="w-full h-[100dvh] flex flex-col relative">
     
     <!-- Toast (浮動提示) -->
-    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-textMain text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 text-sm font-bold flex items-center gap-2 border border-gray-700">
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-textMain text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 text-sm font-medium flex items-center gap-2 border border-gray-700">
       <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg"></span>
     </div>
 
@@ -98,7 +99,7 @@
         </div>
         
         <h1 class="text-3xl font-bold text-brand-dark mb-3 tracking-tighter">趣．旅行</h1>
-        <p class="text-brand-textSub mb-12 text-center text-sm font-bold opacity-60 tracking-tight">記錄您的所有精彩旅程</p>
+        <p class="text-brand-textSub mb-12 text-center text-sm font-normal opacity-70 tracking-tight">記錄您的所有精彩旅程</p>
         
         <button id="btn-login-google" class="w-full bg-white border border-slate-200 text-brand-textMain font-bold py-4 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-50 active:scale-[0.98] transition-all">
           <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -112,30 +113,35 @@
       </div>
     </div>
 
-    <!-- 主內容區塊 -->
+    <!-- 主內容區塊 (支援全寬) -->
     <div id="app-inner" class="flex-1 w-full flex flex-col overflow-hidden bg-white">
       
       <!-- VIEW: 我的行程 -->
       <div id="view-plans" class="hidden flex-1 flex flex-col overflow-hidden">
-        <header class="pt-12 pb-6 px-8 shrink-0 flex justify-between items-center">
+        <header class="pt-12 pb-6 px-8 shrink-0 flex justify-between items-center content-width">
           <h1 class="text-3xl font-bold text-brand-dark tracking-tighter">我的計畫</h1>
           <button id="btn-new-plan" class="bg-brand-primary text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 transition-all">
             <i class="fa-solid fa-plus text-xl"></i>
           </button>
         </header>
-        <div id="plans-list" class="flex-1 overflow-y-auto px-6 pb-28 hide-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-min bg-slate-50 pt-4">
+        <div class="flex-1 overflow-y-auto bg-slate-50 pt-4 px-6 pb-28 hide-scrollbar">
+          <div id="plans-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-min content-width">
+            <!-- 行程卡片 -->
+          </div>
         </div>
       </div>
 
       <!-- VIEW: 行程詳情 / 編輯器 -->
       <div id="view-editor" class="hidden flex-1 flex flex-col overflow-hidden bg-white relative">
         <header class="bg-white pt-12 pb-4 px-6 shrink-0 border-b border-slate-100 flex items-center justify-between z-10">
-          <button onclick="switchView('plans')" class="w-10 h-10 flex items-center justify-start text-brand-textMain hover:scale-110 transition-all">
-            <i class="fa-solid fa-arrow-left text-xl"></i>
-          </button>
-          <div class="text-center flex-1">
-            <h2 id="current-plan-title" class="font-bold text-brand-textMain truncate px-4">載入中...</h2>
-            <p id="current-plan-date" class="text-[10px] text-brand-primary font-bold uppercase tracking-widest"></p>
+          <div class="flex items-center gap-4 flex-1">
+            <button onclick="switchView('plans')" class="w-10 h-10 flex items-center justify-start text-brand-textMain hover:scale-110 transition-all">
+              <i class="fa-solid fa-arrow-left text-xl"></i>
+            </button>
+            <div class="truncate">
+              <h2 id="current-plan-title" class="font-bold text-brand-textMain truncate text-xl">載入中...</h2>
+              <p id="current-plan-date" class="text-[10px] text-brand-primary font-bold uppercase tracking-widest"></p>
+            </div>
           </div>
           <button id="btn-edit-plan-info" class="w-10 h-10 flex items-center justify-end text-brand-textSub">
             <i class="fa-solid fa-sliders text-lg"></i>
@@ -143,13 +149,17 @@
         </header>
 
         <div class="bg-white px-6 py-4 shrink-0 border-b border-slate-50 overflow-x-auto hide-scrollbar">
-          <div id="days-tabs" class="flex gap-3 snap-x"></div>
+          <div id="days-tabs" class="flex gap-3 snap-x content-width justify-center md:justify-start"></div>
         </div>
 
-        <div id="timeline-container" class="flex-1 overflow-y-auto px-4 pb-32 pt-6 relative bg-white md:px-16 lg:px-32">
+        <div id="timeline-container" class="flex-1 overflow-y-auto px-4 pb-32 pt-8 relative bg-white hide-scrollbar">
+          <!-- 時間軸內容限定寬度以保證易讀性 -->
+          <div class="max-w-3xl mx-auto">
+             <!-- JS 注入內容 -->
+          </div>
         </div>
 
-        <div class="absolute bottom-28 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none md:bottom-12">
+        <div class="absolute bottom-28 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none md:bottom-12 content-width">
           <button id="btn-add-location" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-textMain text-white font-bold h-14 px-6 rounded-2xl active:scale-95 transition-all border border-brand-textMain">
             <i class="fa-solid fa-location-dot"></i> <span class="text-sm">地點</span>
           </button>
@@ -165,14 +175,14 @@
            <img id="user-photo" src="https://ui-avatars.com/api/?name=User" class="w-full h-full object-cover">
          </div>
          <h2 id="user-name" class="text-2xl font-bold text-brand-textMain mb-1">旅行者</h2>
-         <p id="user-email" class="text-xs text-brand-textSub font-bold mb-12 tracking-wide opacity-60"></p>
+         <p id="user-email" class="text-xs text-brand-textSub font-normal mb-12 tracking-wide opacity-60"></p>
          <button id="btn-logout" class="w-full max-w-xs py-4 bg-white text-red-500 font-bold rounded-2xl border border-red-100 transition-all active:scale-95 flex items-center justify-center gap-3">
            <i class="fa-solid fa-right-from-bracket"></i> 登出帳號
          </button>
       </div>
 
       <!-- 底部分頁導覽 -->
-      <nav id="bottom-nav" class="hidden absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 h-20 shrink-0 flex items-center justify-around px-8 z-[40]">
+      <nav id="bottom-nav" class="hidden absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 h-20 shrink-0 flex items-center justify-around px-8 z-[40]">
         <button class="nav-item flex flex-col items-center gap-1 group relative active" data-view="plans">
           <i class="fa-solid fa-calendar-check text-xl text-brand-textSub group-[.active]:text-brand-primary transition-all"></i>
           <span class="text-[10px] font-bold text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">行程列表</span>
@@ -310,10 +320,10 @@
       }
       tabs.innerHTML = tabsHtml;
 
-      const timeline = document.getElementById('timeline-container');
+      const timeline = document.getElementById('timeline-container').firstElementChild;
       const items = (plan.itinerary && plan.itinerary[state.activeDay]) || [];
       if (items.length === 0) {
-        timeline.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-20"><i class="fa-solid fa-route text-5xl mb-6"></i><p class="font-bold uppercase tracking-widest">Empty Day</p></div>`;
+        timeline.parentElement.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-20"><i class="fa-solid fa-route text-5xl mb-6"></i><p class="font-bold uppercase tracking-widest">Empty Day</p></div>`;
         return;
       }
 
@@ -338,7 +348,7 @@
                    <h4 class="font-bold text-brand-textMain text-lg tracking-tight">${item.name}</h4>
                    ${item.isThrough ? '<span class="text-[9px] font-bold uppercase text-white bg-brand-primary px-2 py-0.5 rounded tracking-widest">Through</span>' : ''}
                 </div>
-                ${item.subtitle ? `<p class="text-xs font-bold text-brand-textSub mt-1.5 leading-relaxed opacity-60">${item.subtitle}</p>` : ''}
+                ${item.subtitle ? `<p class="text-xs font-normal text-brand-textSub mt-1.5 leading-relaxed opacity-60">${item.subtitle}</p>` : ''}
               </div>
             </div>`;
         } else {
@@ -352,7 +362,7 @@
               <div class="w-[76px] shrink-0 text-right pr-5 py-7 flex flex-col justify-between items-end font-bold font-mono text-brand-textMain text-[15px] tracking-tighter opacity-80">
                 <span class="${showStart ? '' : 'opacity-0'}">${item.timeStart}</span>
                 <div class="flex flex-col items-end my-2">
-                   <span class="text-[11px] font-bold text-brand-textSub uppercase tracking-widest opacity-40">${item.duration || ''}</span>
+                   <span class="text-[11px] font-normal text-brand-textSub uppercase tracking-widest opacity-40">${item.duration || ''}</span>
                    ${item.extraInfo ? `<span class="text-[10px] font-bold text-brand-primary flex items-center mt-1 tracking-widest uppercase">${item.extraInfo}<i class="fa-solid fa-caret-down ml-1 text-[8px] opacity-30"></i></span>` : ''}
                 </div>
                 <span class="${showEnd ? '' : 'opacity-0'}">${item.timeEnd || ''}</span>
