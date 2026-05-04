@@ -32,6 +32,7 @@
   </script>
 
   <style>
+    /* --- LINE Seed TW 字體整合 --- */
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
@@ -43,7 +44,7 @@
     .bottom-sheet.closed { transform: translateY(100%); opacity: 0; }
     .view-transition { transition: opacity 0.3s ease; }
     
-    .sidebar-active { background-color: #F8FAFC; color: #748CAB; border-right: 3px solid #748CAB; font-weight: 700; }
+    .sidebar-active { background-color: #F8FAFC; color: #748CAB; border-right: 4px solid #748CAB; font-weight: 700; }
     .active-mode { border-color: #748CAB !important; background-color: #F0F9FF !important; color: #748CAB; font-weight: bold; }
     
     @media (min-width: 768px) {
@@ -60,10 +61,10 @@
 </head>
 <body class="bg-brand-bg text-brand-textMain font-sans antialiased overflow-hidden">
 
-  <div id="app" class="w-full h-[100dvh] flex flex-col relative font-sans">
+  <div id="app" class="w-full h-[100dvh] flex flex-col relative">
     
     <!-- Toast -->
-    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-dark text-white px-6 py-3 rounded-full opacity-0 pointer-events-none transition-all duration-300 text-sm flex items-center gap-2 border border-slate-600">
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-brand-dark text-white px-6 py-3 rounded-full opacity-0 pointer-events-none transition-all duration-300 text-sm font-light flex items-center gap-2 border border-slate-600">
       <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg"></span>
     </div>
 
@@ -89,7 +90,7 @@
       <div id="view-plans" class="hidden flex-1 flex flex-col overflow-hidden">
         <header class="pt-12 pb-6 px-8 shrink-0 flex justify-between items-center max-w-7xl mx-auto w-full">
           <h1 class="text-3xl font-bold text-brand-dark tracking-tighter">我的計畫</h1>
-          <button id="btn-new-plan" class="bg-brand-primary text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 transition-all">
+          <button onclick="openFormModal('new-plan')" class="bg-brand-primary text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-90 transition-all">
             <i class="fa-solid fa-plus text-xl"></i>
           </button>
         </header>
@@ -102,41 +103,36 @@
       <div id="view-editor" class="hidden flex-1 flex flex-col overflow-hidden bg-white relative">
         <div class="desktop-grid flex-1 flex flex-col md:grid">
           
-          <!-- 左側欄：控制台 -->
           <aside class="hidden md:flex flex-col bg-white border-r border-slate-100 overflow-y-auto hide-scrollbar shrink-0">
             <div class="p-8 border-b border-slate-50">
               <button onclick="switchView('plans')" class="text-slate-400 hover:text-brand-primary transition-colors flex items-center gap-2 text-sm font-light mb-6">
                 <i class="fa-solid fa-chevron-left text-xs"></i> 返回列表
               </button>
-              <h2 id="side-plan-title" class="font-bold text-2xl text-brand-dark leading-tight uppercase tracking-tighter mb-2"></h2>
+              <h2 id="side-plan-title" class="font-bold text-2xl text-brand-dark leading-tight tracking-tighter mb-2"></h2>
               <p id="side-plan-date" class="text-[10px] text-brand-primary font-bold uppercase tracking-[2px]"></p>
             </div>
             <div id="side-days-tabs" class="flex-1 py-4"></div>
             <div class="p-6 border-t border-slate-50">
-               <button id="btn-edit-plan-info-side" class="w-full py-3 rounded-xl border border-slate-100 text-slate-400 text-xs font-light hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
-                 <i class="fa-solid fa-gear"></i> 行程詳細設定
+               <button onclick="openFormModal('plan-info')" class="w-full py-3 rounded-xl border border-slate-100 text-slate-400 text-xs font-light hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                 <i class="fa-solid fa-gear"></i> 行程資訊設定
                </button>
             </div>
           </aside>
 
-          <!-- 中間欄：時間軸 -->
           <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
-            <!-- 手機版 Header -->
             <header class="md:hidden bg-white pt-10 pb-4 px-6 shrink-0 border-b border-slate-100 flex items-center justify-between">
               <button onclick="switchView('plans')" class="text-brand-textMain"><i class="fa-solid fa-arrow-left text-xl"></i></button>
               <h2 id="mobile-plan-title" class="font-bold text-brand-textMain truncate px-4"></h2>
-              <button id="btn-edit-plan-info-mob" class="text-brand-textSub"><i class="fa-solid fa-sliders text-lg"></i></button>
+              <button onclick="openFormModal('plan-info')" class="text-brand-textSub"><i class="fa-solid fa-sliders text-lg"></i></button>
             </header>
             <div class="md:hidden bg-white px-6 py-4 shrink-0 border-b border-slate-50 overflow-x-auto hide-scrollbar">
               <div id="mobile-days-tabs" class="flex gap-3"></div>
             </div>
 
-            <!-- 時間軸內容 -->
             <div class="flex-1 overflow-y-auto px-6 py-10 hide-scrollbar">
                <div id="timeline-container" class="max-w-2xl mx-auto w-full"></div>
             </div>
 
-            <!-- 懸浮按鈕 -->
             <div class="absolute bottom-28 md:bottom-10 right-6 flex flex-col gap-3 z-20">
               <button onclick="openFormModal('location')" class="flex items-center justify-center gap-2 bg-brand-dark text-white font-bold h-14 px-6 rounded-2xl border border-brand-dark hover:bg-black transition-all shadow-sm">
                 <i class="fa-solid fa-location-dot"></i> <span class="text-sm font-light">地點</span>
@@ -147,39 +143,38 @@
             </div>
           </main>
 
-          <!-- 右側欄：佔位與資訊 -->
           <aside class="hidden md:flex flex-col bg-brand-bg border-l border-slate-100 relative">
              <div class="absolute inset-0 flex flex-col items-center justify-center p-10 text-center text-slate-300">
                 <i class="fa-solid fa-map-location-dot text-6xl mb-4 opacity-20"></i>
-                <p class="text-sm font-light tracking-widest uppercase">Map & Info</p>
-                <div class="mt-8 w-full h-64 border border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-[10px] uppercase tracking-widest">地圖視圖開發中</div>
+                <p class="text-sm font-light tracking-widest uppercase">Map Area</p>
+                <div class="mt-8 w-full h-64 border border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-[10px] uppercase tracking-widest">區域功能開發中</div>
              </div>
           </aside>
         </div>
       </div>
 
-      <!-- VIEW: 設定與個人資料 (含匯入匯出) -->
-      <div id="view-profile" class="hidden flex-1 flex flex-col items-center justify-center px-8 bg-brand-bg overflow-y-auto hide-scrollbar">
+      <!-- VIEW: 設定 -->
+      <div id="view-profile" class="hidden flex-1 flex flex-col items-center justify-center px-8 bg-brand-bg">
          <div class="w-24 h-24 bg-white rounded-[32px] mb-6 overflow-hidden border border-slate-200 shadow-sm shrink-0">
            <img id="user-photo" src="https://ui-avatars.com/api/?name=User" class="w-full h-full object-cover">
          </div>
-         <h2 id="user-name" class="text-2xl font-bold text-brand-textMain mb-1 tracking-tighter uppercase"></h2>
+         <h2 id="user-name" class="text-2xl font-bold text-brand-textMain mb-1 tracking-tighter"></h2>
          <p id="user-email" class="text-xs text-brand-textSub font-light mb-12 tracking-wide"></p>
          
          <div class="w-full max-w-sm space-y-4">
            <div class="bg-white p-6 rounded-3xl border border-slate-100 space-y-4 shadow-sm">
-             <label class="block text-[10px] font-bold text-brand-textSub uppercase tracking-[2px]">資料備份與分享 (JSON)</label>
+             <label class="block text-[10px] font-bold text-brand-textSub uppercase tracking-[2px]">備份與分享 (JSON)</label>
              <div class="flex gap-3">
                <button onclick="handleExport()" class="flex-1 py-3 bg-brand-bg text-brand-dark font-bold text-sm rounded-xl border border-slate-100 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-file-export"></i> 匯出</button>
                <button onclick="document.getElementById('input-import-file').click()" class="flex-1 py-3 bg-brand-bg text-brand-dark font-bold text-sm rounded-xl border border-slate-100 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-file-import"></i> 匯入</button>
                <input type="file" id="input-import-file" accept=".json" class="hidden" onchange="handleImport(event)">
              </div>
            </div>
-           <button id="btn-logout" class="w-full py-4 bg-white text-red-500 font-bold rounded-2xl border border-red-100 hover:bg-red-50 transition-all flex items-center justify-center gap-3 shadow-sm">登出帳號</button>
+           <button onclick="signOut(getAuth())" class="w-full py-4 bg-white text-red-500 font-bold rounded-2xl border border-red-100 hover:bg-red-50 transition-all flex items-center justify-center gap-3">登出帳號</button>
          </div>
       </div>
 
-      <!-- Bottom Nav (手機版) -->
+      <!-- 手機版 Bottom Nav -->
       <nav id="bottom-nav" class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 h-20 shrink-0 flex items-center justify-around px-8 z-[40]">
         <button class="nav-item flex flex-col items-center gap-1 group relative active" data-view="plans"><i class="fa-solid fa-calendar-check text-xl text-brand-textSub group-[.active]:text-brand-primary transition-all"></i><span class="text-[10px] font-bold text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">行程列表</span></button>
         <button class="nav-item flex flex-col items-center gap-1 group relative" data-view="profile"><i class="fa-solid fa-user-gear text-xl text-brand-textSub group-[.active]:text-brand-primary transition-all"></i><span class="text-[10px] font-bold text-brand-textSub group-[.active]:text-brand-primary uppercase tracking-tighter">設定</span></button>
@@ -187,9 +182,9 @@
     </div>
   </div>
 
-  <!-- 遮罩與專業彈窗 -->
-  <div id="modal-overlay" class="hidden fixed inset-0 z-[60] bg-slate-900/20 backdrop-blur-[2px] transition-opacity" onclick="closeSheet()"></div>
-  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[61] bg-white rounded-t-[40px] max-h-[90vh] flex flex-col mx-auto overflow-hidden border border-slate-100 shadow-lg">
+  <!-- 彈窗系統 -->
+  <div id="modal-overlay" class="hidden fixed inset-0 z-[60] bg-slate-900/10 backdrop-blur-[1px] transition-opacity" onclick="closeSheet()"></div>
+  <div id="sheet-form" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[61] bg-white rounded-t-[40px] max-h-[90vh] flex flex-col mx-auto overflow-hidden border border-slate-100">
      <div id="sheet-header" class="px-8 py-6 border-b border-slate-50 flex justify-between items-center shrink-0">
         <h3 id="sheet-title" class="text-xl font-bold text-brand-dark tracking-tight">建立行程</h3>
         <button onclick="closeSheet()" class="text-slate-300 hover:text-brand-primary transition-colors"><i class="fa-solid fa-circle-xmark text-2xl"></i></button>
@@ -249,7 +244,7 @@
       const container = document.getElementById('plans-list');
       if (state.plans.length === 0) { container.innerHTML = `<div class="col-span-full py-24 text-center text-slate-300 font-light"><i class="fa-solid fa-map-location-dot text-6xl mb-6 opacity-20"></i><p>目前暫無計畫</p></div>`; return; }
       container.innerHTML = state.plans.sort((a, b) => b.createdAt - a.createdAt).map(plan => `
-        <div onclick="openPlan('${plan.id}')" class="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm flex h-32 active:scale-[0.98] transition-all cursor-pointer hover:border-brand-primary">
+        <div onclick="openPlan('${plan.id}')" class="bg-white rounded-[32px] overflow-hidden border border-slate-100 flex h-32 active:scale-[0.98] transition-all cursor-pointer hover:border-brand-primary shadow-sm">
           <div class="w-28 bg-brand-light flex items-center justify-center text-brand-primary text-3xl opacity-30 shrink-0"><i class="fa-solid fa-plane-up"></i></div>
           <div class="flex-1 p-6 flex flex-col justify-center overflow-hidden">
             <h3 class="font-bold text-brand-textMain text-lg truncate tracking-tight uppercase">${plan.title}</h3>
@@ -290,16 +285,10 @@
         if (item.type === 'location') {
           html += `<div class="relative flex group py-6 cursor-pointer" onclick="openFormModal('location', '${item.id}')">
             <div class="w-[80px] shrink-0 text-right pr-6 pt-1 flex flex-col font-bold font-mono text-brand-textMain text-sm leading-tight tracking-tighter opacity-80">
-              <span>${item.timeStart}</span>
-              ${item.timeEnd ? `<span class="opacity-20 text-[11px]">${item.timeEnd}</span>` : ''}
+              <span>${item.timeStart}</span>${item.timeEnd ? `<span class="opacity-20 text-[11px]">${item.timeEnd}</span>` : ''}
             </div>
-            <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}<div class="w-3.5 h-3.5 rounded-full border-2 border-brand-primary bg-white z-10 mt-[6px]"></div></div>
-            <div class="flex-1 pl-6">
-              <h4 class="font-bold text-brand-textMain text-lg tracking-tight uppercase">${item.name}</h4>
-              ${item.subtitle ? `<p class="text-xs font-light text-brand-textSub mt-1 opacity-70 leading-relaxed">${item.subtitle}</p>` : ''}
-              ${costStr}
-              ${item.isThrough ? '<span class="inline-block mt-2 text-[9px] font-bold uppercase text-white bg-brand-primary px-2 py-0.5 rounded tracking-widest">Through</span>' : ''}
-            </div>
+            <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}<div class="${item.isThrough ? 'w-4 h-4 border-2' : 'w-3.5 h-3.5 border-2'} rounded-full border-brand-primary bg-white z-10 mt-[6px] flex items-center justify-center">${item.isThrough ? '<i class="fa-solid fa-angles-down text-[7px]"></i>' : ''}</div></div>
+            <div class="flex-1 pl-6"><h4 class="font-bold text-brand-textMain text-lg tracking-tight uppercase">${item.name}</h4>${item.subtitle ? `<p class="text-xs font-light text-brand-textSub mt-1 opacity-70 leading-relaxed">${item.subtitle}</p>` : ''}${costStr}${item.isThrough ? '<span class="inline-block mt-2 text-[9px] font-bold uppercase text-white bg-brand-primary px-2 py-0.5 rounded tracking-widest">Through</span>' : ''}</div>
           </div>`;
         } else {
           let showStart = true; let showEnd = true; const prev = arr[index - 1]; const next = arr[index + 1];
@@ -314,11 +303,7 @@
               <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex items-center justify-between group-hover:border-brand-primary transition-all">
                 <div class="flex items-center gap-4">
                   <div class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-brand-accent shadow-sm shrink-0"><i class="${modeObj.icon}"></i></div>
-                  <div>
-                    <p class="text-[10px] font-bold uppercase tracking-[2px] text-brand-accent opacity-60">${item.operator || ''} ${item.vehicleNo || ''}</p>
-                    <h4 class="font-bold text-brand-textMain uppercase tracking-tight">${item.name}</h4>
-                    ${costStr}
-                  </div>
+                  <div><p class="text-[10px] font-bold uppercase tracking-[2px] text-brand-accent opacity-60">${item.operator || ''} ${item.vehicleNo || ''}</p><h4 class="font-bold text-brand-textMain uppercase tracking-tight">${item.name}</h4>${costStr}</div>
                 </div>
               </div>
             </div>
@@ -342,42 +327,33 @@
       if (type === 'new-plan') {
         headerTitle.innerText = "建立新行程";
         content.innerHTML = `<div class="space-y-6">
-          <div><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">行程名稱</label><input id="f-title" type="text" placeholder="例：東京橫濱 五日遊" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold focus:border-brand-primary transition-all"></div>
-          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">開始日期</label><input id="f-start-date" type="date" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">結束日期</label><input id="f-end-date" type="date" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div></div>
-          <div><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">預設住宿地點</label><input id="f-acc" type="text" placeholder="例：新宿飯店" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div>
-          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">出發機場</label><input id="f-ad" type="text" placeholder="TPE" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">抵達機場</label><input id="f-aa" type="text" placeholder="NRT" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div></div>
-          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">去程航班</label><input id="f-fo" type="text" placeholder="CI100" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">回程航班</label><input id="f-fr" type="text" placeholder="CI101" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div></div>
-          <div class="flex gap-4 pt-4"><button onclick="closeSheet()" class="flex-1 py-4 border border-slate-100 rounded-xl font-light text-slate-400">取消</button><button onclick="createNewPlan()" class="flex-1 py-4 bg-brand-primary text-white rounded-xl font-bold">建立行程</button></div></div>`;
+          <div><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">行程名稱</label><input id="f-title" type="text" placeholder="例：2026大阪自由行" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold focus:border-brand-primary transition-all"></div>
+          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">開始日期</label><input id="f-start-date" type="date" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div><div class="flex-1"><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">結束日期</label><input id="f-end-date" type="date" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div></div>
+          <div><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">住宿飯店 (預設)</label><input id="f-acc" type="text" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div>
+          <div class="flex gap-4 pt-4"><button onclick="closeSheet()" class="flex-1 py-4 border border-slate-100 rounded-xl font-light">取消</button><button onclick="createNewPlan()" class="flex-1 py-4 bg-brand-primary text-white rounded-xl font-bold">建立行程</button></div></div>`;
       } else if (type === 'plan-info') {
-        headerTitle.innerText = "行程資訊設定";
+        headerTitle.innerText = "行程設定";
         content.innerHTML = `<div class="space-y-6">
-          <div><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">名稱</label><input id="f-title" type="text" value="${plan.title}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold"></div>
-          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">日期</label><input id="f-date" type="date" value="${plan.startDate}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold"></div><div class="w-28"><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">天數</label><input id="f-days" type="number" value="${plan.days}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-center"></div></div>
-          <div><label class="text-[11px] font-light text-slate-400 block mb-2 uppercase tracking-[2px]">住宿飯店</label><input id="f-acc" type="text" value="${plan.accommodation || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold"></div>
-          <button onclick="updatePlanInfo()" class="w-full bg-brand-primary text-white py-4 rounded-xl font-bold mt-4">儲存變更</button><button onclick="deletePlan()" class="w-full py-4 text-red-500 font-light text-xs uppercase opacity-40 hover:opacity-100 transition-opacity">刪除整個行程</button></div>`;
+          <div><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">名稱</label><input id="f-title" type="text" value="${plan.title}" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none font-bold"></div>
+          <div class="flex gap-4"><div class="flex-1"><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">日期</label><input id="f-date" type="date" value="${plan.startDate}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div><div class="w-28"><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">天數</label><input id="f-days" type="number" value="${plan.days}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold text-center"></div></div>
+          <div><label class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-[2px]">住宿飯店</label><input id="f-acc" type="text" value="${plan.accommodation || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold"></div>
+          <button onclick="updatePlanInfo()" class="w-full bg-brand-primary text-white py-4 rounded-xl font-bold mt-4">儲存變更</button><button onclick="deletePlan()" class="w-full py-4 text-red-500 font-light text-xs uppercase opacity-40 hover:opacity-100 transition-opacity">刪除行程</button></div>`;
       } else {
         const isLoc = type === 'location';
-        headerTitle.innerText = item ? '編輯項目' : (isLoc ? '新增地點' : '新增交通');
-        
+        headerTitle.innerText = item ? '編輯內容' : (isLoc ? '新增地點' : '新增交通');
         let quickFills = '';
-        if (isLoc) {
-          if (plan.accommodation) quickFills += `<button onclick="fillField('f-name','${plan.accommodation}', 'hotel')" class="px-3 py-1.5 bg-brand-light text-brand-primary rounded-full text-[10px] font-bold uppercase tracking-widest"><i class="fa-solid fa-hotel mr-1"></i> 帶入飯店</button>`;
-          if (plan.airportDept) quickFills += `<button onclick="fillField('f-name','${plan.airportDept}', 'airport')" class="px-3 py-1.5 bg-brand-light text-brand-primary rounded-full text-[10px] font-bold uppercase tracking-widest"><i class="fa-solid fa-plane mr-1"></i> 帶入機場</button>`;
-        } else {
-          if (plan.flightOut) quickFills += `<button onclick="fillField('f-veh','${plan.flightOut}')" class="px-3 py-1.5 bg-brand-light text-brand-accent rounded-full text-[10px] font-bold uppercase tracking-widest"><i class="fa-solid fa-ticket mr-1"></i> 去程航班</button>`;
-          if (plan.flightRet) quickFills += `<button onclick="fillField('f-veh','${plan.flightRet}')" class="px-3 py-1.5 bg-brand-light text-brand-accent rounded-full text-[10px] font-bold uppercase tracking-widest"><i class="fa-solid fa-ticket mr-1"></i> 回程航班</button>`;
-        }
+        if (isLoc && plan.accommodation) quickFills = `<button onclick="fillField('f-name','${plan.accommodation}', 'hotel')" class="px-3 py-1.5 bg-brand-light text-brand-primary rounded-full text-[10px] font-bold uppercase tracking-widest"><i class="fa-solid fa-hotel mr-1"></i> 帶入飯店</button>`;
 
         content.innerHTML = `<div class="space-y-6">
           <div class="flex gap-3 overflow-x-auto hide-scrollbar">${quickFills}</div>
           <div class="flex gap-4">
-            <div class="flex-1"><label class="text-[10px] font-light text-slate-400 uppercase block mb-2">起始時間</label><input id="f-start" type="time" value="${item?.timeStart || '08:00'}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-xl font-mono"></div>
-            <div class="flex-1"><label class="text-[10px] font-light text-slate-400 uppercase block mb-2">結束時間</label><input id="f-end" type="time" value="${item?.timeEnd || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-xl font-mono"></div>
+            <div class="flex-1"><label class="text-[11px] font-bold text-slate-400 uppercase block mb-2 tracking-[2px]">起始時間</label><input id="f-start" type="time" value="${item?.timeStart || '08:00'}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-xl font-mono"></div>
+            <div class="flex-1"><label class="text-[11px] font-bold text-slate-400 uppercase block mb-2 tracking-[2px]">結束時間</label><input id="f-end" type="time" value="${item?.timeEnd || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-xl font-mono"></div>
           </div>
-          ${isLoc ? `<div class="grid grid-cols-4 gap-3">${LOCATION_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-14 rounded-2xl border border-slate-200 flex items-center justify-center transition-all ${item?.locMode === m.id ? 'active-mode' : (isLoc && m.id==='spot' && !item ? 'active-mode' : '')}"><i class="${m.icon}"></i></button>`).join('')}</div><input id="f-name" type="text" placeholder="地點名稱" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-lg"><textarea id="f-sub" placeholder="備註、門票資訊..." class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl text-sm h-24">${item?.subtitle || ''}</textarea><label class="flex items-center gap-4 text-sm font-bold text-brand-textMain cursor-pointer p-2"><input type="checkbox" id="f-through" ${item?.isThrough ? 'checked' : ''} class="w-6 h-6 accent-brand-primary"> 直通站點 (不下車)</label>` : 
-          `<div class="grid grid-cols-5 gap-3">${TRANSPORT_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-12 rounded-xl border border-slate-200 flex items-center justify-center transition-all ${item?.mode === m.id ? 'active-mode' : (!isLoc && m.id==='train' && !item ? 'active-mode' : '')}"><i class="${m.icon}"></i></button>`).join('')}</div><div class="flex gap-3"><input id="f-op" type="text" placeholder="業者" value="${item?.operator || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm shadow-inner"><input id="f-veh" type="text" placeholder="班次" value="${item?.vehicleNo || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm shadow-inner"></div><input id="f-name" type="text" placeholder="路線目的地" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-lg shadow-inner"><div class="flex gap-3"><input id="f-dur" type="text" placeholder="耗時" value="${item?.duration || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm shadow-inner"><input id="f-extra" type="text" placeholder="站數" value="${item?.extraInfo || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm shadow-inner"></div>`}
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><div class="flex justify-between items-center mb-2"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">花費預算 (選填)</label><div class="flex gap-2 bg-white p-1 rounded-lg border border-slate-100"><button onclick="state.currency='JPY';document.getElementById('curr-sym').innerText='¥'" class="px-2 py-0.5 text-[10px] font-bold">JPY</button><button onclick="state.currency='TWD';document.getElementById('curr-sym').innerText='$'" class="px-2 py-0.5 text-[10px] font-bold">TWD</button></div></div><div class="flex items-center gap-3"><span id="curr-sym" class="text-xl font-bold text-slate-300">¥</span><input id="f-cost" type="number" value="${item?.cost || ''}" class="w-full bg-transparent outline-none font-bold text-xl"></div></div>
-          <button onclick="saveItem('${type}')" class="w-full bg-brand-primary text-white py-5 rounded-2xl font-bold text-lg mt-4 active:scale-95 transition-all">儲存行程</button>${itemId ? `<button onclick="deleteItem()" class="w-full py-4 text-red-500 font-light text-xs uppercase opacity-40 hover:opacity-100 transition-all">刪除此項目</button>` : ''}</div>`;
+          ${isLoc ? `<div class="grid grid-cols-4 gap-3">${LOCATION_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-14 rounded-2xl border border-slate-200 flex items-center justify-center transition-all ${item?.locMode === m.id ? 'active-mode' : (isLoc && m.id==='spot' && !item ? 'active-mode' : '')}"><i class="${m.icon}"></i></button>`).join('')}</div><input id="f-name" type="text" placeholder="地點名稱" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-lg"><textarea id="f-sub" placeholder="備註..." class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl text-sm h-24">${item?.subtitle || ''}</textarea><label class="flex items-center gap-4 text-sm font-bold text-brand-textMain cursor-pointer p-2"><input type="checkbox" id="f-through" ${item?.isThrough ? 'checked' : ''} class="w-6 h-6 accent-brand-primary"> 直通站點 (不下車)</label>` : 
+          `<div class="grid grid-cols-5 gap-3">${TRANSPORT_MODES.map(m => `<button onclick="selectMode(this)" data-mode="${m.id}" class="mode-btn h-12 rounded-xl border border-slate-200 flex items-center justify-center transition-all ${item?.mode === m.id ? 'active-mode' : (!isLoc && m.id==='train' && !item ? 'active-mode' : '')}"><i class="${m.icon} text-lg"></i></button>`).join('')}</div><div class="flex gap-3"><input id="f-op" type="text" placeholder="業者" value="${item?.operator || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm"><input id="f-veh" type="text" placeholder="班次" value="${item?.vehicleNo || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm"></div><input id="f-name" type="text" placeholder="路線目的地" value="${item?.name || ''}" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-lg"><div class="flex gap-3"><input id="f-dur" type="text" placeholder="耗時" value="${item?.duration || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm"><input id="f-extra" type="text" placeholder="站數" value="${item?.extraInfo || ''}" class="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl font-bold text-sm"></div>`}
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><div class="flex justify-between items-center mb-2"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">花費金額</label><div class="flex gap-2 bg-white p-1 rounded-lg border border-slate-100"><button onclick="state.currency='JPY';document.getElementById('curr-sym').innerText='¥'" class="px-2 py-0.5 text-[10px] font-bold">JPY</button><button onclick="state.currency='TWD';document.getElementById('curr-sym').innerText='$'" class="px-2 py-0.5 text-[10px] font-bold">TWD</button></div></div><div class="flex items-center gap-3"><span id="curr-sym" class="text-xl font-bold text-slate-300">¥</span><input id="f-cost" type="number" value="${item?.cost || ''}" class="w-full bg-transparent outline-none font-bold text-xl"></div></div>
+          <button onclick="saveItem('${type}')" class="w-full bg-brand-primary text-white py-5 rounded-2xl font-bold text-lg mt-4 active:scale-95 transition-all">儲存行程</button>${itemId ? `<button onclick="deleteItem()" class="w-full py-4 text-red-500 font-light text-xs uppercase opacity-40 hover:opacity-100 transition-all">刪除項目</button>` : ''}</div>`;
       }
     };
 
@@ -388,7 +364,7 @@
       const endD = document.getElementById('f-end-date').value;
       if (!title || !startD || !endD) return showToast("請完整填寫行程資訊");
       const diff = Math.ceil(Math.abs(new Date(endD) - new Date(startD)) / (1000 * 60 * 60 * 24)) + 1;
-      const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), { title, days: diff, startDate: startD, accommodation: document.getElementById('f-acc').value, airportDept: document.getElementById('f-ad').value, airportArr: document.getElementById('f-aa').value, flightOut: document.getElementById('f-fo').value, flightRet: document.getElementById('f-fr').value, itinerary: {}, createdAt: serverTimestamp() });
+      const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), { title, days: diff, startDate: startD, accommodation: document.getElementById('f-acc').value, itinerary: {}, createdAt: serverTimestamp() });
       closeSheet(); openPlan(docRef.id);
     };
 
@@ -406,11 +382,11 @@
       if (state.editingId) { const idx = itinerary[state.activeDay].findIndex(i => i.id === state.editingId); itinerary[state.activeDay][idx] = data; } 
       else { itinerary[state.activeDay].push(data); }
       await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary });
-      closeSheet(); showToast("雲端同步成功");
+      closeSheet(); showToast("同步成功");
     };
 
     window.deleteItem = async () => {
-      if (!confirm("確定刪除此項行程？")) return;
+      if (!confirm("確定刪除此項目？")) return;
       const plan = state.plans.find(p => p.id === state.currentPlanId);
       plan.itinerary[state.activeDay] = plan.itinerary[state.activeDay].filter(i => i.id !== state.editingId);
       await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: plan.itinerary });
@@ -418,7 +394,7 @@
     };
 
     window.updatePlanInfo = async () => { await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { title: document.getElementById('f-title').value, startDate: document.getElementById('f-date').value, days: parseInt(document.getElementById('f-days').value), accommodation: document.getElementById('f-acc').value }); closeSheet(); };
-    window.deletePlan = async () => { if (confirm("確定刪除整個行程？雲端資料將無法復原。")) { await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId)); state.currentPlanId = null; switchView('plans'); closeSheet(); } };
+    window.deletePlan = async () => { if (confirm("確定刪除整個行程？資料無法復原。")) { await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId)); state.currentPlanId = null; switchView('plans'); closeSheet(); } };
 
     window.handleExport = () => {
       const dataStr = JSON.stringify(state.plans, null, 2);
@@ -434,22 +410,31 @@
       reader.onload = async (event) => {
         try {
           const imported = JSON.parse(event.target.result);
-          for (let p of (Array.isArray(imported) ? imported : [imported])) {
-            delete p.id; p.createdAt = serverTimestamp();
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), p);
+          // 智慧判定：如果是舊版單一行程物件，轉換為陣列處理
+          const plansToImport = (imported && imported.title && !Array.isArray(imported)) ? [imported] : imported;
+          
+          if (!Array.isArray(plansToImport)) throw new Error("Format Invalid");
+
+          for (let p of plansToImport) {
+            // 資料清洗與兼容
+            const cleanPlan = {
+              title: p.title || "未命名行程",
+              startDate: p.startDate || new Date().toISOString().split('T')[0],
+              days: p.days || 1,
+              accommodation: p.accommodation || "",
+              itinerary: p.itinerary || {},
+              createdAt: serverTimestamp()
+            };
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
           }
           showToast('成功匯入行程');
-        } catch (err) { alert('格式錯誤'); }
+        } catch (err) { alert('匯入失敗，請確認檔案格式是否正確。'); }
       };
       reader.readAsText(file);
     };
 
     document.getElementById('btn-login-google').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
-    document.getElementById('btn-logout').onclick = () => signOut(auth);
     document.querySelectorAll('.nav-item').forEach(btn => btn.onclick = () => switchView(btn.dataset.view));
-    document.getElementById('btn-new-plan').onclick = () => openFormModal('new-plan');
-    document.getElementById('btn-edit-plan-info-mob').onclick = () => openFormModal('plan-info');
-    document.getElementById('btn-edit-plan-info-side').onclick = () => openFormModal('plan-info');
 
     function showToast(msg) { const el = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; el.classList.remove('opacity-0'); el.classList.add('opacity-100'); setTimeout(() => { el.classList.remove('opacity-100'); el.classList.add('opacity-0'); }, 2500); }
 
