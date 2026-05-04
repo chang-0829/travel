@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>旅遊行程規劃</title>
   
   <!-- Font Awesome -->
@@ -55,6 +55,9 @@
     /* 隱藏原生 checkbox 並美化 */
     .custom-checkbox input:checked + div { background-color: #748CAB; border-color: #748CAB; }
     .custom-checkbox input:checked + div i { opacity: 1; }
+
+    /* iPhone 底部安全距離適配 */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
@@ -94,10 +97,24 @@
     </header>
 
     <!-- VIEW: 首頁 / 計畫列表 -->
-    <div id="view-plans" class="hidden flex-1 overflow-y-auto px-6 pb-12 hide-scrollbar">
+    <div id="view-plans" class="hidden flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar">
       <div id="plans-list" class="space-y-4 mt-6"></div>
       <button onclick="createNewPlanInit()" class="w-full mt-6 py-4 border-2 border-dashed border-brand-primary text-brand-primary font-bold rounded-[20px] hover:bg-brand-light transition-all flex justify-center items-center gap-2">
         <i class="fa-solid fa-plus"></i> 建立新行程
+      </button>
+    </div>
+
+    <!-- VIEW: 會員中心 -->
+    <div id="view-profile" class="hidden flex-1 overflow-y-auto px-6 hide-scrollbar flex flex-col items-center pt-12 pb-6">
+      <div class="w-24 h-24 bg-white border-4 border-brand-light rounded-full flex items-center justify-center mb-4 text-brand-primary text-4xl shadow-md overflow-hidden relative">
+        <img id="profile-pic" src="" alt="avatar" class="hidden w-full h-full object-cover">
+        <i id="profile-icon" class="fa-solid fa-user"></i>
+      </div>
+      <h2 id="profile-name" class="text-2xl font-bold text-brand-dark mb-1">User</h2>
+      <p id="profile-email" class="text-sm font-bold text-brand-textSub mb-8">email@example.com</p>
+      
+      <button onclick="handleSignOut()" class="w-full bg-[#FFE5E5] text-[#E63946] font-bold text-lg py-4 rounded-[20px] shadow-sm hover:bg-[#FFD1D1] active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-auto">
+        <i class="fa-solid fa-right-from-bracket"></i> 登出帳號
       </button>
     </div>
 
@@ -195,6 +212,20 @@
       </div>
     </div>
 
+    <!-- 底部導覽列 -->
+    <nav id="bottom-nav" class="hidden bg-brand-card border-t border-brand-light shrink-0 z-40 pb-safe">
+      <div class="flex justify-around items-center h-[60px]">
+        <button id="nav-btn-plans" onclick="switchView('plans')" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors">
+          <i class="fa-solid fa-house mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">首頁</span>
+        </button>
+        <button id="nav-btn-profile" onclick="switchView('profile')" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-user mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">會員</span>
+        </button>
+      </div>
+    </nav>
+
   </div> <!-- End App -->
 
   <!-- ================= MODALS ================= -->
@@ -225,10 +256,10 @@
 
         <div id="quick-fill-container" class="hidden flex gap-2 overflow-x-auto hide-scrollbar"></div>
 
-        <!-- 地點專屬：地點 Icon 分類 -->
+        <!-- 地點專屬：地點 Icon 分類 (改為 grid-cols-3 九宮格) -->
         <div id="group-location-mode" class="hidden bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">地點類型</label>
-          <div id="location-modes-grid" class="grid grid-cols-4 gap-2"></div>
+          <div id="location-modes-grid" class="grid grid-cols-3 gap-2"></div>
         </div>
 
         <!-- 交通專屬：交通工具選擇 -->
@@ -371,13 +402,17 @@
       { id: 'walk', label: '步行', icon: 'fa-solid fa-person-walking' }
     ];
 
+    // 更新地點模式的選項，擴充至 9 個
     const LOCATION_MODES = [
-      { id: 'spot', label: '景點', icon: 'fa-solid fa-location-dot' },
-      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
+      { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
       { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
       { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
+      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
+      { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
+      { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
+      { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
       { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
-      { id: 'activity', label: '活動', icon: 'fa-solid fa-ticket' }
+      { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
     let state = {
@@ -401,10 +436,24 @@
       }, 3000);
     }
 
+    window.handleSignOut = () => {
+      signOut(auth).then(() => {
+          showToast("已登出帳號");
+      });
+    };
+
     // --- Firebase Auth & Sync ---
     onAuthStateChanged(auth, (user) => {
       state.user = user;
       if (user) {
+        document.getElementById('profile-name').innerText = user.displayName || '旅行者';
+        document.getElementById('profile-email').innerText = user.email || '';
+        if(user.photoURL) {
+            document.getElementById('profile-pic').src = user.photoURL;
+            document.getElementById('profile-pic').classList.remove('hidden');
+            document.getElementById('profile-icon').classList.add('hidden');
+        }
+
         document.getElementById('view-login').classList.add('hidden');
         switchView('plans'); 
         listenToPlans();
@@ -437,7 +486,7 @@
 
     // --- View Switching ---
     window.switchView = function(v) {
-      ['login', 'plans', 'setup', 'itinerary'].forEach(id => {
+      ['login', 'plans', 'setup', 'itinerary', 'profile'].forEach(id => {
         const el = document.getElementById(`view-${id}`);
         if (el) el.classList.add('hidden');
       });
@@ -447,6 +496,23 @@
       const title = document.getElementById('header-title');
       const sub = document.getElementById('header-subtitle');
       const btnAction = document.getElementById('btn-header-action');
+      
+      const bottomNav = document.getElementById('bottom-nav');
+      const navBtnPlans = document.getElementById('nav-btn-plans');
+      const navBtnProfile = document.getElementById('nav-btn-profile');
+
+      if (v === 'plans' || v === 'profile') {
+         bottomNav.classList.remove('hidden');
+         if(v === 'plans') {
+             navBtnPlans.classList.add('text-brand-primary'); navBtnPlans.classList.remove('text-brand-textSub');
+             navBtnProfile.classList.add('text-brand-textSub'); navBtnProfile.classList.remove('text-brand-primary');
+         } else {
+             navBtnProfile.classList.add('text-brand-primary'); navBtnProfile.classList.remove('text-brand-textSub');
+             navBtnPlans.classList.add('text-brand-textSub'); navBtnPlans.classList.remove('text-brand-primary');
+         }
+      } else {
+         bottomNav.classList.add('hidden');
+      }
 
       if (v === 'login') {
         header.classList.add('hidden');
@@ -454,8 +520,14 @@
         header.classList.remove('hidden');
         sub.innerText = state.user?.displayName ? `Hi, ${state.user.displayName}` : 'Welcome';
         title.innerText = '我的計畫';
-        btnAction.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i>';
-        btnAction.onclick = () => signOut(auth);
+        btnAction.innerHTML = '<i class="fa-solid fa-bell text-lg"></i>';
+        btnAction.onclick = () => showToast('目前沒有新通知');
+      } else if (v === 'profile') {
+        header.classList.remove('hidden');
+        sub.innerText = 'Account';
+        title.innerText = '會員中心';
+        btnAction.innerHTML = '<i class="fa-solid fa-gear text-lg"></i>';
+        btnAction.onclick = () => showToast('設定功能建置中');
       } else if (v === 'setup') {
         header.classList.remove('hidden');
         sub.innerText = 'My Trip';
@@ -466,7 +538,7 @@
         header.classList.remove('hidden');
         sub.innerText = 'My Trip';
         title.innerText = state.tripData.title || '行程表';
-        btnAction.innerHTML = '<i class="fa-solid fa-gear"></i>';
+        btnAction.innerHTML = '<i class="fa-solid fa-gear text-lg"></i>';
         btnAction.onclick = () => openSetup(state.currentPlanId);
       }
     };
@@ -605,19 +677,23 @@
             ? `<div class="w-4 h-4 rounded-full bg-brand-bg border-2 border-brand-primary z-10 mt-[20px] shadow-sm flex items-center justify-center"><i class="fa-solid fa-angles-down text-[8px] text-brand-primary"></i></div>`
             : `<div class="w-3.5 h-3.5 rounded-full border-[3px] border-brand-primary bg-brand-card z-10 mt-[20px] shadow-sm"></div>`;
 
+          // 在這裡加上帶背景底框的設計 (同交通卡片風格)
           html += `
             <div class="relative flex group cursor-pointer" onclick="openOptions('${item.id}')">
               <div class="w-[68px] shrink-0 text-right pr-3 pt-[20px]">${timeHtml}</div>
               <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}${nodeDot}</div>
               <div class="flex-1 pt-[16px] pb-6 pl-2 relative pr-8">
-                <div class="flex items-start gap-2">
-                   <div class="text-[17px] font-extrabold text-brand-textMain leading-snug break-words">
-                     <i class="${locObj.icon} text-brand-primary mr-1.5 opacity-80"></i>${nameHtml}
+                <div class="flex items-start gap-2.5">
+                   <div class="w-[24px] h-[24px] rounded bg-brand-primary/15 text-brand-primary flex items-center justify-center shrink-0 mt-[1px]">
+                     <i class="${locObj.icon} text-[13px]"></i>
+                   </div>
+                   <div class="text-[17px] font-extrabold text-brand-textMain leading-snug break-words flex-1">
+                     ${nameHtml}
                    </div>
                 </div>
-                ${item.isThrough ? `<div class="mt-1"><span class="text-[10px] font-bold text-white bg-brand-primary/80 px-1.5 py-0.5 rounded">免下車</span></div>` : ''}
-                ${subHtml ? `<div class="text-[14px] font-medium text-brand-textMain mt-1.5 leading-relaxed">${subHtml}</div>` : ''}
-                ${costHtml}
+                ${item.isThrough ? `<div class="mt-1 ml-[34px]"><span class="text-[10px] font-bold text-white bg-brand-primary/80 px-1.5 py-0.5 rounded">免下車</span></div>` : ''}
+                ${subHtml ? `<div class="text-[14px] font-medium text-brand-textMain mt-1.5 ml-[34px] leading-relaxed">${subHtml}</div>` : ''}
+                <div class="ml-[34px]">${costHtml}</div>
                 <button class="absolute right-0 top-3 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
               </div>
             </div>`;
@@ -650,14 +726,14 @@
               <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}</div>
               <div class="flex-1 pl-2 pr-0 py-[20px] relative">
                  <div class="pl-1 relative pb-2">
-                   <div class="flex items-center gap-2 mb-1 pr-6">
+                   <div class="flex items-center gap-2.5 mb-1 pr-6">
                      <div class="w-[24px] h-[24px] rounded bg-brand-accent/15 text-brand-accent flex items-center justify-center shrink-0">
                        <i class="${modeObj.icon} text-[13px]"></i>
                      </div>
                      ${titleLine ? `<span class="text-[15px] font-bold text-brand-accent leading-tight">${titleLine}</span>` : ''}
                    </div>
-                   ${routeStr ? `<div class="text-[15px] font-extrabold text-brand-textMain leading-snug pr-6 ml-[32px]">${routeStr}${dirStr}</div>` : ''}
-                   <div class="ml-[32px]">${costHtml}</div>
+                   ${routeStr ? `<div class="text-[15px] font-extrabold text-brand-textMain leading-snug pr-6 ml-[34px]">${routeStr}${dirStr}</div>` : ''}
+                   <div class="ml-[34px]">${costHtml}</div>
                  </div>
                  <button class="absolute right-1 top-4 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full"><i class="fa-solid fa-ellipsis-vertical"></i></button>
               </div>
@@ -883,6 +959,9 @@
 
       document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeAllModals));
       document.getElementById('modal-overlay').addEventListener('click', closeAllModals);
+
+      document.getElementById('btn-add-location').addEventListener('click', () => openFormModal('location'));
+      document.getElementById('btn-add-transport').addEventListener('click', () => openFormModal('transport'));
 
       document.getElementById('btn-save-item').addEventListener('click', async () => {
         const plan = state.tripData;
