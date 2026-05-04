@@ -57,99 +57,152 @@
     <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg">成功！</span>
   </div>
 
-  <!-- APP 容器 -->
+  <!-- APP 容器 (維持舊版單欄寬度) -->
   <div id="app" class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
     
-    <!-- HEADER -->
-    <header class="bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
-      <div>
-        <p id="header-subtitle" class="text-sm font-bold text-brand-primary mb-1">My Trip</p>
-        <h1 id="header-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">行程設定</h1>
-      </div>
-      <button id="btn-settings" class="hidden w-10 h-10 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all">
-        <i class="fa-solid fa-gear text-lg"></i>
-      </button>
-    </header>
-
-    <!-- VIEW: SETUP -->
-    <div id="view-setup" class="flex-1 overflow-y-auto px-6 pb-12 hide-scrollbar">
-      <form id="form-setup" class="space-y-6 mt-6">
-        <div class="space-y-4">
-          <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm">
-            <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">行程名稱 <span class="text-brand-primary">*</span></label>
-            <input type="text" id="setup-title" placeholder="例：東京五日遊" required
-              class="w-full text-xl font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-          </div>
-          <div class="flex gap-3">
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
-              <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">出發日期</label>
-              <input type="date" id="setup-start-date" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent">
-            </div>
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm w-24">
-              <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">天數</label>
-              <input type="number" id="setup-days" min="1" max="30" value="3" required
-                class="w-full text-lg font-bold text-brand-textMain outline-none bg-transparent text-center">
-            </div>
-          </div>
+    <!-- VIEW: 登入頁 -->
+    <div id="view-login" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-brand-bg px-8 transition-opacity duration-300">
+      <div class="w-full bg-brand-card p-10 rounded-[32px] shadow-lg border border-brand-light flex flex-col items-center">
+        <div class="w-20 h-20 bg-brand-primary rounded-3xl flex items-center justify-center mb-6 shadow-md shadow-brand-primary/20">
+          <i class="fa-solid fa-compass text-white text-4xl"></i>
         </div>
-
-        <div class="mt-8 mb-2 flex items-center gap-2 text-brand-dark font-bold border-b border-brand-light pb-2">
-          <i class="fa-solid fa-bolt text-brand-primary"></i> 預設參數 (可於編輯時快速帶入)
-        </div>
-        
-        <div class="space-y-4">
-          <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm">
-            <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-hotel mr-1"></i>住宿地點</label>
-            <input type="text" id="setup-accommodation" placeholder="例：新宿格拉斯麗飯店" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-          </div>
-          <div class="flex gap-3">
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
-              <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-plane-departure mr-1"></i>出發機場</label>
-              <input type="text" id="setup-airport-dept" placeholder="例：桃園(TPE)" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-            </div>
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
-              <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-plane-arrival mr-1"></i>抵達機場</label>
-              <input type="text" id="setup-airport-arr" placeholder="例：關西(KIX)" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
-              <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-ticket mr-1"></i>去程航班</label>
-              <input type="text" id="setup-flight-out" placeholder="例：CX564" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-            </div>
-            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
-              <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-ticket mr-1"></i>回程航班</label>
-              <input type="text" id="setup-flight-ret" placeholder="例：CX565" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
-            </div>
-          </div>
-        </div>
-        <button type="submit" class="w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all mt-8 mb-8 flex justify-center items-center gap-2">
-          <i class="fa-solid fa-circle-check text-xl"></i> 儲存並開始規劃
+        <h1 class="text-3xl font-extrabold text-brand-dark mb-2 tracking-tight">趣．旅行</h1>
+        <p class="text-brand-textSub mb-10 text-sm font-bold tracking-widest uppercase">My Trip Cloud</p>
+        <button id="btn-login-google" class="w-full bg-white border-2 border-brand-light text-brand-textMain font-bold py-4 rounded-[20px] shadow-sm hover:bg-brand-bg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google 帳號登入
         </button>
-      </form>
-
-      <!-- 匯入 / 匯出 區塊 -->
-      <div class="mt-6 mb-8 border-t border-brand-light pt-6">
-        <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">資料備份與分享</label>
-        <div class="flex gap-3">
-          <button id="btn-export" type="button" class="flex-1 bg-brand-card border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-file-export text-brand-primary"></i> 匯出行程
-          </button>
-          <button id="btn-import" type="button" class="flex-1 bg-brand-card border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-file-import text-brand-primary"></i> 匯入行程
-          </button>
-          <input type="file" id="input-import-file" accept=".json" class="hidden">
-        </div>
-        <p class="text-[10px] text-brand-textSub mt-3 leading-relaxed">提示：您可以匯出 JSON 檔備份，或傳送給同行旅伴，對方在此點擊「匯入行程」即可無縫讀取！</p>
       </div>
     </div>
 
-    <!-- VIEW: ITINERARY -->
+    <!-- VIEW: 首頁 / 計畫列表 -->
+    <div id="view-plans" class="hidden flex-1 flex flex-col overflow-hidden bg-brand-bg relative">
+      <header class="bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+        <div>
+          <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest">My Plans</p>
+          <h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">行程列表</h1>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-logout" class="w-10 h-10 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-red-400 hover:text-red-500 active:scale-95 transition-all">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+          <button onclick="openSetup(null)" class="w-10 h-10 flex items-center justify-center bg-brand-primary shadow-sm shadow-brand-primary/30 rounded-full text-white hover:bg-brand-dark active:scale-95 transition-all">
+            <i class="fa-solid fa-plus text-lg"></i>
+          </button>
+        </div>
+      </header>
+      <div id="plans-list" class="flex-1 overflow-y-auto px-6 py-6 space-y-4 hide-scrollbar">
+        <!-- JS 渲染卡片 -->
+      </div>
+    </div>
+
+    <!-- VIEW: SETUP (新增/編輯行程參數) -->
+    <div id="view-setup" class="hidden flex-1 flex flex-col overflow-hidden bg-brand-bg relative">
+      <header class="bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+        <div>
+          <p id="setup-header-sub" class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest">Setup</p>
+          <h1 id="setup-header-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">行程設定</h1>
+        </div>
+        <button onclick="switchView(state.currentPlanId ? 'itinerary' : 'plans')" class="w-10 h-10 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto px-6 pb-12 hide-scrollbar">
+        <form id="form-setup" class="space-y-6 mt-6">
+          <div class="space-y-4">
+            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm">
+              <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">行程名稱 <span class="text-brand-primary">*</span></label>
+              <input type="text" id="setup-title" placeholder="例：東京五日遊" required class="w-full text-xl font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+            </div>
+            <div class="flex gap-3">
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
+                <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">出發日期</label>
+                <input type="date" id="setup-start-date" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent">
+              </div>
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm w-24">
+                <label class="block text-xs font-bold text-brand-textSub mb-2 uppercase tracking-wider">天數</label>
+                <input type="number" id="setup-days" min="1" max="30" value="3" required class="w-full text-lg font-bold text-brand-textMain outline-none bg-transparent text-center">
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 mb-2 flex items-center gap-2 text-brand-dark font-bold border-b border-brand-light pb-2">
+            <i class="fa-solid fa-bolt text-brand-primary"></i> 預設參數 (可於編輯時快速帶入)
+          </div>
+          
+          <div class="space-y-4">
+            <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm">
+              <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-hotel mr-1"></i>住宿地點</label>
+              <input type="text" id="setup-accommodation" placeholder="例：新宿格拉斯麗飯店" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+            </div>
+            <div class="flex gap-3">
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
+                <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-plane-departure mr-1"></i>出發機場</label>
+                <input type="text" id="setup-airport-dept" placeholder="例：桃園(TPE)" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+              </div>
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
+                <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-plane-arrival mr-1"></i>抵達機場</label>
+                <input type="text" id="setup-airport-arr" placeholder="例：關西(KIX)" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
+                <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-ticket mr-1"></i>去程航班</label>
+                <input type="text" id="setup-flight-out" placeholder="例：CX564" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+              </div>
+              <div class="bg-brand-card p-4 rounded-[20px] border border-brand-light shadow-sm flex-1">
+                <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider"><i class="fa-solid fa-ticket mr-1"></i>回程航班</label>
+                <input type="text" id="setup-flight-ret" placeholder="例：CX565" class="w-full text-base font-bold text-brand-textMain outline-none bg-transparent placeholder-brand-textSub/50">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 hover:bg-brand-dark active:scale-[0.98] transition-all mt-8 mb-8 flex justify-center items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-xl"></i> 儲存並同步雲端
+          </button>
+        </form>
+
+        <div id="setup-delete-section" class="hidden mt-4 pt-6 border-t border-brand-light">
+          <button onclick="deletePlan()" class="w-full py-4 text-red-500 font-bold opacity-50 hover:opacity-100 text-xs tracking-widest uppercase transition-opacity">
+            <i class="fa-solid fa-trash-can mr-1"></i> 刪除整個行程計畫
+          </button>
+        </div>
+
+        <!-- 匯入 / 匯出 區塊 -->
+        <div class="mt-6 mb-8 border-t border-brand-light pt-6">
+          <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">資料備份與分享</label>
+          <div class="flex gap-3">
+            <button id="btn-export" type="button" class="flex-1 bg-brand-card border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-file-export text-brand-primary"></i> 匯出行程
+            </button>
+            <button id="btn-import" type="button" class="flex-1 bg-brand-card border border-brand-light text-brand-dark font-bold py-3 rounded-[16px] shadow-sm hover:bg-brand-light/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-file-import text-brand-primary"></i> 匯入行程
+            </button>
+            <input type="file" id="input-import-file" accept=".json" class="hidden">
+          </div>
+          <p class="text-[10px] text-brand-textSub mt-3 leading-relaxed">提示：您可以匯出 JSON 檔備份，或傳送給同行旅伴，對方在此點擊「匯入行程」即可無縫讀取！</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: ITINERARY (時間軸) -->
     <div id="view-itinerary" class="hidden flex-1 flex flex-col h-full overflow-hidden bg-brand-card relative">
+      <header class="bg-brand-bg pt-12 pb-4 px-6 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
+        <div class="flex items-center gap-3 w-full">
+          <button onclick="switchView('plans')" class="w-8 h-8 shrink-0 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-brand-textSub active:scale-95 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
+          <div class="flex-1 min-w-0">
+            <h1 id="itinerary-header-title" class="text-xl font-extrabold text-brand-dark tracking-tight truncate"></h1>
+          </div>
+        </div>
+        <button onclick="openSetup(state.currentPlanId)" class="w-10 h-10 shrink-0 flex items-center justify-center bg-brand-card border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all ml-2">
+          <i class="fa-solid fa-gear text-lg"></i>
+        </button>
+      </header>
+
       <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
         <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
       </div>
-      <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-32 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
+      <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-32 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent hide-scrollbar">
       </div>
       <div class="absolute bottom-6 inset-x-0 px-6 flex justify-end gap-3 z-20 pointer-events-none">
         <button id="btn-add-location" class="pointer-events-auto flex items-center justify-center gap-2 bg-brand-dark text-brand-card font-bold h-14 px-6 rounded-full shadow-lg shadow-brand-dark/20 hover:bg-brand-textMain active:scale-95 transition-all">
@@ -197,7 +250,7 @@
           <div id="location-modes-grid" class="grid grid-cols-4 gap-2"></div>
         </div>
 
-        <!-- 交通專屬 -->
+        <!-- 交通專屬：交通工具選擇 -->
         <div id="group-transport-mode" class="hidden bg-brand-bg p-4 rounded-[16px] border border-brand-light">
           <label class="block text-xs font-bold text-brand-textSub mb-3 uppercase tracking-wider">交通工具</label>
           <div id="transport-modes-grid" class="grid grid-cols-4 gap-2"></div>
@@ -236,7 +289,7 @@
           </div>
         </div>
 
-        <!-- 地點專屬 -->
+        <!-- 地點專屬：文字輸入 -->
         <div id="group-location-fields" class="space-y-4">
           <div class="bg-brand-bg p-4 rounded-[16px] border border-brand-light">
             <label class="block text-xs font-bold text-brand-textSub mb-1 uppercase tracking-wider">地點名稱 <span class="text-brand-primary">*</span></label>
@@ -276,7 +329,7 @@
         </div>
         
         <button id="btn-save-item" class="w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[16px] shadow-lg shadow-brand-primary/20 mt-6 active:scale-95 transition-all disabled:opacity-50">
-          確定儲存
+          雲端同步儲存
         </button>
       </div>
     </div>
@@ -317,12 +370,14 @@
     </div>
   </div>
 
-  <script>
-    const STABLE_STORAGE_KEY = 'my_trip_app_permanent_data';
-    const LEGACY_STORAGE_KEYS = [
-      'trip_itinerary_brand_html_v3', 'trip_itinerary_brand_html_v2', 'trip_itinerary_brand_html_v1',
-      'trip_itinerary_brand_v1', 'trip_itinerary_data_v1', 'trip_itinerary_data'
-    ];
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, doc, collection, onSnapshot, query, addDoc, deleteDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // === Firebase Config ===
+    const firebaseConfig = { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
+    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = "travel-platform-v1";
 
     const TRANSPORT_MODES = [
       { id: 'flight', label: '航班', icon: 'fa-solid fa-plane' },
@@ -345,19 +400,19 @@
     ];
 
     let state = {
-      activeTab: 'setup', 
+      user: null,
+      plans: [],
+      currentPlanId: null,
       activeDay: 1,
-      tripData: { 
-        title: '', startDate: '', days: 3, 
-        accommodation: '', airportDept: '', airportArr: '', flightOut: '', flightRet: '', itinerary: {} 
-      },
       modalMode: null, 
       itemType: 'location', 
       editingId: null,
-      formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false }
+      formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false },
+      tripData: { title: '', startDate: '', days: 3, accommodation: '', airportDept: '', airportArr: '', flightOut: '', flightRet: '', itinerary: {} }
     };
 
     const els = {
+      viewLogin: document.getElementById('view-login'), viewPlans: document.getElementById('view-plans'),
       viewSetup: document.getElementById('view-setup'), viewItinerary: document.getElementById('view-itinerary'),
       headerTitle: document.getElementById('header-title'), headerSubtitle: document.getElementById('header-subtitle'),
       btnSettings: document.getElementById('btn-settings'), daysTabs: document.getElementById('days-tabs'),
@@ -368,6 +423,7 @@
       setupDays: document.getElementById('setup-days'), setupAcc: document.getElementById('setup-accommodation'),
       setupAirportDept: document.getElementById('setup-airport-dept'), setupAirportArr: document.getElementById('setup-airport-arr'),
       setupFlightOut: document.getElementById('setup-flight-out'), setupFlightRet: document.getElementById('setup-flight-ret'),
+      setupDeleteSec: document.getElementById('setup-delete-section'),
       
       overlay: document.getElementById('modal-overlay'), sheetForm: document.getElementById('sheet-form'),
       sheetOptions: document.getElementById('sheet-options'), modalDelete: document.getElementById('modal-delete'),
@@ -395,128 +451,113 @@
     };
 
     function init() {
-      loadData();
       setupEventListeners();
-      renderApp();
     }
 
-    function showToast(msg) {
-      els.toastMsg.innerText = msg;
-      els.toast.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
-      els.toast.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
-        els.toast.classList.remove('opacity-100', 'translate-y-0');
-        els.toast.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
-      }, 3000);
-    }
-
-    function handleExport() {
-      const dataStr = JSON.stringify(state.tripData, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const safeTitle = (state.tripData.title || 'trip').replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/gi, '_');
-      a.href = url;
-      a.download = `${safeTitle}_backup.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('已匯出行程 JSON 檔！');
-    }
-
-    function handleImportFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result);
-          if (importedData && typeof importedData === 'object' && importedData.title) {
-            state.tripData = { ...state.tripData, ...importedData };
-            if (state.tripData.itinerary) {
-              Object.keys(state.tripData.itinerary).forEach(day => {
-                state.tripData.itinerary[day].forEach(item => {
-                  if (item.time && !item.timeStart) item.timeStart = item.time;
-                  if (item.type === 'location' && !item.locMode) item.locMode = 'spot';
-                });
-              });
-            }
-            saveData();
-            state.activeTab = 'itinerary';
-            renderApp();
-            showToast('成功匯入行程！');
-          } else {
-            throw new Error("Invalid format");
-          }
-        } catch (err) {
-          alert('檔案格式錯誤，請確認這是由本系統匯出的 JSON 行程檔。');
-        }
-        els.inputImportFile.value = ''; 
-      };
-      reader.readAsText(file);
-    }
-
-    function loadData() {
-      try {
-        let finalDataStr = null;
-        let stableDataStr = localStorage.getItem(STABLE_STORAGE_KEY);
-        
-        if (stableDataStr) {
-          let parsed = JSON.parse(stableDataStr);
-          if (parsed && parsed.title) finalDataStr = stableDataStr;
-        }
-
-        if (!finalDataStr) {
-          for (let key of LEGACY_STORAGE_KEYS) {
-            let oldDataStr = localStorage.getItem(key);
-            if (oldDataStr) {
-              let oldParsed = JSON.parse(oldDataStr);
-              if (oldParsed && oldParsed.title) {
-                finalDataStr = oldDataStr;
-                localStorage.setItem(STABLE_STORAGE_KEY, finalDataStr);
-                break;
-              }
-            }
-          }
-        }
-
-        if (finalDataStr) {
-          const parsed = JSON.parse(finalDataStr);
-          state.tripData = { ...state.tripData, ...parsed };
-          
-          if (state.tripData.itinerary) {
-            Object.keys(state.tripData.itinerary).forEach(day => {
-              state.tripData.itinerary[day].forEach(item => {
-                if (item.time && !item.timeStart) item.timeStart = item.time;
-                if (item.type === 'location' && !item.locMode) item.locMode = 'spot';
-              });
-            });
-          }
-          if (state.tripData.title) state.activeTab = 'itinerary';
-        }
-      } catch (e) {}
-    }
-
-    function saveData() {
-      try { localStorage.setItem(STABLE_STORAGE_KEY, JSON.stringify(state.tripData)); } catch (e) {}
-    }
-
-    function renderApp() {
-      if (state.activeTab === 'setup') {
-        els.viewSetup.classList.remove('hidden'); els.viewItinerary.classList.add('hidden');
-        els.headerTitle.innerText = '行程設定'; els.headerSubtitle.innerText = state.tripData.title || 'My Trip';
-        els.btnSettings.classList.add('hidden');
-        
-        els.setupTitle.value = state.tripData.title || ''; els.setupStartDate.value = state.tripData.startDate || '';
-        els.setupDays.value = state.tripData.days || 3; els.setupAcc.value = state.tripData.accommodation || '';
-        els.setupAirportDept.value = state.tripData.airportDept || ''; els.setupAirportArr.value = state.tripData.airportArr || '';
-        els.setupFlightOut.value = state.tripData.flightOut || ''; els.setupFlightRet.value = state.tripData.flightRet || '';
+    // --- Firebase Auth & Firestore Sync ---
+    onAuthStateChanged(auth, (user) => {
+      state.user = user;
+      if (user) {
+        els.viewLogin.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => els.viewLogin.classList.add('hidden'), 300);
+        switchView('plans'); listenToPlans();
       } else {
-        els.viewSetup.classList.add('hidden'); els.viewItinerary.classList.remove('hidden');
-        els.headerTitle.innerText = '行程表'; els.headerSubtitle.innerText = state.tripData.title;
-        els.btnSettings.classList.remove('hidden');
-        renderDaysTabs(); renderTimeline();
+        closeAllModals();
+        els.viewLogin.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        switchView('login');
       }
+    });
+
+    function listenToPlans() {
+      if (!state.user) return;
+      const q = collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans');
+      onSnapshot(q, (snapshot) => {
+        state.plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderPlansList();
+        if (state.currentPlanId) {
+          const activePlan = state.plans.find(p => p.id === state.currentPlanId);
+          if (activePlan) {
+            state.tripData = activePlan; // Sync current active plan data
+            renderItinerary();
+          } else {
+            // Plan was deleted
+            switchView('plans');
+          }
+        }
+      });
+    }
+
+    function switchView(viewName) {
+      ['login', 'plans', 'setup', 'itinerary'].forEach(v => {
+        document.getElementById(`view-${v}`)?.classList.add('hidden');
+      });
+      document.getElementById(`view-${viewName}`)?.classList.remove('hidden');
+    }
+
+    // --- Plans List View ---
+    function renderPlansList() {
+      const container = document.getElementById('plans-list');
+      if (state.plans.length === 0) { 
+        container.innerHTML = `<div class="py-24 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-map-location-dot text-6xl mb-6"></i><p class="font-bold">尚無任何行程，點擊右上角新增</p></div>`; 
+        return; 
+      }
+      container.innerHTML = state.plans.sort((a, b) => b.createdAt - a.createdAt).map(plan => `
+        <div onclick="openPlan('${plan.id}')" class="bg-brand-card rounded-[24px] p-6 border border-brand-light shadow-sm flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer mb-4">
+          <div>
+            <h3 class="font-bold text-brand-textMain text-lg truncate mb-1">${plan.title}</h3>
+            <p class="text-xs text-brand-textSub font-bold">${plan.startDate} · ${plan.days} 天</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-primary">
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.openPlan = (id) => { 
+      state.currentPlanId = id; 
+      state.activeDay = 1; 
+      state.tripData = state.plans.find(p => p.id === id) || state.tripData;
+      renderItinerary(); 
+      switchView('itinerary'); 
+    };
+
+    window.openSetup = (id = null) => {
+      state.currentPlanId = id;
+      if (id) {
+        const plan = state.plans.find(p => p.id === id);
+        state.tripData = { ...plan };
+        document.getElementById('setup-header-sub').innerText = "Edit Plan";
+        document.getElementById('setup-header-title').innerText = "行程設定";
+        els.setupDeleteSec.classList.remove('hidden');
+      } else {
+        state.tripData = { title: '', startDate: '', days: 3, accommodation: '', airportDept: '', airportArr: '', flightOut: '', flightRet: '', itinerary: {} };
+        document.getElementById('setup-header-sub').innerText = "New Plan";
+        document.getElementById('setup-header-title').innerText = "建立新行程";
+        els.setupDeleteSec.classList.add('hidden');
+      }
+      
+      els.setupTitle.value = state.tripData.title || ''; els.setupStartDate.value = state.tripData.startDate || '';
+      els.setupDays.value = state.tripData.days || 3; els.setupAcc.value = state.tripData.accommodation || '';
+      els.setupAirportDept.value = state.tripData.airportDept || ''; els.setupAirportArr.value = state.tripData.airportArr || '';
+      els.setupFlightOut.value = state.tripData.flightOut || ''; els.setupFlightRet.value = state.tripData.flightRet || '';
+      
+      switchView('setup');
+    };
+
+    window.deletePlan = async () => {
+      if(confirm("確定要刪除整個行程嗎？雲端資料將無法復原。")) {
+        await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId));
+        state.currentPlanId = null;
+        switchView('plans');
+      }
+    };
+
+    // --- Itinerary View ---
+    function renderItinerary() {
+      document.getElementById('itinerary-header-title').innerText = state.tripData.title;
+      renderDaysTabs();
+      renderTimeline();
     }
 
     function getDayDateString(dayIndex) {
@@ -541,14 +582,9 @@
 
     function renderTimeDisplay(start, end, showStart = true, showEnd = true) {
       let html = `<div class="flex flex-col items-end gap-1 mt-[2px]">`;
-      if (start) {
-         html += `<span class="text-[15px] font-bold font-mono text-brand-dark tracking-tight leading-none ${showStart ? '' : 'opacity-0'}">${start}</span>`;
-      }
-      if (end) {
-         html += `<span class="text-[15px] font-bold font-mono text-brand-dark tracking-tight leading-none ${showEnd ? '' : 'opacity-0'}">${end}</span>`;
-      }
-      html += `</div>`;
-      return html;
+      if (start) html += `<span class="text-[15px] font-bold font-mono text-brand-dark tracking-tight leading-none ${showStart ? '' : 'opacity-0'}">${start}</span>`;
+      if (end) html += `<span class="text-[15px] font-bold font-mono text-brand-dark tracking-tight leading-none ${showEnd ? '' : 'opacity-0'}">${end}</span>`;
+      html += `</div>`; return html;
     }
 
     function renderCost(cost, curr) {
@@ -562,26 +598,20 @@
       els.timelineContainer.innerHTML = '';
 
       if (items.length === 0) {
-        els.timelineContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-48 mt-12 text-brand-textSub"><div class="w-16 h-16 bg-brand-bg border border-brand-light rounded-full flex items-center justify-center mb-4 shadow-sm"><i class="fa-solid fa-calendar-day text-2xl text-brand-primary"></i></div><p class="font-medium">這一天尚未安排行程</p></div>`;
+        els.timelineContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-48 mt-12 text-brand-textSub"><div class="w-16 h-16 bg-brand-bg border border-brand-light rounded-full flex items-center justify-center mb-4 shadow-sm"><i class="fa-solid fa-calendar-day text-2xl text-brand-primary"></i></div><p class="font-bold">這一天尚未安排行程</p></div>`;
         return;
       }
 
       let html = '<div class="relative pl-1 pr-1 pt-4 pb-12">';
-      items.forEach((item, index) => {
-        const isLast = index === items.length - 1;
-        const isFirst = index === 0;
-        const isOnly = items.length === 1;
+      items.sort((a, b) => a.timeStart.localeCompare(b.timeStart)).forEach((item, index) => {
+        const isLast = index === items.length - 1; const isFirst = index === 0; const isOnly = items.length === 1;
         const costHtml = renderCost(item.cost, item.currency);
 
         let lineHtml = '';
         if (!isOnly) {
-            if (isFirst) {
-                lineHtml = `<div class="absolute top-[26px] bottom-0 timeline-line bg-brand-primary z-0"></div>`;
-            } else if (isLast) {
-                lineHtml = `<div class="absolute top-0 h-[26px] timeline-line bg-brand-primary z-0"></div>`;
-            } else {
-                lineHtml = `<div class="absolute top-0 bottom-0 timeline-line bg-brand-primary z-0"></div>`;
-            }
+            if (isFirst) lineHtml = `<div class="absolute top-[26px] bottom-0 timeline-line bg-brand-primary z-0"></div>`;
+            else if (isLast) lineHtml = `<div class="absolute top-0 h-[26px] timeline-line bg-brand-primary z-0"></div>`;
+            else lineHtml = `<div class="absolute top-0 bottom-0 timeline-line bg-brand-primary z-0"></div>`;
         }
 
         if (item.type === 'location') {
@@ -589,7 +619,6 @@
           const subHtml = item.subtitle ? item.subtitle.replace(/\n/g, '<br>') : '';
           const timeHtml = renderTimeDisplay(item.timeStart, item.timeEnd, true, true);
           const locObj = LOCATION_MODES.find(m => m.id === item.locMode) || LOCATION_MODES[0];
-          
           const nodeDot = item.isThrough
             ? `<div class="w-4 h-4 rounded-full bg-brand-bg border-2 border-brand-primary z-10 mt-[20px] shadow-sm flex items-center justify-center"><i class="fa-solid fa-angles-down text-[8px] text-brand-primary"></i></div>`
             : `<div class="w-3.5 h-3.5 rounded-full border-[3px] border-brand-primary bg-brand-card z-10 mt-[20px] shadow-sm"></div>`;
@@ -597,10 +626,7 @@
           html += `
             <div class="relative flex group cursor-pointer" onclick="openOptions('${item.id}')">
               <div class="w-[68px] shrink-0 text-right pr-3 pt-[20px]">${timeHtml}</div>
-              <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">
-                ${lineHtml}
-                ${nodeDot}
-              </div>
+              <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}${nodeDot}</div>
               <div class="flex-1 pt-[16px] pb-6 pl-2 relative pr-8">
                 <div class="flex items-start gap-2">
                    <div class="text-[17px] font-extrabold text-brand-textMain leading-snug break-words">
@@ -614,11 +640,8 @@
               </div>
             </div>`;
         } else {
-          let showStart = true;
-          let showEnd = true;
-          const prevItem = items[index - 1];
-          const nextItem = items[index + 1];
-
+          let showStart = true; let showEnd = true;
+          const prevItem = items[index - 1]; const nextItem = items[index + 1];
           if (prevItem && item.timeStart === (prevItem.timeEnd || prevItem.timeStart)) showStart = false;
           if (nextItem && item.timeEnd && item.timeEnd === nextItem.timeStart) showEnd = false;
 
@@ -633,18 +656,14 @@
              </div>`;
 
           const modeObj = TRANSPORT_MODES.find(m => m.id === item.mode) || TRANSPORT_MODES[1];
-          const opStr = item.operator || '';
-          const vehStr = item.vehicleNo || '';
+          const titleLine = `${item.operator || ''} ${item.vehicleNo || ''}`.trim();
           const routeStr = item.name ? item.name.replace(/\n/g, '<br>') : '';
           const dirStr = item.direction ? `（${item.direction}）` : '';
-          const titleLine = `${opStr} ${vehStr}`.trim();
 
           html += `
             <div class="relative flex items-stretch group cursor-pointer" onclick="openOptions('${item.id}')">
               ${timeColHtml}
-              <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">
-                ${lineHtml}
-              </div>
+              <div class="w-6 shrink-0 flex flex-col items-center relative self-stretch">${lineHtml}</div>
               <div class="flex-1 pl-2 pr-0 py-[20px] relative">
                  <div class="pl-1 relative pb-2">
                    <div class="flex items-center gap-2 mb-1 pr-6">
@@ -654,17 +673,68 @@
                      ${titleLine ? `<span class="text-[15px] font-bold text-brand-accent leading-tight">${titleLine}</span>` : ''}
                    </div>
                    ${routeStr ? `<div class="text-[15px] font-extrabold text-brand-textMain leading-snug pr-6 ml-[32px]">${routeStr}${dirStr}</div>` : ''}
-                   <div class="ml-[32px]">
-                     ${costHtml}
-                   </div>
+                   <div class="ml-[32px]">${costHtml}</div>
                  </div>
                  <button class="absolute right-1 top-4 w-8 h-8 flex items-center justify-center text-brand-textSub hover:text-brand-dark rounded-full"><i class="fa-solid fa-ellipsis-vertical"></i></button>
               </div>
             </div>`;
         }
       });
-      html += '</div>';
-      els.timelineContainer.innerHTML = html;
+      html += '</div>'; els.timelineContainer.innerHTML = html;
+    }
+
+    // --- Form & Modals ---
+    window.openFormModal = function(type, itemId = null) {
+      state.itemType = type; state.editingId = itemId;
+      
+      if (itemId) {
+        const item = state.tripData.itinerary[state.activeDay].find(i => i.id === itemId);
+        state.formData = { ...item };
+        if(!state.formData.timeStart) state.formData.timeStart = state.formData.time || '';
+        if(type === 'location' && !state.formData.locMode) state.formData.locMode = 'spot';
+        els.formTitle.innerText = '編輯項目';
+      } else {
+        const timeString = new Date().toTimeString().slice(0, 5);
+        state.formData = { timeStart: timeString, timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: state.formData.currency || 'JPY', isThrough: false };
+        els.formTitle.innerText = type === 'location' ? '新增地點' : '新增交通';
+      }
+
+      if (type === 'location') {
+        els.groupLocMode.classList.remove('hidden'); els.groupLocFields.classList.remove('hidden'); 
+        els.groupTransMode.classList.add('hidden'); els.groupTransFields.classList.add('hidden');
+        els.inputLocName.value = state.formData.name || '';
+        els.inputLocSub.value = state.formData.subtitle || '';
+        els.inputLocThrough.checked = !!state.formData.isThrough;
+        els.labelTime.innerHTML = '抵達與離開時間 <span class="text-brand-primary">*</span>';
+        els.hintTime.innerText = '可填寫抵達與離開時間。如果只是單一時間點，只需填寫左側即可。';
+        els.btnSaveItem.className = "w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-primary/20 mt-6 active:scale-95 transition-all disabled:opacity-50";
+        renderLocationModes();
+      } else {
+        els.groupLocMode.classList.add('hidden'); els.groupLocFields.classList.add('hidden'); 
+        els.groupTransMode.classList.remove('hidden'); els.groupTransFields.classList.remove('hidden');
+        els.inputOperator.value = state.formData.operator || '';
+        els.inputVehicleNo.value = state.formData.vehicleNo || '';
+        els.inputRouteName.value = state.formData.name || '';
+        els.inputDirection.value = state.formData.direction || '';
+        els.inputDuration.value = state.formData.duration || '';
+        els.inputExtra.value = state.formData.extraInfo || '';
+        els.labelTime.innerHTML = '出發與抵達時間 <span class="text-brand-accent">*</span>';
+        els.hintTime.innerText = '請填寫交通的起訖時間。若與前後行程時間連貫，時間軸上會自動隱藏重複顯示的時間。';
+        els.btnSaveItem.className = "w-full bg-brand-accent text-brand-card font-bold text-lg py-4 rounded-[20px] shadow-lg shadow-brand-accent/20 mt-6 active:scale-95 transition-all disabled:opacity-50";
+        renderTransportModes();
+      }
+
+      els.inputTimeStart.value = state.formData.timeStart;
+      els.inputTimeEnd.value = state.formData.timeEnd || '';
+      els.inputCost.value = state.formData.cost || '';
+      selectCurrency(state.formData.currency || 'JPY');
+
+      renderQuickFills(type);
+      setTimeout(() => {
+        els.inputLocName.style.height = ''; els.inputLocName.style.height = els.inputLocName.scrollHeight + 'px';
+        els.inputLocSub.style.height = ''; els.inputLocSub.style.height = els.inputLocSub.scrollHeight + 'px';
+      }, 10);
+      validateForm(); showModal('form');
     }
 
     function renderTransportModes() {
@@ -702,10 +772,8 @@
       if (chips.length > 0) {
         els.quickFillContainer.classList.remove('hidden');
         chips.forEach(chip => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
+          const btn = document.createElement('button'); btn.type = 'button';
           const btnColorClass = type === 'transport' ? 'border-brand-accent/30 text-brand-accent hover:bg-brand-accent' : 'border-brand-primary/30 text-brand-primary hover:bg-brand-primary';
-          
           btn.className = `shrink-0 bg-brand-bg border px-3.5 py-1.5 rounded-full text-xs font-bold hover:text-brand-card transition-colors flex items-center gap-1.5 shadow-sm active:scale-95 ${btnColorClass}`;
           btn.innerHTML = `<i class="fa-solid ${chip.icon}"></i> 帶入${chip.label}`;
           btn.onclick = () => {
@@ -730,67 +798,12 @@
       els.displayCurrSym.innerText = val === 'TWD' ? '$' : '¥';
       document.querySelectorAll('.curr-btn').forEach(btn => {
         if (btn.dataset.val === val) {
-          btn.classList.add('bg-white', 'shadow-sm', 'text-brand-dark');
-          btn.classList.remove('text-brand-textSub', 'bg-transparent');
+          btn.classList.add('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.remove('text-brand-textSub', 'bg-transparent');
         } else {
-          btn.classList.remove('bg-white', 'shadow-sm', 'text-brand-dark');
-          btn.classList.add('text-brand-textSub', 'bg-transparent');
+          btn.classList.remove('bg-white', 'shadow-sm', 'text-brand-dark'); btn.classList.add('text-brand-textSub', 'bg-transparent');
         }
       });
     };
-
-    function openFormModal(type, editingId = null) {
-      state.itemType = type; state.editingId = editingId;
-      
-      if (editingId) {
-        const item = state.tripData.itinerary[state.activeDay].find(i => i.id === editingId);
-        state.formData = { ...item };
-        if(!state.formData.timeStart) state.formData.timeStart = state.formData.time || '';
-        if(type === 'location' && !state.formData.locMode) state.formData.locMode = 'spot';
-        els.formTitle.innerText = '編輯項目';
-      } else {
-        const timeString = new Date().toTimeString().slice(0, 5);
-        state.formData = { timeStart: timeString, timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: state.formData.currency || 'JPY', isThrough: false };
-        els.formTitle.innerText = type === 'location' ? '新增地點' : '新增交通';
-      }
-
-      if (type === 'location') {
-        els.groupLocMode.classList.remove('hidden'); els.groupLocFields.classList.remove('hidden'); 
-        els.groupTransMode.classList.add('hidden'); els.groupTransFields.classList.add('hidden');
-        els.inputLocName.value = state.formData.name || '';
-        els.inputLocSub.value = state.formData.subtitle || '';
-        els.inputLocThrough.checked = !!state.formData.isThrough;
-        els.labelTime.innerHTML = '抵達與離開時間 <span class="text-brand-primary">*</span>';
-        els.hintTime.innerText = '可填寫抵達與離開時間。如果只是單一時間點，只需填寫左側即可。';
-        els.btnSaveItem.className = "w-full bg-brand-primary text-brand-card font-bold text-lg py-4 rounded-[16px] shadow-lg shadow-brand-primary/20 mt-6 active:scale-95 transition-all disabled:opacity-50";
-        renderLocationModes();
-      } else {
-        els.groupLocMode.classList.add('hidden'); els.groupLocFields.classList.add('hidden'); 
-        els.groupTransMode.classList.remove('hidden'); els.groupTransFields.classList.remove('hidden');
-        els.inputOperator.value = state.formData.operator || '';
-        els.inputVehicleNo.value = state.formData.vehicleNo || '';
-        els.inputRouteName.value = state.formData.name || '';
-        els.inputDirection.value = state.formData.direction || '';
-        els.inputDuration.value = state.formData.duration || '';
-        els.inputExtra.value = state.formData.extraInfo || '';
-        els.labelTime.innerHTML = '出發與抵達時間 <span class="text-brand-accent">*</span>';
-        els.hintTime.innerText = '請填寫交通的起訖時間。若與前後行程時間連貫，時間軸上會自動隱藏重複顯示的時間。';
-        els.btnSaveItem.className = "w-full bg-brand-accent text-brand-card font-bold text-lg py-4 rounded-[16px] shadow-lg shadow-brand-accent/20 mt-6 active:scale-95 transition-all disabled:opacity-50";
-        renderTransportModes();
-      }
-
-      els.inputTimeStart.value = state.formData.timeStart;
-      els.inputTimeEnd.value = state.formData.timeEnd || '';
-      els.inputCost.value = state.formData.cost || '';
-      selectCurrency(state.formData.currency || 'JPY');
-
-      renderQuickFills(type);
-      setTimeout(() => {
-        els.inputLocName.style.height = ''; els.inputLocName.style.height = els.inputLocName.scrollHeight + 'px';
-        els.inputLocSub.style.height = ''; els.inputLocSub.style.height = els.inputLocSub.scrollHeight + 'px';
-      }, 10);
-      validateForm(); showModal('form');
-    }
 
     window.openOptions = function(id) { state.editingId = id; showModal('options'); };
     window.selectTransportMode = function(id) { state.formData.mode = id; renderTransportModes(); };
@@ -807,7 +820,7 @@
       state.modalMode = modalName;
     }
 
-    function closeAllModals() {
+    window.closeAllModals = function() {
       els.overlay.classList.remove('open'); els.overlay.classList.add('closed');
       els.sheetForm.classList.remove('open'); els.sheetForm.classList.add('closed');
       els.sheetOptions.classList.remove('open'); els.sheetOptions.classList.add('closed');
@@ -823,104 +836,109 @@
     }
 
     function handleFormInputs() {
-      state.formData.timeStart = els.inputTimeStart.value;
-      state.formData.timeEnd = els.inputTimeEnd.value;
-      state.formData.cost = els.inputCost.value;
-      
+      state.formData.timeStart = els.inputTimeStart.value; state.formData.timeEnd = els.inputTimeEnd.value; state.formData.cost = els.inputCost.value;
       if(state.itemType === 'location'){
-        state.formData.name = els.inputLocName.value;
-        state.formData.subtitle = els.inputLocSub.value;
-        state.formData.isThrough = els.inputLocThrough.checked;
+        state.formData.name = els.inputLocName.value; state.formData.subtitle = els.inputLocSub.value; state.formData.isThrough = els.inputLocThrough.checked;
       } else {
-        state.formData.operator = els.inputOperator.value;
-        state.formData.vehicleNo = els.inputVehicleNo.value;
-        state.formData.name = els.inputRouteName.value;
-        state.formData.direction = els.inputDirection.value;
-        state.formData.duration = els.inputDuration.value;
-        state.formData.extraInfo = els.inputExtra.value;
+        state.formData.operator = els.inputOperator.value; state.formData.vehicleNo = els.inputVehicleNo.value; state.formData.name = els.inputRouteName.value;
+        state.formData.direction = els.inputDirection.value; state.formData.duration = els.inputDuration.value; state.formData.extraInfo = els.inputExtra.value;
       }
       validateForm();
     }
 
-    function saveItem() {
+    async function saveItem() {
       handleFormInputs();
       if (!state.tripData.itinerary[state.activeDay]) state.tripData.itinerary[state.activeDay] = [];
       const currentItems = state.tripData.itinerary[state.activeDay];
       
-      const newItem = { 
-        ...state.formData, 
-        time: state.formData.timeStart, 
-        type: state.itemType, 
-        id: state.editingId || Date.now().toString() 
-      };
+      const newItem = { ...state.formData, time: state.formData.timeStart, type: state.itemType, id: state.editingId || Date.now().toString() };
       
       if (state.editingId) {
         const index = currentItems.findIndex(i => i.id === state.editingId);
         if (index > -1) currentItems[index] = newItem;
-      } else {
-        currentItems.push(newItem);
-      }
+      } else { currentItems.push(newItem); }
 
       currentItems.sort((a, b) => a.timeStart.localeCompare(b.timeStart));
-      saveData(); closeAllModals(); renderTimeline();
+      await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: state.tripData.itinerary });
+      closeAllModals(); showToast("已同步至雲端！");
     }
 
-    function deleteItem() {
+    async function deleteItem() {
       if (!state.editingId) return;
       state.tripData.itinerary[state.activeDay] = state.tripData.itinerary[state.activeDay].filter(i => i.id !== state.editingId);
-      saveData(); closeAllModals(); renderTimeline();
+      await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), { itinerary: state.tripData.itinerary });
+      closeAllModals(); showToast("已刪除項目");
     }
 
+    // --- Import / Export ---
+    window.handleExport = () => {
+      const dataStr = JSON.stringify(state.plans, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `趣旅行_備份.json`; a.click();
+      URL.revokeObjectURL(url); showToast('已匯出行程 JSON 檔！');
+    };
+
+    window.handleImport = (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          // 支援匯入舊版單一行程 或 新版陣列行程
+          const plansToImport = (imported && imported.title && !Array.isArray(imported)) ? [imported] : imported;
+          if (!Array.isArray(plansToImport)) throw new Error("Invalid format");
+          
+          for (let p of plansToImport) {
+            const cleanPlan = { 
+              title: p.title || "未命名行程", startDate: p.startDate || new Date().toISOString().split('T')[0], days: p.days || 1, 
+              accommodation: p.accommodation || "", airportDept: p.airportDept || "", airportArr: p.airportArr || "", flightOut: p.flightOut || "", flightRet: p.flightRet || "",
+              itinerary: p.itinerary || {}, createdAt: serverTimestamp() 
+            };
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
+          }
+          showToast('成功匯入行程！'); switchView('plans');
+        } catch (err) { alert('檔案格式錯誤，請確認這是由本系統匯出的 JSON 行程檔。'); }
+        document.getElementById('input-import-file').value = '';
+      };
+      reader.readAsText(file);
+    };
+
     function setupEventListeners() {
-      els.btnSettings.addEventListener('click', () => { state.activeTab = 'setup'; renderApp(); });
-      
-      els.formSetup.addEventListener('submit', (e) => {
+      els.formSetup.addEventListener('submit', async (e) => {
         e.preventDefault();
-        state.tripData.title = els.setupTitle.value; state.tripData.startDate = els.setupStartDate.value;
-        state.tripData.days = parseInt(els.setupDays.value) || 1; state.tripData.accommodation = els.setupAcc.value;
-        state.tripData.airportDept = els.setupAirportDept.value; state.tripData.airportArr = els.setupAirportArr.value;
-        state.tripData.flightOut = els.setupFlightOut.value; state.tripData.flightRet = els.setupFlightRet.value;
-        state.activeTab = 'itinerary'; saveData(); renderApp();
-      });
-
-      els.btnExport.addEventListener('click', handleExport);
-      els.btnImport.addEventListener('click', () => els.inputImportFile.click());
-      els.inputImportFile.addEventListener('change', handleImportFile);
-
-      document.getElementById('btn-add-location').addEventListener('click', () => openFormModal('location'));
-      document.getElementById('btn-add-transport').addEventListener('click', () => openFormModal('transport'));
-
-      document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeAllModals));
-
-      document.querySelectorAll('.curr-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => selectCurrency(e.target.dataset.val));
-      });
-
-      [
-        els.inputTimeStart, els.inputTimeEnd, els.inputLocName, els.inputLocSub, 
-        els.inputLocThrough, els.inputOperator, els.inputVehicleNo, els.inputRouteName, 
-        els.inputDirection, els.inputDuration, els.inputExtra, els.inputCost
-      ].forEach(input => {
-        if (input) {
-          input.addEventListener('input', handleFormInputs);
-          input.addEventListener('change', handleFormInputs); 
+        const planData = {
+          title: els.setupTitle.value, startDate: els.setupStartDate.value, days: parseInt(els.setupDays.value) || 1,
+          accommodation: els.setupAcc.value, airportDept: els.setupAirportDept.value, airportArr: els.setupAirportArr.value,
+          flightOut: els.setupFlightOut.value, flightRet: els.setupFlightRet.value
+        };
+        
+        if (state.currentPlanId) {
+          await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'plans', state.currentPlanId), planData);
+          showToast("已儲存設定"); switchView('itinerary');
+        } else {
+          planData.itinerary = {}; planData.createdAt = serverTimestamp();
+          const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), planData);
+          openPlan(docRef.id); showToast("已建立新行程");
         }
       });
+
+      document.getElementById('btn-login-google').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+      document.getElementById('btn-logout').onclick = () => signOut(auth);
+      
+      document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', closeAllModals));
+      document.getElementById('modal-overlay').addEventListener('click', closeAllModals);
+
+      [els.inputTimeStart, els.inputTimeEnd, els.inputLocName, els.inputLocSub, els.inputLocThrough, els.inputOperator, els.inputVehicleNo, els.inputRouteName, els.inputDirection, els.inputDuration, els.inputExtra, els.inputCost]
+        .forEach(input => { if (input) { input.addEventListener('input', handleFormInputs); input.addEventListener('change', handleFormInputs); } });
 
       els.btnSaveItem.addEventListener('click', saveItem);
 
       document.getElementById('btn-option-edit').addEventListener('click', () => {
-        closeAllModals();
-        setTimeout(() => {
-          const item = state.tripData.itinerary[state.activeDay].find(i => i.id === state.editingId);
-          if (item) openFormModal(item.type, item.id);
-        }, 300);
+        closeAllModals(); setTimeout(() => { const item = state.tripData.itinerary[state.activeDay].find(i => i.id === state.editingId); if (item) openFormModal(item.type, item.id); }, 300);
       });
 
-      document.getElementById('btn-option-delete').addEventListener('click', () => {
-        closeAllModals(); setTimeout(() => showModal('delete'), 300);
-      });
-
+      document.getElementById('btn-option-delete').addEventListener('click', () => { closeAllModals(); setTimeout(() => showModal('delete'), 300); });
       document.getElementById('btn-confirm-delete').addEventListener('click', deleteItem);
     }
 
