@@ -135,7 +135,7 @@
       </div>
     </div>
 
-    <!-- VIEW: SETUP (升級UI) -->
+    <!-- VIEW: SETUP (升級UI與分開航班填寫) -->
     <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar">
       <form id="form-setup" class="space-y-6 mt-4">
         
@@ -144,48 +144,104 @@
           <div>
             <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">行程名稱 <span class="text-brand-primary">*</span></label>
             <input type="text" id="setup-title" placeholder="例：東京五日遊" required
-              class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 placeholder-brand-textSub/50 focus:ring-2 focus:ring-brand-primary/30 transition-all">
+              class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
           </div>
           <div class="flex gap-3">
             <div class="flex-1">
               <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">出發日期</label>
-              <input type="date" id="setup-start-date" class="w-full text-[15px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-primary/30 transition-all">
+              <input type="date" id="setup-start-date" class="w-full text-[15px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl px-4 py-3 border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
             </div>
             <div class="w-24 shrink-0 relative">
               <label class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">天數</label>
               <input type="number" id="setup-days" min="1" max="30" value="3" required
-                class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl pl-4 pr-8 py-3 text-center focus:ring-2 focus:ring-brand-primary/30 transition-all">
+                class="w-full text-[16px] font-bold text-brand-dark outline-none bg-brand-bg rounded-xl pl-4 pr-8 py-3 text-center border border-transparent focus:border-brand-primary/50 focus:bg-white transition-all">
               <span class="absolute right-3 top-[34px] text-[12px] font-bold text-brand-textSub pointer-events-none">天</span>
             </div>
           </div>
         </div>
 
-        <!-- 航班資訊 -->
+        <!-- 航班資訊 (細化為 6 欄位/單趟) -->
         <div class="bg-white p-5 rounded-[24px] border border-brand-light shadow-sm">
           <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[12px]"></i></div> 航班資訊
           </h3>
-          <div class="space-y-4">
+          <div class="space-y-5">
             <!-- 去程 -->
-            <div class="p-3 bg-brand-bg rounded-[16px] border border-brand-light/50">
-              <label class="block text-[11px] font-bold text-brand-textSub mb-2 pl-1">去程航班</label>
-              <div class="flex gap-2">
-                <input type="text" id="setup-flight-out-airline" placeholder="航空公司" class="w-1/3 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm">
-                <input type="text" id="setup-flight-out-time" placeholder="航班與時間 (例: BR192 07:30)" class="w-2/3 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm">
+            <div class="p-4 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
+              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/50 pb-1 mb-2"><i class="fa-solid fa-plane-departure mr-1"></i>去程航班</label>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-out-airline" placeholder="例: 長榮航空" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-out-no" placeholder="例: BR192" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-out-dept-loc" placeholder="例: 桃園(TPE)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-out-arr-loc" placeholder="例: 關西(KIX)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛時間</label>
+                  <input type="time" id="setup-flight-out-dept-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落時間</label>
+                  <input type="time" id="setup-flight-out-arr-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
             </div>
+
             <!-- 回程 -->
-            <div class="p-3 bg-brand-bg rounded-[16px] border border-brand-light/50">
-              <label class="block text-[11px] font-bold text-brand-textSub mb-2 pl-1">回程航班</label>
-              <div class="flex gap-2">
-                <input type="text" id="setup-flight-ret-airline" placeholder="航空公司" class="w-1/3 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm">
-                <input type="text" id="setup-flight-ret-time" placeholder="航班與時間 (例: JX803 14:00)" class="w-2/3 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm">
+            <div class="p-4 bg-brand-bg rounded-[20px] border border-brand-light/80 space-y-3 shadow-sm">
+              <label class="block text-[13px] font-extrabold text-brand-primary border-b border-brand-light/50 pb-1 mb-2"><i class="fa-solid fa-plane-arrival mr-1"></i>回程航班</label>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
+                  <input type="text" id="setup-flight-ret-airline" placeholder="例: 星宇航空" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">航班編號</label>
+                  <input type="text" id="setup-flight-ret-no" placeholder="例: JX803" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛地</label>
+                  <input type="text" id="setup-flight-ret-dept-loc" placeholder="例: 關西(KIX)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落地</label>
+                  <input type="text" id="setup-flight-ret-arr-loc" placeholder="例: 桃園(TPE)" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">起飛時間</label>
+                  <input type="time" id="setup-flight-ret-dept-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
+                <div>
+                  <label class="text-[10px] text-brand-textSub font-bold px-1 block mb-1">降落時間</label>
+                  <input type="time" id="setup-flight-ret-arr-time" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-lg px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all">
+                </div>
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- 住宿資訊 (支援多筆動態載入) -->
+        <!-- 住宿資訊 (修復破圖與優化排列) -->
         <div class="bg-white p-5 rounded-[24px] border border-brand-light shadow-sm relative">
           <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center"><i class="fa-solid fa-hotel text-[12px]"></i></div> 住宿安排
@@ -267,14 +323,12 @@
         </button>
       </div>
       <div class="px-6 py-6 flex gap-4">
-        <!-- 選擇地點 -->
         <button id="btn-choose-location" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
           <div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl">
             <i class="fa-solid fa-location-dot"></i>
           </div>
           新增地點
         </button>
-        <!-- 選擇交通 -->
         <button id="btn-choose-transport" class="flex-1 bg-brand-bg text-brand-dark font-bold text-lg py-8 rounded-[24px] flex flex-col justify-center items-center gap-3 hover:bg-brand-light transition-colors border border-brand-light shadow-sm active:scale-95">
           <div class="w-14 h-14 rounded-full bg-brand-accent/10 text-brand-accent flex items-center justify-center text-2xl">
             <i class="fa-solid fa-train-tram"></i>
@@ -470,7 +524,8 @@
     let state = {
       user: null, plans: [], currentPlanId: null, activeDay: 0, modalMode: null, itemType: 'location', editingId: null,
       formData: { timeStart: '', timeEnd: '', name: '', subtitle: '', mode: 'train', locMode: 'spot', operator: '', vehicleNo: '', direction: '', duration: '', extraInfo: '', cost: '', currency: 'JPY', isThrough: false },
-      tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutTime: '', flightRetAirline: '', flightRetTime: '', accommodations: [], itinerary: {} }
+      // 新版 12 個航班欄位結構
+      tripData: { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} }
     };
 
     function init() {
@@ -493,32 +548,33 @@
       signOut(auth).then(() => { showToast("已登出帳號"); });
     };
 
-    // 全域綁定行程設定的按鈕，避免 module 作用域問題
     window.handleSetupClick = () => { window.openSetup(state.currentPlanId); };
 
-    // --- 動態新增飯店 DOM (優化版卡片排版) ---
+    // --- 動態新增飯店 DOM (修復破圖、拆分成上下排版) ---
     window.addSetupHotel = () => {
       const container = document.getElementById('hotel-list-container');
       const index = container.children.length;
       const html = `
-        <div class="hotel-item bg-brand-bg/50 p-4 rounded-[20px] border border-brand-light/80 relative mb-3">
+        <div class="hotel-item bg-brand-bg/60 p-4 rounded-[20px] border border-brand-light/80 relative mb-3 shadow-sm">
           <div class="flex justify-between items-center mb-3">
             <h4 class="text-[14px] font-extrabold text-brand-dark flex items-center gap-1.5 pl-1"><i class="fa-solid fa-bed text-brand-accent text-[12px]"></i> 住宿 ${index + 1}</h4>
             <button type="button" onclick="this.closest('.hotel-item').remove()" class="w-7 h-7 flex items-center justify-center bg-white rounded-full text-brand-textSub hover:text-[#E63946] border border-brand-light shadow-sm transition-colors"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
           </div>
           <div class="space-y-3">
             <div>
-              <input type="text" class="hotel-name w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" placeholder="中文或常用名稱 (必填)">
+              <input type="text" class="hotel-name w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="中文或常用名稱 (必填)">
             </div>
-            <div class="flex gap-2">
-              <input type="text" class="hotel-foreign flex-1 text-[13px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" placeholder="外文名稱 (選填)">
-              <div class="w-24 shrink-0 relative">
-                <input type="number" min="1" value="1" class="hotel-nights w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl pl-4 pr-8 py-3 text-center border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm">
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-brand-textSub pointer-events-none">晚</span>
-              </div>
+            <!-- 修改：將外文名稱與天數分開，避免手機窄螢幕破圖 -->
+            <div>
+              <input type="text" class="hotel-foreign w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="外文名稱 (選填)">
             </div>
             <div>
-              <input type="text" class="hotel-address w-full text-[13px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" placeholder="詳細地址 (選填)">
+              <input type="text" class="hotel-address w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-4 py-3 placeholder-brand-textSub/50 border border-brand-light/50 focus:border-brand-primary transition-all" placeholder="詳細地址 (選填)">
+            </div>
+            <div class="flex items-center gap-2 mt-1 px-1">
+              <span class="text-[12px] font-bold text-brand-textSub">入住</span>
+              <input type="number" min="1" value="1" class="hotel-nights w-20 text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl py-2 text-center border border-brand-light/50 focus:border-brand-primary transition-all shadow-sm">
+              <span class="text-[12px] font-bold text-brand-textSub">晚</span>
             </div>
           </div>
         </div>
@@ -530,7 +586,7 @@
       const container = document.getElementById('hotel-list-container');
       container.innerHTML = '';
       if (!accommodations || accommodations.length === 0) {
-        window.addSetupHotel(); // 至少給一個空格
+        window.addSetupHotel(); 
       } else {
         accommodations.forEach(h => {
           window.addSetupHotel();
@@ -673,7 +729,7 @@
     window.openPlan = (id) => { 
       if(!state.user) { showToast('請先至會員中心登入'); window.switchView('profile'); return; }
       state.currentPlanId = id; 
-      state.activeDay = 0; // 預設進入總覽
+      state.activeDay = 0; 
       state.tripData = state.plans.find(p => p.id === id) || state.tripData;
       renderItinerary(); 
       window.switchView('itinerary'); 
@@ -684,6 +740,7 @@
       window.openSetup(null);
     };
 
+    // --- 開啟設定並綁定 12 個航班欄位 ---
     window.openSetup = (id = null) => {
       state.currentPlanId = id;
       if (id) {
@@ -691,17 +748,29 @@
         state.tripData = { ...plan };
         document.getElementById('btn-delete-plan').classList.remove('hidden');
       } else {
-        state.tripData = { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutTime: '', flightRetAirline: '', flightRetTime: '', accommodations: [], itinerary: {} };
+        state.tripData = { title: '', startDate: '', days: 3, flightOutAirline: '', flightOutNo: '', flightOutDeptLoc: '', flightOutArrLoc: '', flightOutDeptTime: '', flightOutArrTime: '', flightRetAirline: '', flightRetNo: '', flightRetDeptLoc: '', flightRetArrLoc: '', flightRetDeptTime: '', flightRetArrTime: '', accommodations: [], itinerary: {} };
         document.getElementById('btn-delete-plan').classList.add('hidden');
       }
       
       document.getElementById('setup-title').value = state.tripData.title || ''; 
       document.getElementById('setup-start-date').value = state.tripData.startDate || '';
       document.getElementById('setup-days').value = state.tripData.days || 3; 
+      
+      // 去程
       document.getElementById('setup-flight-out-airline').value = state.tripData.flightOutAirline || ''; 
-      document.getElementById('setup-flight-out-time').value = state.tripData.flightOutTime || ''; 
+      document.getElementById('setup-flight-out-no').value = state.tripData.flightOutNo || ''; 
+      document.getElementById('setup-flight-out-dept-loc').value = state.tripData.flightOutDeptLoc || ''; 
+      document.getElementById('setup-flight-out-arr-loc').value = state.tripData.flightOutArrLoc || ''; 
+      document.getElementById('setup-flight-out-dept-time').value = state.tripData.flightOutDeptTime || ''; 
+      document.getElementById('setup-flight-out-arr-time').value = state.tripData.flightOutArrTime || ''; 
+      
+      // 回程
       document.getElementById('setup-flight-ret-airline').value = state.tripData.flightRetAirline || ''; 
-      document.getElementById('setup-flight-ret-time').value = state.tripData.flightRetTime || ''; 
+      document.getElementById('setup-flight-ret-no').value = state.tripData.flightRetNo || ''; 
+      document.getElementById('setup-flight-ret-dept-loc').value = state.tripData.flightRetDeptLoc || ''; 
+      document.getElementById('setup-flight-ret-arr-loc').value = state.tripData.flightRetArrLoc || ''; 
+      document.getElementById('setup-flight-ret-dept-time').value = state.tripData.flightRetDeptTime || ''; 
+      document.getElementById('setup-flight-ret-arr-time').value = state.tripData.flightRetArrTime || ''; 
       
       window.renderSetupHotels(state.tripData.accommodations);
       window.switchView('setup');
@@ -735,7 +804,6 @@
       const tabs = document.getElementById('days-tabs');
       tabs.innerHTML = '';
       
-      // 總覽 Tab
       const isOverview = state.activeDay === 0;
       const btnOverview = document.createElement('button');
       btnOverview.className = `snap-start shrink-0 px-5 py-2.5 rounded-full font-bold transition-all duration-200 border ${
@@ -772,32 +840,40 @@
       const container = document.getElementById('timeline-container');
       const plan = state.tripData;
       
-      // ===== 總覽畫面 (UI 大升級版) =====
+      // ===== 總覽畫面 (整合精細版航班) =====
       if (state.activeDay === 0) {
         document.getElementById('fab-container').classList.add('hidden');
         
-        // 航班雙拼卡片
+        let flightOutTitle = plan.flightOutAirline || plan.flightOutNo ? `${plan.flightOutAirline || ''} ${plan.flightOutNo || ''}`.trim() : '未設定去程';
+        let flightOutRoute = plan.flightOutDeptLoc || plan.flightOutArrLoc ? `${plan.flightOutDeptLoc || '出發'} <i class="fa-solid fa-plane text-[10px] mx-1 opacity-50"></i> ${plan.flightOutArrLoc || '降落'}` : '';
+        let flightOutTimeStr = plan.flightOutDeptTime || plan.flightOutArrTime ? `${plan.flightOutDeptTime || '--:--'} - ${plan.flightOutArrTime || '--:--'}` : '';
+
+        let flightRetTitle = plan.flightRetAirline || plan.flightRetNo ? `${plan.flightRetAirline || ''} ${plan.flightRetNo || ''}`.trim() : '未設定回程';
+        let flightRetRoute = plan.flightRetDeptLoc || plan.flightRetArrLoc ? `${plan.flightRetDeptLoc || '出發'} <i class="fa-solid fa-plane text-[10px] mx-1 opacity-50"></i> ${plan.flightRetArrLoc || '降落'}` : '';
+        let flightRetTimeStr = plan.flightRetDeptTime || plan.flightRetArrTime ? `${plan.flightRetDeptTime || '--:--'} - ${plan.flightRetArrTime || '--:--'}` : '';
+
         let flightHtml = `
           <div class="bg-white border border-brand-light rounded-[24px] p-5 shadow-sm mb-6">
              <h3 class="text-[15px] font-extrabold text-brand-dark mb-4 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center"><i class="fa-solid fa-plane-departure text-[13px]"></i></div> 航班資訊
              </h3>
              <div class="grid grid-cols-2 gap-3">
-                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50">
-                   <p class="text-[11px] text-brand-textSub font-bold mb-1">出發航班</p>
-                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${plan.flightOutAirline || '未設定'}</p>
-                   <p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${plan.flightOutTime || '--:--'}</p>
+                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative overflow-hidden">
+                   <p class="text-[11px] text-brand-textSub font-bold mb-1.5 border-b border-brand-light pb-1">出發</p>
+                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${flightOutTitle}</p>
+                   ${flightOutRoute ? `<p class="text-[12px] font-bold text-brand-textSub mt-1 truncate flex items-center">${flightOutRoute}</p>` : ''}
+                   ${flightOutTimeStr ? `<p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${flightOutTimeStr}</p>` : ''}
                 </div>
-                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50">
-                   <p class="text-[11px] text-brand-textSub font-bold mb-1">回程航班</p>
-                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${plan.flightRetAirline || '未設定'}</p>
-                   <p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${plan.flightRetTime || '--:--'}</p>
+                <div class="bg-brand-bg rounded-[16px] p-4 border border-brand-light/50 relative overflow-hidden">
+                   <p class="text-[11px] text-brand-textSub font-bold mb-1.5 border-b border-brand-light pb-1">回程</p>
+                   <p class="text-[14px] font-extrabold text-brand-dark truncate">${flightRetTitle}</p>
+                   ${flightRetRoute ? `<p class="text-[12px] font-bold text-brand-textSub mt-1 truncate flex items-center">${flightRetRoute}</p>` : ''}
+                   ${flightRetTimeStr ? `<p class="text-[12px] font-mono text-brand-primary mt-0.5 truncate">${flightRetTimeStr}</p>` : ''}
                 </div>
              </div>
           </div>
         `;
 
-        // 住宿輪播卡片 (橫向滑動)
         let accommodationsHtml = '';
         if (plan.accommodations && plan.accommodations.length > 0) {
             accommodationsHtml = `<div class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-2 pt-1 px-1 -mx-1">`;
@@ -1024,11 +1100,13 @@
             });
         }
       } else {
-        if (plan.flightOutAirline || plan.flightOutTime) {
-            chips.push({ label: '去程航班', icon: 'fa-ticket', veh: plan.flightOutTime, op: plan.flightOutAirline, mode: 'flight' });
+        if (plan.flightOutAirline || plan.flightOutNo || plan.flightOutDeptTime) {
+            let vehStr = `${plan.flightOutNo || ''} ${plan.flightOutDeptTime || ''}`.trim();
+            chips.push({ label: '去程航班', icon: 'fa-ticket', veh: vehStr, op: plan.flightOutAirline, mode: 'flight' });
         }
-        if (plan.flightRetAirline || plan.flightRetTime) {
-            chips.push({ label: '回程航班', icon: 'fa-ticket', veh: plan.flightRetTime, op: plan.flightRetAirline, mode: 'flight' });
+        if (plan.flightRetAirline || plan.flightRetNo || plan.flightRetDeptTime) {
+            let vehStr = `${plan.flightRetNo || ''} ${plan.flightRetDeptTime || ''}`.trim();
+            chips.push({ label: '回程航班', icon: 'fa-ticket', veh: vehStr, op: plan.flightRetAirline, mode: 'flight' });
         }
       }
 
@@ -1109,8 +1187,9 @@
           for (let p of plansToImport) {
             const cleanPlan = { 
               title: p.title || "未命名行程", startDate: p.startDate || new Date().toISOString().split('T')[0], days: p.days || 1, 
-              flightOutAirline: p.flightOutAirline || "", flightOutTime: p.flightOutTime || "", flightRetAirline: p.flightRetAirline || "", flightRetTime: p.flightRetTime || "", accommodations: p.accommodations || [],
-              itinerary: p.itinerary || {}, createdAt: serverTimestamp() 
+              flightOutAirline: p.flightOutAirline || "", flightOutNo: p.flightOutNo || "", flightOutDeptLoc: p.flightOutDeptLoc || "", flightOutArrLoc: p.flightOutArrLoc || "", flightOutDeptTime: p.flightOutDeptTime || "", flightOutArrTime: p.flightOutArrTime || "",
+              flightRetAirline: p.flightRetAirline || "", flightRetNo: p.flightRetNo || "", flightRetDeptLoc: p.flightRetDeptLoc || "", flightRetArrLoc: p.flightRetArrLoc || "", flightRetDeptTime: p.flightRetDeptTime || "", flightRetArrTime: p.flightRetArrTime || "",
+              accommodations: p.accommodations || [], itinerary: p.itinerary || {}, createdAt: serverTimestamp() 
             };
             await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'plans'), cleanPlan);
           }
@@ -1145,9 +1224,17 @@
           startDate: document.getElementById('setup-start-date').value, 
           days: parseInt(document.getElementById('setup-days').value) || 1,
           flightOutAirline: document.getElementById('setup-flight-out-airline').value,
-          flightOutTime: document.getElementById('setup-flight-out-time').value,
+          flightOutNo: document.getElementById('setup-flight-out-no').value,
+          flightOutDeptLoc: document.getElementById('setup-flight-out-dept-loc').value,
+          flightOutArrLoc: document.getElementById('setup-flight-out-arr-loc').value,
+          flightOutDeptTime: document.getElementById('setup-flight-out-dept-time').value,
+          flightOutArrTime: document.getElementById('setup-flight-out-arr-time').value,
           flightRetAirline: document.getElementById('setup-flight-ret-airline').value,
-          flightRetTime: document.getElementById('setup-flight-ret-time').value,
+          flightRetNo: document.getElementById('setup-flight-ret-no').value,
+          flightRetDeptLoc: document.getElementById('setup-flight-ret-dept-loc').value,
+          flightRetArrLoc: document.getElementById('setup-flight-ret-arr-loc').value,
+          flightRetDeptTime: document.getElementById('setup-flight-ret-dept-time').value,
+          flightRetArrTime: document.getElementById('setup-flight-ret-arr-time').value,
           accommodations: accommodations
         };
         
