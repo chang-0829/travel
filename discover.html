@@ -132,49 +132,55 @@
       </div>
 
       <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
-      <div class="absolute inset-0 pointer-events-none flex flex-col z-[400] overflow-hidden
-                  md:p-6 md:justify-start">
+      <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 md:block pb-[65px] md:pb-0">
          
-         <!-- 手機版：頂部搜尋浮動框 / 電腦版：左側卡片的頂部 -->
-         <div class="md:w-[380px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[24px] md:shadow-2xl md:border md:border-white/50 pointer-events-auto flex flex-col md:h-full md:max-h-full transition-all">
+         <!-- 卡片容器 (電腦版包裝 / 手機版分離) -->
+         <div class="md:w-[380px] md:h-full md:bg-white/95 md:backdrop-blur-xl md:rounded-[24px] md:shadow-2xl md:border md:border-white/50 flex flex-col pointer-events-none md:pointer-events-auto h-full">
             
-            <!-- 搜尋區 -->
-            <div class="p-4 md:p-6 shrink-0 bg-transparent md:border-b md:border-brand-light/50">
+            <!-- 搜尋區 (頂部) -->
+            <div class="p-4 md:p-6 pt-safe md:pt-6 shrink-0 pointer-events-auto transition-transform">
                <div class="relative shadow-lg md:shadow-none rounded-full md:rounded-2xl bg-white md:bg-brand-bg/50">
                   <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
                   <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="w-full bg-transparent rounded-full md:rounded-2xl py-3.5 md:py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark placeholder-brand-textSub/60">
                </div>
             </div>
 
-            <!-- 列表區 (手機版在底部浮出，電腦版在卡片內) -->
-            <div class="flex-1 flex flex-col justify-end md:justify-start pointer-events-none md:pointer-events-auto overflow-hidden">
-                <!-- 手機版的 Bottom Sheet 容器設計 -->
-                <div class="bg-white/95 backdrop-blur-xl md:bg-transparent rounded-t-[32px] md:rounded-none h-[40vh] md:h-auto md:flex-1 flex flex-col pointer-events-auto shadow-[0_-10px_30px_rgba(0,0,0,0.1)] md:shadow-none mt-auto">
-                   
-                   <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto my-3 shrink-0"></div>
-                   <div class="px-6 pb-2 md:pt-2 flex justify-between items-center shrink-0">
-                      <h3 class="font-extrabold text-brand-dark text-lg">景點列表</h3>
-                      <span id="spot-count" class="text-xs font-bold bg-brand-primary/10 text-brand-primary px-2 py-1 rounded-md">-- 個地標</span>
-                   </div>
+            <!-- 手機版彈性空白區：這會把下面的列表強制推到畫面底部 -->
+            <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-                   <!-- 捲動列表 -->
-                   <div id="explore-list" class="flex-1 overflow-y-auto px-4 pb-20 md:pb-6 pt-2 hide-scrollbar space-y-3">
-                      <!-- JS 動態渲染卡片 -->
-                      <div class="py-12 text-center text-brand-textSub opacity-50">
-                         <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
-                         <p class="font-bold text-sm">地圖資訊載入中...</p>
-                      </div>
-                   </div>
-                </div>
+            <!-- 列表區 (手機版 45vh Bottom Sheet / 電腦版卡片內部滿版) -->
+            <div id="mobile-list-panel" class="h-[45vh] md:h-auto md:flex-1 w-full bg-white/95 backdrop-blur-xl md:bg-transparent rounded-t-[32px] md:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10">
+               
+               <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
+               <div class="px-6 pb-2 md:pt-2 flex justify-between items-center shrink-0">
+                  <h3 class="font-extrabold text-brand-dark text-lg">景點列表</h3>
+                  <span id="spot-count" class="text-xs font-bold bg-brand-primary/10 text-brand-primary px-2 py-1 rounded-md">-- 個地標</span>
+               </div>
+
+               <!-- 捲動列表 -->
+               <div id="explore-list" class="flex-1 overflow-y-auto px-4 pb-6 pt-2 hide-scrollbar space-y-3">
+                  <!-- JS 動態渲染卡片 -->
+                  <div class="py-12 text-center text-brand-textSub opacity-50">
+                     <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                     <p class="font-bold text-sm">地圖資訊載入中...</p>
+                  </div>
+               </div>
             </div>
+
          </div>
       </div>
 
-      <!-- 浮動新增按鈕 (FAB) -->
-      <div class="absolute bottom-[90px] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto">
-        <button onclick="window.startAddSpotMode()" class="w-14 h-14 bg-[#D5896F] text-white rounded-full shadow-lg shadow-[#D5896F]/40 flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all">
-           <i class="fa-solid fa-plus"></i>
-        </button>
+      <!-- 右下角浮動按鈕群組 (定位 + 新增景點) -->
+      <!-- 透過 calc(45vh + 80px) 確保按鈕永遠在手機景點列表的上方 -->
+      <div id="fab-group" class="absolute bottom-[calc(45vh+80px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 md:gap-4 transition-all duration-300">
+         <!-- 定位按鈕 -->
+         <button onclick="window.locateUser()" id="btn-locate" class="w-11 h-11 md:w-12 md:h-12 bg-white text-brand-textMain rounded-full shadow-lg border border-brand-light/80 flex items-center justify-center text-lg md:text-xl hover:text-[#4285F4] hover:bg-brand-light/50 active:scale-95 transition-all">
+            <i class="fa-solid fa-location-crosshairs"></i>
+         </button>
+         <!-- 新增景點按鈕 (FAB) -->
+         <button onclick="window.startAddSpotMode()" class="w-14 h-14 bg-[#D5896F] text-white rounded-full shadow-lg shadow-[#D5896F]/40 flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all">
+            <i class="fa-solid fa-plus"></i>
+         </button>
       </div>
 
       <!-- 新增模式時的底部確認面板 (預設隱藏) -->
@@ -191,7 +197,7 @@
     </main>
 
     <!-- ================= 手機版：底部導覽列 ================= -->
-    <nav class="md:hidden absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-light shrink-0 z-[500] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <nav class="md:hidden absolute bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-brand-light shrink-0 z-[500] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div class="flex justify-around items-center h-[65px]">
         <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-house mb-1 text-[18px]"></i>
@@ -323,17 +329,17 @@
     let map = null;
     let markersLayer = null;
     let markersDict = {};
+    let userMarker = null;
 
     function initMap() {
         // 建立兩種圖層：1. Google 街道圖 2. Google 衛星混合圖
         const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google',
             maxZoom: 20,
-            keepBuffer: 4,         // 預先載入鄰近圖塊以減少白邊
-            updateWhenIdle: true   // 拖曳停止後再更新以提升效能
+            keepBuffer: 4,
+            updateWhenIdle: true
         });
         
-        // lyrs=y 代表混合模式：衛星圖加上街道、標籤名稱
         const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google',
             maxZoom: 20,
@@ -341,25 +347,63 @@
             updateWhenIdle: true
         });
 
-        // 隱藏預設縮放按鈕
+        // 初始化地圖設定
         map = L.map('map', { 
             zoomControl: false,
-            layers: [streetLayer] // 預設顯示街道圖
+            layers: [streetLayer]
         }).setView([23.5, 121], 6); 
         
-        // 加入圖層控制面板 (右上角)
         const baseMaps = {
             "街道圖": streetLayer,
             "衛星圖": satelliteLayer
         };
         L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-
-        // 將縮放控制鈕放到右上方
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         markersLayer = L.layerGroup().addTo(map);
+        
+        // 綁定定位成功事件
+        map.on('locationfound', function(e) {
+            if (!userMarker) {
+                // 繪製定位專用的藍色發光圓點
+                const userIcon = L.divIcon({
+                    className: 'user-marker',
+                    html: `<div class="w-4 h-4 bg-[#4285F4] rounded-full border-2 border-white shadow-[0_0_10px_rgba(66,133,244,0.6)]"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+                userMarker = L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+            } else {
+                userMarker.setLatLng(e.latlng);
+            }
+            
+            const btnIcon = document.querySelector('#btn-locate i');
+            if (btnIcon) btnIcon.className = 'fa-solid fa-location-crosshairs text-[#4285F4]';
+            window.showToast("已取得目前位置");
+        });
+
+        // 定位失敗事件
+        map.on('locationerror', function(e) {
+            const btnIcon = document.querySelector('#btn-locate i');
+            if (btnIcon) btnIcon.className = 'fa-solid fa-location-crosshairs';
+            window.showToast("無法取得位置，請確認設備定位權限");
+            console.warn("Location error:", e.message);
+        });
+
         setTimeout(() => { map.invalidateSize(); }, 500);
     }
+    
+    // 觸發使用者定位
+    window.locateUser = function() {
+        const btnIcon = document.querySelector('#btn-locate i');
+        if (btnIcon) {
+            btnIcon.className = 'fa-solid fa-spinner fa-spin text-brand-primary';
+        }
+        window.showToast("正在尋找您的位置...");
+        
+        // 要求定位權限並縮放至該座標，超時設為 10 秒
+        map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
+    };
 
     function renderMarkersOnMap(spots) {
         markersLayer.clearLayers();
@@ -421,12 +465,20 @@
     let addSpotMode = 'spot';
 
     window.startAddSpotMode = function() {
-        // 顯示十字準星與工具列
+        // 隱藏手機版列表與 FAB，提供全螢幕地圖視野
+        document.getElementById('mobile-list-panel').classList.add('max-md:hidden');
+        document.getElementById('fab-group').classList.add('hidden');
+        
+        // 顯示十字準星與確認工具列
         document.getElementById('map-crosshair').classList.add('active');
         document.getElementById('add-spot-toolbar').classList.remove('hidden');
     };
 
     window.cancelAddSpotMode = function() {
+        // 恢復手機版列表與 FAB
+        document.getElementById('mobile-list-panel').classList.remove('max-md:hidden');
+        document.getElementById('fab-group').classList.remove('hidden');
+        
         // 隱藏十字準星與工具列
         document.getElementById('map-crosshair').classList.remove('active');
         document.getElementById('add-spot-toolbar').classList.add('hidden');
