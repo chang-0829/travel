@@ -48,13 +48,10 @@
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-    /* 覆寫 Leaflet 預設樣式以符合設計語言 */
+    /* 覆寫 Leaflet 預設樣式 */
     .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 8px !important; border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; background: #fff !important; margin-bottom: 4px !important; }
     .leaflet-control-zoom { border: none !important; margin-top: 24px !important; margin-right: 24px !important; }
     .leaflet-control-layers { border-radius: 12px !important; border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; font-family: 'LINE Seed TW', sans-serif !important; font-weight: 700 !important; color: #2C3E50 !important; padding: 6px !important; margin-top: 24px !important; margin-right: 24px !important;}
-    .leaflet-popup-content-wrapper { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 0; }
-    .leaflet-popup-content { margin: 0; }
-    .leaflet-popup-tip-container { display: none; }
     
     /* 自訂 Marker 樣式 */
     .custom-marker { background: transparent; border: none; }
@@ -145,12 +142,11 @@
                </div>
             </div>
 
-            <!-- 手機版彈性空白區：這會把下面的列表強制推到畫面底部 -->
+            <!-- 手機版彈性空白區 -->
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
             <!-- 列表區 (手機版 45vh Bottom Sheet / 電腦版卡片內部滿版) -->
             <div id="mobile-list-panel" class="h-[45vh] md:h-auto md:flex-1 w-full bg-white/95 backdrop-blur-xl md:bg-transparent rounded-t-[32px] md:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10">
-               
                <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
                <div class="px-6 pb-2 md:pt-2 flex justify-between items-center shrink-0">
                   <h3 class="font-extrabold text-brand-dark text-lg">景點列表</h3>
@@ -159,7 +155,6 @@
 
                <!-- 捲動列表 -->
                <div id="explore-list" class="flex-1 overflow-y-auto px-4 pb-6 pt-2 hide-scrollbar space-y-3">
-                  <!-- JS 動態渲染卡片 -->
                   <div class="py-12 text-center text-brand-textSub opacity-50">
                      <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
                      <p class="font-bold text-sm">地圖資訊載入中...</p>
@@ -171,7 +166,6 @@
       </div>
 
       <!-- 右下角浮動按鈕群組 (定位 + 新增景點) -->
-      <!-- 透過 calc(45vh + 80px) 確保按鈕永遠在手機景點列表的上方 -->
       <div id="fab-group" class="absolute bottom-[calc(45vh+80px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 md:gap-4 transition-all duration-300">
          <!-- 定位按鈕 -->
          <button onclick="window.locateUser()" id="btn-locate" class="w-11 h-11 md:w-12 md:h-12 bg-white text-brand-textMain rounded-full shadow-lg border border-brand-light/80 flex items-center justify-center text-lg md:text-xl hover:text-[#4285F4] hover:bg-brand-light/50 active:scale-95 transition-all">
@@ -183,7 +177,7 @@
          </button>
       </div>
 
-      <!-- 新增模式時的底部確認面板 (預設隱藏) -->
+      <!-- 新增模式時的底部確認面板 -->
       <div id="add-spot-toolbar" class="absolute bottom-[80px] md:bottom-6 left-1/2 transform -translate-x-1/2 z-[450] pointer-events-auto hidden w-[90%] md:w-auto max-w-sm">
          <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-brand-light p-4 flex flex-col gap-3">
             <div class="text-center font-bold text-brand-dark text-sm">請將要新增的景點移至畫面中央十字準星處</div>
@@ -191,6 +185,71 @@
                <button onclick="window.cancelAddSpotMode()" class="flex-1 py-2.5 bg-brand-bg text-brand-textSub font-bold rounded-xl hover:bg-brand-light transition-all">取消</button>
                <button onclick="window.openAddSpotForm()" class="flex-1 py-2.5 bg-[#D5896F] text-white font-bold rounded-xl shadow-md shadow-[#D5896F]/30 active:scale-95 transition-all">確認位置</button>
             </div>
+         </div>
+      </div>
+
+      <!-- ================= 景點資訊面板 (Desktop 右側 / Mobile 全螢幕) ================= -->
+      <!-- 預設在畫面最右側 (translate-x-full) 隱藏 -->
+      <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-white z-[2000] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 flex flex-col">
+         
+         <!-- 頂部返回區 (手機版實用，電腦版提供打叉按鈕) -->
+         <div class="h-[60px] md:h-[72px] shrink-0 border-b border-brand-light/50 flex items-center px-4 pt-safe md:pt-0 bg-white/90 backdrop-blur z-20 absolute top-0 w-full">
+            <button onclick="window.closeSpotDetail()" class="w-10 h-10 flex items-center justify-center rounded-full bg-brand-bg text-brand-textMain hover:bg-brand-light transition-colors shadow-sm">
+               <i class="fa-solid fa-chevron-left md:hidden"></i>
+               <i class="fa-solid fa-xmark hidden md:block"></i>
+            </button>
+         </div>
+
+         <!-- 內容捲動區 -->
+         <div class="flex-1 overflow-y-auto hide-scrollbar bg-brand-bg">
+            <!-- 封面圖區 (利用漸層佔位) -->
+            <div class="h-64 md:h-72 bg-brand-light relative flex items-center justify-center overflow-hidden">
+               <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/40 to-brand-accent/40"></div>
+               <i class="fa-solid fa-mountain-sun text-6xl text-white/50 z-0 drop-shadow-md"></i>
+
+               <!-- 圓形地標 Icon (浮動在封面與白底交界處) -->
+               <div id="detail-icon" class="absolute -bottom-6 left-6 w-16 h-16 rounded-full bg-white shadow-md border-4 border-white flex items-center justify-center text-brand-primary text-2xl z-10">
+                   <i class="fa-solid fa-camera"></i>
+               </div>
+            </div>
+
+            <!-- 詳細資訊區 -->
+            <div class="px-6 pt-10 pb-8 space-y-5 bg-white min-h-full">
+               <div>
+                   <h2 id="detail-name" class="text-2xl font-extrabold text-brand-dark leading-tight">景點名稱</h2>
+                   <p class="text-sm font-bold text-brand-textSub mt-2 flex items-start gap-1.5 leading-relaxed">
+                      <i class="fa-solid fa-location-dot mt-1 opacity-70"></i> 
+                      <span id="detail-sub-text">地址或備註資訊</span>
+                   </p>
+               </div>
+
+               <div class="flex gap-2">
+                   <span id="detail-cat" class="px-3 py-1 bg-brand-primary/10 text-brand-primary text-xs font-bold rounded-md">分類</span>
+               </div>
+
+               <!-- 擴充資訊區 (展示用) -->
+               <div class="grid grid-cols-2 gap-3 pt-3">
+                   <div class="bg-brand-bg rounded-xl p-3 flex flex-col justify-center">
+                       <span class="text-[10px] text-brand-textSub font-bold mb-1">社群分享</span>
+                       <div class="flex items-center gap-1 text-sm font-extrabold text-brand-dark"><i class="fa-solid fa-users text-[#E9C46A]"></i> 值得探索</div>
+                   </div>
+                   <div class="bg-brand-bg rounded-xl p-3 flex flex-col justify-center">
+                       <span class="text-[10px] text-brand-textSub font-bold mb-1">地標狀態</span>
+                       <div class="flex items-center gap-1 text-sm font-extrabold text-[#2A9D8F]"><i class="fa-solid fa-circle-check"></i> 已確認位置</div>
+                   </div>
+               </div>
+               
+               <div class="pt-4 border-t border-brand-light/50">
+                   <p class="text-xs text-brand-textSub leading-relaxed font-bold">這個景點由社群成員建立分享。你可以將它加入到你的行程規劃中，安排完美的旅途！</p>
+               </div>
+            </div>
+         </div>
+
+         <!-- 底部加入行程按鈕 -->
+         <div class="p-4 md:p-6 bg-white shrink-0 border-t border-brand-light/50 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20">
+            <button onclick="window.showToast('已觸發！請至「我的行程」將景點排入行程表內')" class="w-full py-4 bg-brand-primary text-white text-[15px] font-bold rounded-[20px] shadow-lg shadow-brand-primary/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+               <i class="fa-solid fa-plus text-lg"></i> 將景點加入行程
+            </button>
          </div>
       </div>
 
@@ -421,15 +480,12 @@
                 });
 
                 const marker = L.marker([spot.lat, spot.lng], { icon: customIcon });
-                const popupContent = `
-                   <div class="p-4 w-48 text-center bg-white rounded-2xl relative overflow-hidden">
-                      <div class="w-10 h-10 mx-auto rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg mb-2"><i class="${locObj.icon}"></i></div>
-                      <h4 class="font-extrabold text-brand-dark text-[15px] mb-1 truncate">${spot.name}</h4>
-                      <p class="text-[11px] text-brand-textSub font-bold truncate mb-3">${spot.subtitle || locObj.label}</p>
-                      <button onclick="window.showToast('前往我的行程以加入：${spot.name}')" class="w-full py-2 bg-brand-primary text-white text-[12px] font-bold rounded-lg shadow-sm active:scale-95 transition-all">加入行程</button>
-                   </div>
-                `;
-                marker.bindPopup(popupContent);
+                
+                // 完全移除 bindPopup 邏輯，改為點擊地標觸發飛梭與側邊資訊欄
+                marker.on('click', () => {
+                   window.flyToSpot(spot.id);
+                });
+
                 markersLayer.addLayer(marker);
                 markersDict[spot.id] = marker;
             }
@@ -443,25 +499,49 @@
         }
     }
 
+    // 飛梭至地標並打開資訊面板
     window.flyToSpot = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
         if (spot && spot.lat && spot.lng) {
-            const isDesktop = window.innerWidth >= 768;
-            const targetLat = isDesktop ? spot.lat : spot.lat - 0.002;
-            map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
-            if (markersDict[spotId]) {
-                setTimeout(() => { markersDict[spotId].openPopup(); }, 800);
-            }
+            // 平移視角
+            map.flyTo([spot.lat, spot.lng], 16, { duration: 1 });
+            // 呼叫打開資訊面板
+            window.showSpotDetail(spotId);
         } else {
             window.showToast('這個景點尚未設定精確座標！');
         }
+    };
+
+    // ========== 景點資訊面板邏輯 ==========
+    window.showSpotDetail = function(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+
+        const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+
+        // 填入資料
+        document.getElementById('detail-icon').innerHTML = `<i class="${locObj.icon}"></i>`;
+        document.getElementById('detail-name').innerText = spot.name;
+        document.getElementById('detail-sub-text').innerText = spot.subtitle || '無詳細地址備註';
+        document.getElementById('detail-cat').innerText = locObj.label;
+
+        // 滑入面板
+        const panel = document.getElementById('spot-detail-panel');
+        panel.classList.remove('translate-x-full');
+        panel.classList.add('translate-x-0');
+    };
+
+    window.closeSpotDetail = function() {
+        // 滑出面板
+        const panel = document.getElementById('spot-detail-panel');
+        panel.classList.remove('translate-x-0');
+        panel.classList.add('translate-x-full');
     };
 
     // ========== 新增景點邏輯 ==========
     let tempLatLng = null;
     let addSpotMode = 'spot';
 
-    // 解決按鈕變數作用域的關鍵函式
     window.setAddSpotMode = function(modeId) {
         addSpotMode = modeId;
         window.renderPublicSpotModes();
@@ -499,7 +579,6 @@
     window.renderPublicSpotModes = function() {
        const container = document.getElementById('public-spot-modes-grid');
        const modes = LOCATION_MODES.filter(m => m.id !== 'station' && m.id !== 'airport' && m.id !== 'hotel');
-       // 將 onclick 換成呼叫掛載在 window 的 setAddSpotMode
        container.innerHTML = modes.map(mode => `
             <button type="button" onclick="window.setAddSpotMode('${mode.id}')"
               class="py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
@@ -531,7 +610,6 @@
             window.showToast("已成功新增至地圖！");
             renderListAndMap();
         } else {
-            // 確保非訪客模式下，使用者有成功驗證 (包含匿名) 才能寫入
             if (!currentUser) {
                 window.showToast("連線中，請稍候再試...");
                 return;
@@ -554,6 +632,9 @@
         document.getElementById('modal-overlay').classList.add('closed');
         document.getElementById('sheet-add-public-spot').classList.remove('open');
         document.getElementById('sheet-add-public-spot').classList.add('closed');
+        
+        // 確保關閉 Modal 也能連帶關閉資訊側邊欄 (避免畫面卡住)
+        window.closeSpotDetail();
     };
 
     // ========== 資料載入 ==========
