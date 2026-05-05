@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>趣旅行 - 探索景點</title>
+  <title>趣旅行 - 探索地圖</title>
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet CSS (地圖核心) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,20 +47,37 @@
     
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
+
+    /* 覆寫 Leaflet 預設樣式以符合設計語言 */
+    .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 8px !important; border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; background: #fff !important; margin-bottom: 4px !important; }
+    .leaflet-control-zoom { border: none !important; margin-top: 24px !important; margin-right: 24px !important; }
+    .leaflet-popup-content-wrapper { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 0; }
+    .leaflet-popup-content { margin: 0; }
+    .leaflet-popup-tip-container { display: none; }
+    
+    /* 自訂 Marker 樣式 */
+    .custom-marker { background: transparent; border: none; }
+    .marker-pin { width: 36px; height: 36px; border-radius: 50%; background: #748CAB; border: 3px solid white; box-shadow: 0 4px 10px rgba(116, 140, 171, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; transition: transform 0.2s; }
+    .marker-pin:hover { transform: scale(1.15) translateY(-4px); z-index: 1000 !important; background: #3E5C76;}
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
 
-  <!-- 整體響應式容器：滿版寬高 -->
+  <!-- 提示訊息 Toast -->
+  <div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[100] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
+    <i class="fa-solid fa-circle-info text-brand-primary"></i> <span id="toast-msg">提示訊息</span>
+  </div>
+
+  <!-- 整體響應式容器 -->
   <div class="w-full h-[100dvh] flex overflow-hidden relative">
 
-    <!-- ================= 電腦版：左側導覽列 (Sidebar) ================= -->
-    <aside class="hidden md:flex flex-col w-64 bg-white border-r border-brand-light z-20 shadow-sm shrink-0">
-      <div class="h-[72px] flex items-center px-6 border-b border-brand-light/50">
-         <div class="w-8 h-8 rounded-xl bg-brand-primary text-white flex items-center justify-center text-lg mr-3 shadow-sm">
+    <!-- ================= 電腦版：左側導覽列 ================= -->
+    <aside class="hidden md:flex flex-col w-[200px] lg:w-64 bg-white border-r border-brand-light z-[1000] shadow-sm shrink-0">
+      <div class="h-[72px] flex items-center px-6 border-b border-brand-light/50 shrink-0">
+         <div class="w-8 h-8 rounded-xl bg-brand-primary text-white flex items-center justify-center text-lg mr-3 shadow-sm shrink-0">
             <i class="fa-solid fa-plane"></i>
          </div>
-         <span class="text-xl font-extrabold text-brand-dark tracking-tight">趣旅行</span>
+         <span class="text-xl font-extrabold text-brand-dark tracking-tight truncate">趣旅行</span>
       </div>
       
       <div class="flex-1 py-6 px-4 space-y-2 overflow-y-auto hide-scrollbar">
@@ -65,94 +85,86 @@
         <a href="./index.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-brand-textSub hover:bg-brand-bg hover:text-brand-primary transition-all font-bold">
           <i class="fa-solid fa-house text-lg w-5 text-center"></i> <span>首頁</span>
         </a>
-        <!-- 電腦版 Active 狀態 -->
         <a href="./discover.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl bg-brand-primary/10 text-brand-primary transition-all font-bold">
-          <i class="fa-solid fa-earth-americas text-lg w-5 text-center"></i> <span>探索景點</span>
+          <i class="fa-solid fa-map-location-dot text-lg w-5 text-center"></i> <span>地圖探索</span>
         </a>
         <a href="./mytrip.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-brand-textSub hover:bg-brand-bg hover:text-brand-primary transition-all font-bold">
           <i class="fa-solid fa-suitcase-rolling text-lg w-5 text-center"></i> <span>我的行程</span>
         </a>
       </div>
 
-      <div class="p-4 border-t border-brand-light/50">
+      <div class="p-4 border-t border-brand-light/50 shrink-0">
         <a href="./account.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-brand-bg/50 hover:bg-brand-light/50 transition-all cursor-pointer border border-transparent hover:border-brand-light">
           <div class="w-8 h-8 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center shrink-0">
             <i class="fa-solid fa-user text-sm"></i>
           </div>
-          <div class="flex-1 overflow-hidden">
+          <div class="flex-1 overflow-hidden hidden lg:block">
              <div class="text-sm font-extrabold text-brand-dark truncate">會員中心</div>
-             <div class="text-[10px] font-bold text-brand-textSub truncate">點擊查看或設定</div>
+             <div class="text-[10px] font-bold text-brand-textSub truncate">點擊查看設定</div>
           </div>
         </a>
       </div>
     </aside>
 
-    <!-- ================= 主內容區域 ================= -->
-    <main class="flex-1 flex flex-col relative overflow-hidden bg-brand-bg">
+    <!-- ================= 主內容區域 (滿版地圖) ================= -->
+    <main class="flex-1 relative overflow-hidden bg-brand-light">
       
-      <!-- 手機版 Header (螢幕小於 md 時顯示) -->
-      <header class="md:hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
-        <div>
-          <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Discover</p>
-          <h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">探索景點</h1>
-        </div>
-      </header>
+      <!-- 滿版地圖容器 (z-index 0) -->
+      <div id="map" class="absolute inset-0 z-0"></div>
 
-      <!-- 電腦版 Header (螢幕大於等於 md 時顯示) -->
-      <header class="hidden md:flex h-[72px] bg-white/80 backdrop-blur-md px-8 shrink-0 items-center justify-between border-b border-brand-light z-10">
-        <div>
-          <h2 class="text-xl font-extrabold text-brand-dark tracking-tight">公共景點庫</h2>
-          <p class="text-[12px] font-bold text-brand-textSub mt-0.5">發掘並分享來自世界各地的精彩地點</p>
-        </div>
-        <div class="flex items-center gap-4">
-           <button class="w-10 h-10 flex items-center justify-center bg-brand-bg border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary transition-all">
-             <i class="fa-solid fa-bell"></i>
-           </button>
-        </div>
-      </header>
-
-      <!-- 滾動內容區 -->
-      <div class="flex-1 overflow-y-auto hide-scrollbar relative">
-         <div class="max-w-7xl mx-auto w-full px-6 py-4 md:py-8 pb-24 md:pb-8">
+      <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
+      <div class="absolute inset-0 pointer-events-none flex flex-col z-[400] overflow-hidden
+                  md:p-6 md:justify-start">
+         
+         <!-- 手機版：頂部搜尋浮動框 / 電腦版：左側卡片的頂部 -->
+         <div class="md:w-[380px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[24px] md:shadow-2xl md:border md:border-white/50 pointer-events-auto flex flex-col md:h-full md:max-h-full transition-all">
             
-            <!-- 搜尋與過濾區塊 (響應式設計：手機版簡約，電腦版置中放大) -->
-            <div class="mb-6 md:mb-10 md:bg-white md:p-8 md:rounded-[32px] md:shadow-sm md:border md:border-brand-light relative overflow-hidden">
-               <!-- 電腦版的背景裝飾 -->
-               <div class="hidden md:block absolute -right-10 -top-10 w-48 h-48 bg-brand-primary/5 rounded-full blur-3xl"></div>
-               <div class="hidden md:block absolute -left-10 -bottom-10 w-40 h-40 bg-brand-accent/5 rounded-full blur-3xl"></div>
-
-               <div class="relative z-10 md:max-w-2xl md:mx-auto md:text-center">
-                 <h2 class="hidden md:block text-2xl font-extrabold text-brand-dark mb-6">您想去哪裡探索？</h2>
-                 <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-brand-textSub md:text-lg"></i>
-                    <input type="text" id="input-explore-search" placeholder="搜尋大家建立的景點..." class="w-full bg-white md:bg-brand-bg rounded-2xl md:rounded-full py-3 md:py-4 pl-11 md:pl-14 pr-4 shadow-sm border border-brand-light/80 outline-none focus:border-brand-primary/50 focus:bg-white transition-all text-[15px] md:text-[16px] font-bold text-brand-dark placeholder-brand-textSub/50">
-                 </div>
+            <!-- 搜尋區 -->
+            <div class="p-4 md:p-6 shrink-0 bg-transparent md:border-b md:border-brand-light/50">
+               <div class="relative shadow-lg md:shadow-none rounded-full md:rounded-2xl bg-white md:bg-brand-bg/50">
+                  <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
+                  <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="w-full bg-transparent rounded-full md:rounded-2xl py-3.5 md:py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark placeholder-brand-textSub/60">
                </div>
             </div>
 
-            <!-- 景點列表 (手機版：1欄列表；平板：2欄網格；電腦版：3~4欄網格) -->
-            <div id="explore-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                <!-- 載入中動畫 -->
-                <div class="col-span-full py-12 text-center text-brand-textSub opacity-50">
-                    <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
-                    <p class="font-bold text-sm">載入中...</p>
+            <!-- 列表區 (手機版在底部浮出，電腦版在卡片內) -->
+            <div class="flex-1 flex flex-col justify-end md:justify-start pointer-events-none md:pointer-events-auto overflow-hidden">
+                <!-- 手機版的 Bottom Sheet 容器設計 -->
+                <div class="bg-white/95 backdrop-blur-xl md:bg-transparent rounded-t-[32px] md:rounded-none h-[40vh] md:h-auto md:flex-1 flex flex-col pointer-events-auto shadow-[0_-10px_30px_rgba(0,0,0,0.1)] md:shadow-none mt-auto">
+                   
+                   <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto my-3 shrink-0"></div>
+                   <div class="px-6 pb-2 md:pt-2 flex justify-between items-center shrink-0">
+                      <h3 class="font-extrabold text-brand-dark text-lg">景點列表</h3>
+                      <span id="spot-count" class="text-xs font-bold bg-brand-primary/10 text-brand-primary px-2 py-1 rounded-md">-- 個地標</span>
+                   </div>
+
+                   <!-- 捲動列表 -->
+                   <div id="explore-list" class="flex-1 overflow-y-auto px-4 pb-20 md:pb-6 pt-2 hide-scrollbar space-y-3">
+                      <!-- JS 動態渲染卡片 -->
+                      <div class="py-12 text-center text-brand-textSub opacity-50">
+                         <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                         <p class="font-bold text-sm">地圖資訊載入中...</p>
+                      </div>
+                   </div>
                 </div>
             </div>
          </div>
       </div>
-      
+
     </main>
 
-    <!-- ================= 手機版：底部導覽列 ================= -->
-    <nav class="md:hidden absolute bottom-0 w-full bg-white border-t border-brand-light shrink-0 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+    <!-- ================= 手機版：底部導覽列 (z-index 要比地圖高) ================= -->
+    <nav class="md:hidden absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-light shrink-0 z-[500] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div class="flex justify-around items-center h-[65px]">
         <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-house mb-1 text-[18px]"></i>
           <span class="text-[10px] font-bold">首頁</span>
         </a>
-        <a href="./discover.html" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors">
-          <i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i>
-          <span class="text-[10px] font-bold">探索</span>
+        <a href="./discover.html" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors relative">
+          <div class="absolute -top-3 w-12 h-12 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-brand-primary/40">
+             <i class="fa-solid fa-map-location-dot text-[20px]"></i>
+          </div>
+          <span class="text-[10px] font-bold mt-7">地圖</span>
         </a>
         <a href="./mytrip.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i>
@@ -167,6 +179,10 @@
 
   </div>
 
+  <!-- Leaflet JS (地圖核心套件) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Firebase / 邏輯 -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
@@ -184,6 +200,18 @@
     const db = getFirestore(app); 
     const appId = "travel-platform-v2";
 
+    // Toast 顯示
+    window.showToast = function(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      el.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+      el.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        el.classList.remove('opacity-100', 'translate-y-0');
+        el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+      }, 3000);
+    }
+
     const LOCATION_MODES = [
       { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
       { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
@@ -196,40 +224,136 @@
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
+    // 為了地圖展示，替預設景點加上真實經緯度 (lat, lng)
     const DEFAULT_PUBLIC_SPOTS = [
-       { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', createdAt: Date.now() },
-       { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', createdAt: Date.now() },
-       { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', createdAt: Date.now() },
-       { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', createdAt: Date.now() },
-       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', createdAt: Date.now() },
-       { id: 's6', name: '淺草寺', subtitle: '東京都台東區淺草', locMode: 'spot', createdAt: Date.now() - 1000 },
-       { id: 's7', name: '環球影城', subtitle: '大阪府大阪市此花區', locMode: 'park', createdAt: Date.now() - 2000 },
-       { id: 's8', name: '敘敘苑拉麵', subtitle: '東京都新宿區', locMode: 'food', createdAt: Date.now() - 3000 }
+       { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', lat: 25.0339, lng: 121.5644, createdAt: Date.now() },
+       { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', lat: 34.9948, lng: 135.7850, createdAt: Date.now() },
+       { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', lat: 33.5933, lng: 130.4044, createdAt: Date.now() },
+       { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', lat: 35.6329, lng: 139.8804, createdAt: Date.now() },
+       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', lat: 34.6712, lng: 135.5015, createdAt: Date.now() },
+       { id: 's6', name: '淺草寺', subtitle: '東京都台東區淺草', locMode: 'spot', lat: 35.7147, lng: 139.7966, createdAt: Date.now() - 1000 },
+       { id: 's7', name: '環球影城', subtitle: '大阪府大阪市此花區', locMode: 'park', lat: 34.6654, lng: 135.4323, createdAt: Date.now() - 2000 },
+       { id: 's8', name: '敘敘苑拉麵', subtitle: '東京都新宿區', locMode: 'food', lat: 35.6938, lng: 139.7034, createdAt: Date.now() - 3000 }
     ];
 
     let publicSpots = [];
     const isGuest = localStorage.getItem('isGuest') === 'true';
 
+    // ========== 地圖初始化 (Leaflet) ==========
+    let map = null;
+    let markersLayer = null;
+    let markersDict = {}; // 保存 marker 實例，方便點擊列表時觸發
+
+    function initMap() {
+        // 隱藏預設縮放按鈕，後續自訂位置
+        map = L.map('map', { zoomControl: false }).setView([23.5, 121], 6); // 預設視角：台灣
+        
+        // 將縮放控制鈕放到右上方
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // 使用高質感的 CartoDB Voyager 圖層 (現代、乾淨，很適合旅遊 App)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            maxZoom: 19
+        }).addTo(map);
+
+        markersLayer = L.layerGroup().addTo(map);
+        
+        // 延遲更新地圖尺寸 (避免在框架或手機上渲染錯位)
+        setTimeout(() => { map.invalidateSize(); }, 500);
+    }
+
+    // 將景點畫在地圖上
+    function renderMarkersOnMap(spots) {
+        markersLayer.clearLayers();
+        markersDict = {};
+        
+        let validCoords = [];
+
+        spots.forEach(spot => {
+            // 若該資料有座標才畫 Marker
+            if (spot.lat && spot.lng) {
+                validCoords.push([spot.lat, spot.lng]);
+                const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+                
+                // 自訂 HTML Marker 圖示
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="marker-pin"><i class="${locObj.icon}"></i></div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18],
+                    popupAnchor: [0, -16]
+                });
+
+                const marker = L.marker([spot.lat, spot.lng], { icon: customIcon });
+                
+                // 點擊 Marker 顯示的 Popup 卡片
+                const popupContent = `
+                   <div class="p-4 w-48 text-center bg-white rounded-2xl relative overflow-hidden">
+                      <div class="w-10 h-10 mx-auto rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg mb-2"><i class="${locObj.icon}"></i></div>
+                      <h4 class="font-extrabold text-brand-dark text-[15px] mb-1 truncate">${spot.name}</h4>
+                      <p class="text-[11px] text-brand-textSub font-bold truncate mb-3">${spot.subtitle || locObj.label}</p>
+                      <button onclick="window.showToast('前往我的行程以加入：${spot.name}')" class="w-full py-2 bg-brand-primary text-white text-[12px] font-bold rounded-lg shadow-sm active:scale-95 transition-all">加入行程</button>
+                   </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markersLayer.addLayer(marker);
+                markersDict[spot.id] = marker; // 紀錄實例
+            }
+        });
+
+        // 自動縮放以包含所有點 (若有搜尋過濾，會自動聚焦到搜尋結果)
+        if (validCoords.length > 0) {
+            const bounds = L.latLngBounds(validCoords);
+            // 視窗左側/下方有 UI 遮擋，設定 padding
+            const isDesktop = window.innerWidth >= 768;
+            const padOptions = isDesktop ? { paddingTopLeft: [400, 0], padding: [50, 50] } : { paddingBottomRight: [0, 300], padding: [30, 30] };
+            map.flyToBounds(bounds, { ...padOptions, duration: 1.2, maxZoom: 15 });
+        }
+    }
+
+    // 從列表點擊：平滑飛至該地圖點
+    window.flyToSpot = function(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (spot && spot.lat && spot.lng) {
+            // 平移視角
+            const isDesktop = window.innerWidth >= 768;
+            // 如果是手機，讓中心點稍微偏上 (因為下面有列表擋住)
+            const targetLat = isDesktop ? spot.lat : spot.lat - 0.002;
+            
+            map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
+            
+            // 打開氣泡窗
+            if (markersDict[spotId]) {
+                setTimeout(() => { markersDict[spotId].openPopup(); }, 800);
+            }
+        } else {
+            window.showToast('這個景點尚未設定精確座標！');
+        }
+    };
+    // ==========================================
+
     function loadSpots() {
       if (isGuest) {
         const localSpots = localStorage.getItem('guest_spots');
         publicSpots = localSpots ? JSON.parse(localSpots) : DEFAULT_PUBLIC_SPOTS;
-        renderList();
+        renderListAndMap();
       } else {
         const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
         onSnapshot(qSpots, (snapshot) => {
           publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           if (publicSpots.length === 0) publicSpots = DEFAULT_PUBLIC_SPOTS;
-          renderList();
+          renderListAndMap();
         }, err => {
           console.error(err);
           publicSpots = DEFAULT_PUBLIC_SPOTS;
-          renderList();
+          renderListAndMap();
         });
       }
     }
 
-    function renderList(filter = '') {
+    function renderListAndMap(filter = '') {
       const container = document.getElementById('explore-list');
       let spots = publicSpots;
       
@@ -241,58 +365,57 @@
           );
       }
 
+      // 更新地圖上的標記
+      if (map) renderMarkersOnMap(spots);
+
+      document.getElementById('spot-count').innerText = `${spots.length} 個地標`;
+
       if (spots.length === 0) {
           container.innerHTML = `
-            <div class="col-span-full py-24 text-center text-brand-textSub opacity-50">
-                <div class="w-20 h-20 bg-white border border-brand-light rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm"><i class="fa-solid fa-ghost text-3xl"></i></div>
-                <p class="font-bold text-lg text-brand-dark">找不到相關景點</p>
-                <p class="text-sm mt-1">請嘗試使用其他關鍵字搜尋</p>
+            <div class="py-12 text-center text-brand-textSub opacity-50">
+                <i class="fa-solid fa-map-location-dot text-4xl mb-3"></i>
+                <p class="font-bold text-sm">此區域無相關結果</p>
             </div>`;
           return;
       }
 
       const sortedSpots = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      // 產生卡片：在 md 以上螢幕時為垂直卡片佈局，手機上維持橫向清單風格
+      // 產生側邊/下方清單卡片
       container.innerHTML = sortedSpots.map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
           return `
-          <div class="bg-white p-4 md:p-6 rounded-[20px] md:rounded-[24px] border border-brand-light shadow-sm flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-5 cursor-pointer hover:shadow-lg md:hover:-translate-y-1.5 transition-all group">
-             
+          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white p-3 md:p-4 rounded-[16px] md:rounded-[20px] border border-brand-light shadow-sm flex items-center gap-3 md:gap-4 cursor-pointer hover:shadow-md hover:border-brand-primary/40 active:scale-[0.98] transition-all group">
              <!-- 圖示區域 -->
-             <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform">
+             <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg md:text-xl shrink-0 group-hover:scale-110 transition-transform">
                  <i class="${locObj.icon}"></i>
              </div>
-             
              <!-- 文字資訊 -->
              <div class="flex-1 overflow-hidden w-full">
-                <div class="text-[16px] md:text-[18px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">${spot.name}</div>
-                <div class="text-[12px] md:text-[13px] font-bold text-brand-textSub mt-0.5 md:mt-1.5 truncate flex items-center gap-1.5">
-                   <span class="text-brand-primary/80 shrink-0 bg-brand-primary/10 px-2 py-0.5 rounded-md text-[10px] md:text-[11px]">${locObj.label}</span>
-                   ${spot.subtitle ? `<span class="truncate ml-1 opacity-80">${spot.subtitle}</span>` : ''}
+                <div class="text-[14px] md:text-[15px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">${spot.name}</div>
+                <div class="text-[11px] md:text-[12px] font-bold text-brand-textSub mt-0.5 truncate flex items-center gap-1.5">
+                   <span class="text-brand-primary/80 shrink-0 bg-brand-primary/10 px-1.5 py-[2px] rounded text-[9px] md:text-[10px]">${locObj.label}</span>
+                   ${spot.subtitle ? `<span class="truncate opacity-80">${spot.subtitle}</span>` : ''}
                 </div>
              </div>
-             
-             <!-- 互動按鈕 (手機：小加號 / 電腦：寬按鈕) -->
-             <button class="md:hidden w-8 h-8 rounded-full bg-brand-bg text-brand-primary flex items-center justify-center shrink-0 border border-brand-light/80">
-                <i class="fa-solid fa-plus text-[12px]"></i>
-             </button>
-             
-             <button class="hidden md:flex w-full py-2.5 mt-2 rounded-xl bg-brand-bg text-brand-primary font-bold text-sm items-center justify-center gap-2 group-hover:bg-brand-primary group-hover:text-white transition-colors border border-transparent group-hover:border-brand-dark/10">
-                <i class="fa-solid fa-plus"></i> 加入行程
-             </button>
-
+             <!-- 箭頭提示 -->
+             <i class="fa-solid fa-location-arrow text-brand-light group-hover:text-brand-primary text-sm transition-colors"></i>
           </div>
           `;
       }).join('');
     }
 
-    // 綁定所有帶有 search-input 邏輯的輸入框
+    // 綁定搜尋輸入
     document.getElementById('input-explore-search').addEventListener('input', (e) => {
-        renderList(e.target.value);
+        renderListAndMap(e.target.value);
     });
 
+    // 初始化順序
+    initMap();
     loadSpots();
+
+    // 監聽視窗大小改變，重繪地圖尺寸
+    window.addEventListener('resize', () => { if(map) map.invalidateSize(); });
   </script>
 </body>
 </html>
