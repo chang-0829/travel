@@ -338,7 +338,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
     // Firebase Config
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
@@ -658,6 +658,24 @@
         }
     }
 
+    // 更新景點收藏數
+    async function fetchSpotFavoriteCount(spotId) {
+        try {
+            // 這邊需要使用 Cloud Functions 或其他後端機制來統計全部用戶的收藏數
+            // 由於目前只有前端，我們先模擬一個隨機數或固定的數量
+            // 實務上應該在 spots collection 中增加 favoriteCount 欄位，並透過 Cloud Functions 同步更新
+            
+            // 模擬取得收藏數 (暫時)
+            const simulatedCount = Math.floor(Math.random() * 50) + 1;
+            return simulatedCount;
+            
+        } catch (error) {
+            console.error("無法取得收藏數", error);
+            return 0;
+        }
+    }
+
+
     window.toggleFavorite = async function(spotId) {
         if (!currentUser && !isGuest) { window.showToast("請先登入後再使用收藏功能"); return; }
         const isFav = userFavorites.has(spotId);
@@ -698,7 +716,7 @@
       }
     }
 
-    function renderListAndMap(filter = '') {
+    async function renderListAndMap(filter = '') {
       const container = document.getElementById('explore-list');
       let spots = publicSpots;
       if (filter) {
@@ -722,10 +740,15 @@
           return;
       }
 
+      // 非同步取得所有景點的收藏數 (模擬)
+      const spotsWithFavCount = await Promise.all(spots.map(async (spot) => {
+          const count = await fetchSpotFavoriteCount(spot.id);
+          return { ...spot, favoriteCount: count };
+      }));
+
       // 砍掉重練：全新卡片式清單渲染 (更現代的圓角、縮圖設計)
-      container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
+      container.innerHTML = [...spotsWithFavCount].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-          const displayAddress = spot.address || spot.subtitle || '無詳細地址';
           
           // 若後台有傳圖片，左方就顯示縮圖
           const thumbnailHtml = spot.imageUrl
@@ -744,9 +767,13 @@
              <div class="flex-1 flex flex-col justify-center py-1 pr-4 min-w-0">
                 <div class="flex items-center gap-2 mb-1.5">
                    <span class="px-2.5 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
+                   <!-- 收藏人數顯示 -->
+                   <div class="flex items-center gap-1 text-[11px] font-bold text-brand-textSub">
+                       <i class="fa-solid fa-heart text-[#E63946] opacity-70"></i>
+                       <span>${spot.favoriteCount || 0}</span>
+                   </div>
                 </div>
                 <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
-                <div class="text-[12px] font-bold text-brand-textSub mt-1 truncate">${displayAddress}</div>
              </div>
              
              <!-- 裝飾用右側箭頭 -->
