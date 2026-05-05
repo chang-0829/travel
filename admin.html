@@ -39,8 +39,30 @@
 </head>
 <body class="text-brand-textMain antialiased overflow-hidden flex h-screen">
 
+  <!-- ================= 管理員專屬登入遮罩 ================= -->
+  <div id="admin-login-overlay" class="fixed inset-0 z-[9999] bg-brand-bg flex items-center justify-center p-4">
+    <div class="bg-white rounded-[32px] shadow-2xl border border-brand-light p-8 max-w-sm w-full text-center flex flex-col items-center">
+       <div class="w-20 h-20 bg-brand-dark text-white rounded-[24px] flex items-center justify-center text-3xl mb-6 shadow-md shadow-brand-dark/20">
+          <i class="fa-solid fa-user-shield"></i>
+       </div>
+       <h2 class="text-2xl font-extrabold text-brand-dark mb-2">系統管理後台</h2>
+       <p class="text-[13px] font-bold text-brand-textSub mb-8">此區域僅限高階管理員信箱存取</p>
+       
+       <!-- 錯誤提示區 -->
+       <p id="login-error-msg" class="hidden text-[13px] text-[#E63946] bg-[#FFE5E5] px-4 py-3 rounded-xl font-bold w-full mb-6 border border-[#E63946]/20"></p>
+       
+       <button onclick="window.adminLogin()" class="w-full py-4 bg-white border border-brand-light text-brand-dark font-extrabold text-[15px] rounded-[16px] shadow-sm hover:bg-brand-bg active:scale-95 transition-all flex items-center justify-center gap-3">
+          <i class="fa-brands fa-google text-[#4285F4] text-xl"></i> Google 帳號授權登入
+       </button>
+       
+       <a href="./discover.html" class="mt-8 text-xs font-bold text-brand-textSub hover:text-brand-primary transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> 返回前台探索
+       </a>
+    </div>
+  </div>
+
   <!-- 提示訊息 Toast -->
-  <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-brand-dark text-white px-6 py-3 rounded-full shadow-2xl z-[9999] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm">
+  <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-brand-dark text-white px-6 py-3 rounded-full shadow-2xl z-[9000] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm">
     <i class="fa-solid fa-circle-check text-brand-light"></i> <span id="toast-msg">處理成功</span>
   </div>
 
@@ -61,14 +83,13 @@
       <a href="#" class="flex items-center gap-4 px-4 py-3 rounded-xl bg-brand-primary/10 text-brand-primary font-bold transition-all">
         <i class="fa-solid fa-map-location-dot text-lg w-5 text-center"></i> <span>景點資料庫</span>
       </a>
-      <!-- 預留其他功能 -->
       <a href="#" class="flex items-center gap-4 px-4 py-3 rounded-xl text-brand-textSub hover:bg-brand-bg hover:text-brand-primary font-bold transition-all opacity-50 cursor-not-allowed">
         <i class="fa-solid fa-users text-lg w-5 text-center"></i> <span>用戶管理</span>
       </a>
     </div>
 
     <div class="p-4 border-t border-brand-light/50">
-      <a href="./discover.html" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-brand-bg text-brand-textMain font-bold hover:bg-brand-light/50 transition-all border border-brand-light">
+      <a href="./discover.html" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-brand-bg text-brand-textMain font-bold hover:bg-brand-light/50 transition-all border border-brand-light mb-2">
         <i class="fa-solid fa-arrow-right-from-bracket rotate-180"></i> 返回前台探索
       </a>
     </div>
@@ -85,15 +106,14 @@
       </div>
       <div class="flex items-center gap-4">
          <span id="admin-user-name" class="text-sm font-bold text-brand-textSub hidden sm:block">載入中...</span>
-         <div class="w-10 h-10 rounded-full bg-brand-bg border border-brand-light flex items-center justify-center text-brand-primary">
-            <i class="fa-solid fa-user-shield"></i>
-         </div>
+         <button onclick="window.adminLogout()" class="w-10 h-10 rounded-full bg-brand-bg border border-brand-light flex items-center justify-center text-brand-primary hover:bg-[#FFE5E5] hover:text-[#E63946] transition-colors shadow-sm" title="登出並返回">
+            <i class="fa-solid fa-right-from-bracket"></i>
+         </button>
       </div>
     </header>
 
     <!-- 內容區：資料表格 -->
     <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
-       
        <div class="bg-white rounded-2xl shadow-sm border border-brand-light flex flex-col h-full max-h-[800px]">
           <!-- 表格 Header 功能區 -->
           <div class="p-6 border-b border-brand-light/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
@@ -119,8 +139,7 @@
                    </tr>
                 </thead>
                 <tbody id="table-body" class="divide-y divide-brand-light/50">
-                   <!-- 動態渲染資料列 -->
-                   <tr><td colspan="5" class="px-6 py-12 text-center text-brand-textSub font-bold"><i class="fa-solid fa-spinner fa-spin mr-2"></i> 載入中...</td></tr>
+                   <tr><td colspan="5" class="px-6 py-12 text-center text-brand-textSub font-bold"><i class="fa-solid fa-spinner fa-spin mr-2"></i> 驗證權限中...</td></tr>
                 </tbody>
              </table>
           </div>
@@ -154,7 +173,7 @@
               <div>
                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">分類 <span class="text-[#E63946]">*</span></label>
                  <select id="form-mode" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all appearance-none cursor-pointer">
-                    <!-- JS 動態填入 LOCATION_MODES -->
+                    <!-- JS 動態填入 -->
                  </select>
               </div>
 
@@ -180,7 +199,6 @@
               <div class="bg-brand-dark text-white text-[11px] font-bold py-1.5 px-3 text-center shrink-0 flex items-center justify-center gap-2">
                  <i class="fa-solid fa-hand-pointer text-[#D5896F]"></i> 點擊地圖快速設定座標
               </div>
-              <!-- 迷你地圖容器 -->
               <div id="admin-map" class="flex-1 w-full relative z-0"></div>
            </div>
         </div>
@@ -201,7 +219,7 @@
   <!-- Firebase / 邏輯 -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getAuth, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
     import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
     // Firebase Init
@@ -218,6 +236,9 @@
     const db = getFirestore(app); 
     const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
 
+    // 🔒 授權信箱 (只有此信箱能進入後台)
+    const ADMIN_EMAIL = 'a0909921988@gmail.com';
+
     const LOCATION_MODES = [
       { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
       { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
@@ -232,9 +253,9 @@
 
     // State
     let adminSpots = [];
-    const isGuest = localStorage.getItem('isGuest') === 'true';
     let adminMap = null;
     let pickerMarker = null;
+    let isAdmin = false;
 
     // Toast Function
     window.showToast = function(msg) {
@@ -256,34 +277,62 @@
         });
     }
 
-    // Auth
+    // 登入驗證機制
     onAuthStateChanged(auth, user => {
         const nameEl = document.getElementById('admin-user-name');
-        if (isGuest) {
-            nameEl.innerText = "訪客管理員";
-        } else if (user) {
+        const loginOverlay = document.getElementById('admin-login-overlay');
+        const errorMsg = document.getElementById('login-error-msg');
+
+        if (user && user.email === ADMIN_EMAIL) {
+            // ✅ 通過驗證：是管理員
+            isAdmin = true;
             nameEl.innerText = user.displayName || "超級管理員";
+            loginOverlay.classList.add('hidden'); // 解除鎖定
+            initSelect();
+            loadSpots(); // 開始載入資料庫
         } else {
-            nameEl.innerText = "未登入";
+            // ❌ 驗證失敗：非管理員 或 未登入
+            isAdmin = false;
+            nameEl.innerText = "未授權";
+            loginOverlay.classList.remove('hidden'); // 顯示鎖定遮罩
+            document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-[#E63946] font-bold">拒絕存取：無權限讀取</td></tr>`;
+            
+            // 如果是用「不合法的 Google 帳號」登入，顯示錯誤提示
+            if (user && !user.isAnonymous && user.email !== ADMIN_EMAIL) {
+               errorMsg.innerText = `目前帳號 (${user.email}) 無權限進入後台。`;
+               errorMsg.classList.remove('hidden');
+               // 可選擇將其自動登出，避免卡在該信箱
+               signOut(auth);
+            } else {
+               errorMsg.classList.add('hidden');
+            }
         }
     });
 
-    // 載入資料
-    function loadSpots() {
-      if (isGuest) {
-        const localSpots = localStorage.getItem('guest_spots');
-        adminSpots = localSpots ? JSON.parse(localSpots) : [];
-        renderTable();
-      } else {
-        const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-        onSnapshot(qSpots, (snapshot) => {
-          adminSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderTable();
-        }, err => {
-          console.error(err);
-          window.showToast("載入資料失敗，請確認權限");
+    window.adminLogin = function() {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(err => {
+            window.showToast("登入失敗：" + err.message);
         });
-      }
+    };
+
+    window.adminLogout = function() {
+        signOut(auth).then(() => {
+            window.location.href = './discover.html'; // 登出後退回前台
+        });
+    };
+
+    // 載入資料 (只有驗證通過才會執行)
+    function loadSpots() {
+      if (!isAdmin) return;
+      const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+      onSnapshot(qSpots, (snapshot) => {
+        adminSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderTable();
+      }, err => {
+        console.error(err);
+        window.showToast("載入資料失敗，請確認權限");
+      });
     }
 
     // 渲染表格
@@ -301,7 +350,6 @@
           return;
       }
 
-      // 依時間新舊排序
       const sorted = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
       tbody.innerHTML = sorted.map(spot => {
@@ -344,8 +392,7 @@
 
     // ========== 地圖與 Modal 邏輯 ==========
     function initAdminMap() {
-        if(adminMap) return; // 避免重複初始化
-        
+        if(adminMap) return;
         const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google', maxZoom: 20
         });
@@ -355,7 +402,6 @@
         }).setView([23.5, 121], 7); 
         L.control.zoom({ position: 'topright' }).addTo(adminMap);
 
-        // 點擊地圖時更新座標與 Marker
         adminMap.on('click', function(e) {
             updatePickerMarker(e.latlng.lat, e.latlng.lng);
         });
@@ -375,12 +421,10 @@
             });
             pickerMarker = L.marker([lat, lng], { icon: customIcon }).addTo(adminMap);
         }
-        // 將視角稍微移到該點
         adminMap.panTo([lat, lng]);
     }
 
     window.openSpotModal = function(id = null) {
-        // 重置表單
         document.getElementById('form-id').value = id || '';
         document.getElementById('form-name').value = '';
         document.getElementById('form-sub').value = '';
@@ -401,7 +445,6 @@
                 document.getElementById('form-sub').value = spot.subtitle || '';
                 document.getElementById('form-mode').value = spot.locMode || 'spot';
                 if(spot.lat && spot.lng) {
-                    // 等待地圖渲染後更新點位
                     setTimeout(() => updatePickerMarker(spot.lat, spot.lng), 100);
                 }
             }
@@ -413,7 +456,6 @@
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        // 動畫進場 & 初始化地圖 Size
         setTimeout(() => {
             document.getElementById('spot-modal-backdrop').classList.remove('opacity-0');
             const content = document.getElementById('spot-modal-content');
@@ -421,7 +463,7 @@
             content.classList.add('scale-100', 'opacity-100');
             
             if(!adminMap) initAdminMap();
-            adminMap.invalidateSize(); // 解決 Modal 內地圖破圖的關鍵
+            adminMap.invalidateSize();
         }, 10);
     };
 
@@ -440,6 +482,7 @@
 
     // ========== CRUD 操作 ==========
     window.saveSpot = async function() {
+        if (!isAdmin) return; // 二次防呆
         const id = document.getElementById('form-id').value;
         const name = document.getElementById('form-name').value.trim();
         const sub = document.getElementById('form-sub').value.trim();
@@ -457,53 +500,32 @@
             lng: isNaN(lng) ? null : lng
         };
 
-        if (isGuest) {
+        try {
             if (id) {
-                // Edit
-                const idx = adminSpots.findIndex(s => s.id === id);
-                if(idx > -1) adminSpots[idx] = { ...adminSpots[idx], ...spotData };
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id), spotData);
             } else {
-                // Add
-                adminSpots.push({ id: Date.now().toString(), createdAt: Date.now(), ...spotData });
+                spotData.createdAt = Date.now();
+                spotData.creatorId = auth.currentUser ? auth.currentUser.uid : 'admin';
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
             }
-            localStorage.setItem('guest_spots', JSON.stringify(adminSpots));
             window.closeSpotModal();
-            window.showToast("本機儲存成功");
-            renderTable();
-        } else {
-            try {
-                if (id) {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id), spotData);
-                } else {
-                    spotData.createdAt = Date.now(); // 保留時間戳
-                    spotData.creatorId = auth.currentUser ? auth.currentUser.uid : 'admin';
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
-                }
-                window.closeSpotModal();
-                window.showToast("雲端儲存成功");
-            } catch(e) {
-                console.error(e);
-                window.showToast("寫入失敗，請確認權限");
-            }
+            window.showToast("雲端儲存成功");
+        } catch(e) {
+            console.error(e);
+            window.showToast("寫入失敗，請確認 Firebase 權限規則");
         }
     };
 
     window.deleteSpot = async function(id) {
+        if (!isAdmin) return; // 二次防呆
         if(!confirm("確定要刪除此景點嗎？刪除後前台也將無法搜尋到。")) return;
 
-        if (isGuest) {
-            adminSpots = adminSpots.filter(s => s.id !== id);
-            localStorage.setItem('guest_spots', JSON.stringify(adminSpots));
-            window.showToast("本機刪除成功");
-            renderTable();
-        } else {
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id));
-                window.showToast("雲端刪除成功");
-            } catch(e) {
-                console.error(e);
-                window.showToast("刪除失敗，請確認權限");
-            }
+        try {
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id));
+            window.showToast("雲端刪除成功");
+        } catch(e) {
+            console.error(e);
+            window.showToast("刪除失敗，請確認 Firebase 權限規則");
         }
     };
 
@@ -512,14 +534,11 @@
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
             }
         } catch (e) {
             console.log('Auth Init Fallback', e);
         }
-        initSelect();
-        loadSpots();
+        // 資料載入交由 onAuthStateChanged 處理
     }
 
     startApp();
