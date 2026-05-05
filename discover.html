@@ -3,38 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>趣旅行 - 探索</title>
-  <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-  <script>tailwind.config={theme:{extend:{colors:{brand:{primary:'#748CAB',dark:'#3E5C76',light:'#E6EBEF',bg:'#F2F5F8',card:'#FFFFFF',textMain:'#2C3E50',textSub:'#8796A5'}}}}}</script>
+  <title>趣旅行 - 探索景點</title>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#748CAB',
+              dark: '#3E5C76',
+              light: '#E6EBEF',
+              bg: '#F2F5F8',
+              card: '#FFFFFF',
+              textMain: '#2C3E50',
+              textSub: '#8796A5',
+              accent: '#D5896F'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    body { font-family: ui-sans-serif, system-ui, sans-serif; background-color: #F2F5F8; }
+    /* --- LINE Seed TW 字體整合 --- */
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    body { font-family: 'LINE Seed TW', ui-sans-serif, system-ui, sans-serif; background-color: #F2F5F8; }
+
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
   </style>
 </head>
-<body class="text-brand-textMain antialiased overflow-hidden">
+<body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
+
   <div class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
-    <!-- Header -->
-    <header class="bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10">
+
+    <!-- 標準 Header -->
+    <header class="bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
       <div>
         <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Discover</p>
         <h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">探索景點</h1>
       </div>
     </header>
 
-    <!-- View: Explore -->
+    <!-- 主內容區：探索景點列表 -->
     <div class="flex-1 flex flex-col bg-brand-bg relative overflow-hidden">
+       <!-- 搜尋列固定在上方 -->
        <div class="px-6 pt-4 pb-2 shrink-0 bg-brand-bg z-10">
           <div class="relative">
              <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
-             <input type="text" id="input-explore-search" placeholder="搜尋大家建立的景點..." class="w-full bg-white rounded-2xl py-3 pl-11 pr-4 shadow-sm border border-brand-light/80 outline-none focus:border-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark">
+             <input type="text" id="input-explore-search" placeholder="搜尋大家建立的景點..." class="w-full bg-white rounded-2xl py-3 pl-11 pr-4 shadow-sm border border-brand-light/80 outline-none focus:border-brand-primary/50 transition-all text-[15px] font-bold text-brand-dark placeholder-brand-textSub/50">
           </div>
        </div>
-       <div id="explore-list" class="flex-1 overflow-y-auto px-6 py-4 hide-scrollbar space-y-3 pb-24">
-          <!-- 列表 -->
+       
+       <!-- 景點列表 -->
+       <div id="explore-list" class="flex-1 overflow-y-auto px-6 py-4 hide-scrollbar space-y-3 pb-6">
+          <div class="py-12 text-center text-brand-textSub opacity-50">
+              <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+              <p class="font-bold text-sm">載入中...</p>
+          </div>
        </div>
     </div>
 
@@ -42,59 +81,140 @@
     <nav class="bg-white border-t border-brand-light shrink-0 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
       <div class="flex justify-around items-center h-[65px]">
         <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
-          <i class="fa-solid fa-house mb-1 text-[18px]"></i><span class="text-[10px] font-bold">首頁</span>
+          <i class="fa-solid fa-house mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">首頁</span>
         </a>
+        <!-- 探索頁面 Active 狀態 -->
         <a href="./discover.html" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors">
-          <i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i><span class="text-[10px] font-bold">探索</span>
+          <i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">探索</span>
         </a>
         <a href="./mytrip.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
-          <i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i><span class="text-[10px] font-bold">行程</span>
+          <i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">行程</span>
         </a>
         <a href="./account.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
-          <i class="fa-solid fa-user mb-1 text-[18px]"></i><span class="text-[10px] font-bold">會員</span>
+          <i class="fa-solid fa-user mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">會員</span>
         </a>
       </div>
     </nav>
+
   </div>
 
   <script type="module">
-    import { initializeApp } from '[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)';
-    import { getFirestore, collection, onSnapshot } from '[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    const firebaseConfig = { apiKey: "AIza...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
-    const app = initializeApp(firebaseConfig); const db = getFirestore(app); const appId = "travel-platform-v2";
-    
+    // Firebase Init
+    const firebaseConfig = { 
+      apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
+      authDomain: "travel-96009.firebaseapp.com", 
+      projectId: "travel-96009", 
+      storageBucket: "travel-96009.firebasestorage.app", 
+      messagingSenderId: "578860064042", 
+      appId: "1:578860064042:web:b147880df3a01dd8f75253" 
+    };
+    const app = initializeApp(firebaseConfig); 
+    const db = getFirestore(app); 
+    const appId = "travel-platform-v2";
+
+    // 地點圖示與分類
+    const LOCATION_MODES = [
+      { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
+      { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
+      { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
+      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
+      { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
+      { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
+      { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
+      { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
+      { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
+    ];
+
+    // 預設公共景點庫
+    const DEFAULT_PUBLIC_SPOTS = [
+       { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', createdAt: Date.now() },
+       { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', createdAt: Date.now() },
+       { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', createdAt: Date.now() },
+       { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', createdAt: Date.now() },
+       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', createdAt: Date.now() }
+    ];
+
     let publicSpots = [];
     const isGuest = localStorage.getItem('isGuest') === 'true';
 
+    // 載入景點資料
     function loadSpots() {
       if (isGuest) {
         const localSpots = localStorage.getItem('guest_spots');
-        publicSpots = localSpots ? JSON.parse(localSpots) : []; renderList();
+        publicSpots = localSpots ? JSON.parse(localSpots) : DEFAULT_PUBLIC_SPOTS;
+        renderList();
       } else {
-        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), (snapshot) => {
-          publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderList();
+        const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+        onSnapshot(qSpots, (snapshot) => {
+          publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          if (publicSpots.length === 0) publicSpots = DEFAULT_PUBLIC_SPOTS;
+          renderList();
+        }, err => {
+          console.error(err);
+          // 若無權限讀取或發生錯誤，採用預設列表避免空白
+          publicSpots = DEFAULT_PUBLIC_SPOTS;
+          renderList();
         });
       }
     }
 
+    // 渲染列表 (包含搜尋過濾)
     function renderList(filter = '') {
       const container = document.getElementById('explore-list');
       let spots = publicSpots;
-      if(filter) { const kw = filter.toLowerCase(); spots = spots.filter(s => (s.name||'').toLowerCase().includes(kw)); }
       
-      container.innerHTML = spots.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => `
-        <div class="bg-white p-4 rounded-[20px] border border-brand-light shadow-sm flex items-center gap-3">
-           <div class="w-12 h-12 rounded-full bg-brand-bg text-brand-primary flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-location-dot"></i></div>
-           <div class="flex-1 overflow-hidden">
-              <div class="text-[16px] font-extrabold text-brand-dark truncate">${spot.name}</div>
-              <div class="text-[12px] font-bold text-brand-textSub mt-0.5 truncate">${spot.subtitle || ''}</div>
-           </div>
-        </div>
-      `).join('');
+      if (filter) {
+          const kw = filter.toLowerCase();
+          spots = spots.filter(s => 
+              (s.name || '').toLowerCase().includes(kw) || 
+              (s.subtitle || '').toLowerCase().includes(kw)
+          );
+      }
+
+      if (spots.length === 0) {
+          container.innerHTML = `
+            <div class="py-12 text-center text-brand-textSub opacity-50">
+                <i class="fa-solid fa-ghost text-4xl mb-4"></i>
+                <p class="font-bold text-sm">找不到相關景點</p>
+            </div>`;
+          return;
+      }
+
+      // 依照建立時間新舊排序
+      const sortedSpots = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      container.innerHTML = sortedSpots.map(spot => {
+          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+          return `
+          <div class="bg-white p-4 rounded-[20px] border border-brand-light shadow-sm flex items-center gap-3 active:scale-[0.98] transition-transform">
+             <div class="w-12 h-12 rounded-full bg-brand-bg text-brand-primary flex items-center justify-center text-xl shrink-0">
+                 <i class="${locObj.icon}"></i>
+             </div>
+             <div class="flex-1 overflow-hidden">
+                <div class="text-[16px] font-extrabold text-brand-dark truncate">${spot.name}</div>
+                <div class="text-[12px] font-bold text-brand-textSub mt-0.5 truncate flex items-center gap-1.5">
+                   <span class="text-brand-primary/80">${locObj.label}</span>
+                   ${spot.subtitle ? `<i class="fa-solid fa-circle text-[3px] opacity-50"></i> <span class="truncate">${spot.subtitle}</span>` : ''}
+                </div>
+             </div>
+          </div>
+          `;
+      }).join('');
     }
 
-    document.getElementById('input-explore-search').addEventListener('input', (e) => renderList(e.target.value));
+    // 監聽搜尋輸入
+    document.getElementById('input-explore-search').addEventListener('input', (e) => {
+        renderList(e.target.value);
+    });
+
+    // 初始化載入
     loadSpots();
   </script>
 </body>
