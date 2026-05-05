@@ -217,14 +217,20 @@
             
             <!-- 大面積封面圖區 -->
             <div class="h-[280px] md:h-[320px] bg-brand-dark relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
-               <div class="absolute inset-0 bg-gradient-to-b from-brand-primary to-brand-dark opacity-90"></div>
+               
+               <!-- 景點真實圖片背景 (必須補上這段 id，否則 JS 會報錯) -->
+               <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-0"></div>
+               
+               <div class="absolute inset-0 bg-gradient-to-b from-brand-primary to-brand-dark opacity-90 mix-blend-multiply z-0 pointer-events-none"></div>
                <!-- 裝飾性圖案與光影 -->
-               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl"></div>
+               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
+               
                <!-- 景點意象大圖標 -->
-               <i class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0 drop-shadow-2xl"></i>
+               <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300"></i>
+               
                <!-- 頂部漸層遮罩 (讓按鈕清楚) -->
-               <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/40 to-transparent z-10"></div>
+               <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/40 to-transparent z-10 pointer-events-none"></div>
                
                <!-- 左上角返回按鈕 -->
                <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/40 transition-all shadow-md z-20">
@@ -456,19 +462,24 @@
         }
     }
 
+    // 將 showSpotDetail 移出 if-else 邏輯之外，讓沒有地圖座標的景點也能強制打開右側面板！
     window.flyToSpot = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
-        if (spot && spot.lat && spot.lng) {
+        if (!spot) return;
+
+        if (spot.lat && spot.lng) {
             const isMobile = window.innerWidth < 768;
             let targetLat = spot.lat;
             if(isMobile) {
                 targetLat = spot.lat - 0.003; 
             }
             map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
-            window.showSpotDetail(spotId);
         } else {
-            window.showToast('這個景點尚未設定精確座標！');
+            window.showToast('這個景點尚未設定精確座標！但可以查看詳細資訊。');
         }
+        
+        // 確保面板一定會滑出來
+        window.showSpotDetail(spotId);
     };
 
     // ========== 手機版清單觸控拖曳邏輯 ==========
@@ -527,13 +538,6 @@
         }, 300);
     });
 
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768) {
-            sheetPanel.style.height = ''; 
-            document.getElementById('fab-group').style.bottom = '';
-        }
-    });
-
     // ========== 景點資訊面板邏輯 ==========
     window.showSpotDetail = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
@@ -541,19 +545,21 @@
 
         const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
 
-        // 處理頂部封面圖片與預設圖示的動態切換
+        // 處理頂部封面圖片與預設圖示的動態切換 (已加入容錯與元素綁定)
         const coverEl = document.getElementById('detail-cover-image');
         const defaultIconEl = document.getElementById('detail-default-icon');
         
-        if (spot.imageUrl) {
-            coverEl.style.backgroundImage = `url('${spot.imageUrl}')`;
-            coverEl.classList.remove('opacity-0');
-            defaultIconEl.classList.add('opacity-0');
-        } else {
-            coverEl.style.backgroundImage = 'none';
-            coverEl.classList.add('opacity-0');
-            defaultIconEl.className = `fa-solid ${locObj.icon} text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300`;
-            defaultIconEl.classList.remove('opacity-0');
+        if (coverEl && defaultIconEl) {
+            if (spot.imageUrl) {
+                coverEl.style.backgroundImage = `url('${spot.imageUrl}')`;
+                coverEl.classList.remove('opacity-0');
+                defaultIconEl.classList.add('opacity-0');
+            } else {
+                coverEl.style.backgroundImage = 'none';
+                coverEl.classList.add('opacity-0');
+                defaultIconEl.className = `fa-solid ${locObj.icon} text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300`;
+                defaultIconEl.classList.remove('opacity-0');
+            }
         }
 
         // 綁定最新設計的標題與分類 Badge
@@ -621,6 +627,7 @@
         const favBtn = document.getElementById('btn-favorite-spot');
         favBtn.onclick = () => window.toggleFavorite(spot.id);
 
+        // 確保面板正確滑出！
         document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
     };
 
@@ -718,28 +725,35 @@
           return;
       }
 
-      // 全新卡片式清單渲染 (補上 items-center 確保內部方塊與文字互相置中對齊)
+      // 砍掉重練：全新卡片式清單渲染 (更現代的圓角、縮圖設計)
       container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+          const displayAddress = spot.address || spot.subtitle || '無詳細地址';
+          
+          // 若後台有傳圖片，左方就顯示縮圖
+          const thumbnailHtml = spot.imageUrl
+              ? `<img src="${spot.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="${spot.name}">`
+              : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary/10 to-brand-dark/10 text-brand-primary"><i class="${locObj.icon} text-[26px] drop-shadow-sm"></i></div>`;
+
           return `
-          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/70 backdrop-blur-xl p-3 rounded-[24px] border border-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex items-center gap-4 cursor-pointer hover:bg-white hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
+          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white p-3.5 rounded-[28px] border border-brand-light/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex items-center gap-4 cursor-pointer hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-brand-primary/30 hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
              
-             <!-- 卡片左側：大型圖示區塊 -->
-             <div class="w-[72px] h-[72px] rounded-[18px] bg-gradient-to-br from-brand-primary/80 to-brand-dark text-white flex flex-col items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform relative overflow-hidden">
-                 <i class="${locObj.icon} text-[28px] relative z-10 drop-shadow-sm"></i>
-                 <div class="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
+             <!-- 卡片左側：縮圖或圖示 -->
+             <div class="w-[88px] h-[88px] rounded-[20px] bg-brand-bg shrink-0 shadow-inner relative overflow-hidden border border-brand-light/50">
+                 ${thumbnailHtml}
              </div>
              
              <!-- 卡片右側：資訊區塊 -->
-             <div class="flex-1 flex flex-col justify-center py-1 pr-2 min-w-0">
+             <div class="flex-1 flex flex-col justify-center py-1 pr-4 min-w-0">
                 <div class="flex items-center gap-2 mb-1.5">
-                   <span class="px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
+                   <span class="px-2.5 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
                 </div>
                 <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
+                <div class="text-[12px] font-bold text-brand-textSub mt-1 truncate">${displayAddress}</div>
              </div>
              
              <!-- 裝飾用右側箭頭 -->
-             <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-primary">
+             <div class="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-primary">
                 <i class="fa-solid fa-chevron-right text-sm"></i>
              </div>
           </div>`;
