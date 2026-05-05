@@ -168,18 +168,6 @@
         <div class="w-full md:w-[450px] lg:w-[500px] flex flex-col border-b md:border-b-0 md:border-r border-brand-light shrink-0 z-10 bg-white">
            <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-5">
                <input type="hidden" id="form-id">
-               
-               <!-- 從 Google 地圖網址解析 -->
-               <div class="bg-brand-bg/50 p-4 rounded-2xl border border-brand-light shadow-sm">
-                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1"><i class="fa-brands fa-google text-[#4285F4] mr-1"></i>從 Google Maps 網址獲取座標</label>
-                  <div class="flex gap-2">
-                     <input type="url" id="form-gmap-url" placeholder="貼上包含經緯度的完整網址..." class="flex-1 w-full bg-white border border-brand-light/80 rounded-xl px-4 py-2.5 text-sm font-bold text-brand-dark outline-none focus:border-[#4285F4]/50 transition-all">
-                     <button type="button" onclick="window.parseGoogleMapsUrl()" class="px-4 py-2.5 bg-[#4285F4] text-white font-bold rounded-xl shadow-md shadow-[#4285F4]/30 hover:bg-blue-600 active:scale-95 transition-all shrink-0">
-                        解析
-                     </button>
-                  </div>
-                  <p class="text-[10px] text-brand-textSub mt-1.5 px-1">若為短網址 (maps.app.goo.gl) 請先於瀏覽器開啟，待跳轉後複製完整的網址即可解析。</p>
-               </div>
 
                <div>
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點中文名稱 <span class="text-[#E63946]">*</span></label>
@@ -204,15 +192,9 @@
                   </select>
                </div>
 
-               <!-- 地址與自動定位功能 -->
                <div>
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">地址 <span class="text-[#E63946]">*</span></label>
-                  <div class="flex gap-2">
-                     <input type="text" id="form-address" placeholder="輸入完整地址" class="flex-1 w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
-                     <button type="button" onclick="window.geocodeAddress()" class="px-4 py-3 bg-brand-bg text-brand-primary border border-brand-light font-bold rounded-xl hover:bg-brand-primary hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0" title="自動將地址轉換為地圖座標">
-                        <i class="fa-solid fa-search-location mr-1.5"></i> <span class="text-sm">地址定位</span>
-                     </button>
-                  </div>
+                  <input type="text" id="form-address" placeholder="輸入完整地址" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
                </div>
 
                <div>
@@ -250,7 +232,7 @@
         <!-- 右側：滿版地圖選點器 -->
         <div class="flex-1 h-[400px] md:h-full bg-brand-light relative flex flex-col shrink-0 z-0">
            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-lg text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-2 z-[400]">
-              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 點擊地圖、解析 Google 網址、地址搜尋或手動輸入
+              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 在地圖上點擊或左下方手動輸入精準座標
            </div>
            <div id="admin-map" class="flex-1 w-full h-full relative z-0"></div>
         </div>
@@ -465,7 +447,7 @@
         adminMap.panTo([lat, lng]);
     }
 
-    // ★ 新增功能：手動輸入經緯度連動地圖 ★
+    // 手動輸入經緯度連動地圖
     window.handleManualCoordChange = function() {
         const lat = parseFloat(document.getElementById('form-lat').value);
         const lng = parseFloat(document.getElementById('form-lng').value);
@@ -488,83 +470,9 @@
         }
     };
 
-    // ★ 新增功能：從 Google Maps 網址解析座標 ★
-    window.parseGoogleMapsUrl = function() {
-        const url = document.getElementById('form-gmap-url').value.trim();
-        if (!url) {
-            window.showToast("請貼上 Google 地圖網址");
-            return;
-        }
-
-        let lat, lng;
-
-        // 嘗試解析 @lat,lng (例如：@25.0339639,121.5644722)
-        const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-        const matchAt = url.match(regexAt);
-
-        if (matchAt) {
-            lat = parseFloat(matchAt[1]);
-            lng = parseFloat(matchAt[2]);
-        } else {
-            // 嘗試解析 !3d... !4d... 格式
-            const regexBang = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/;
-            const matchBang = url.match(regexBang);
-            if (matchBang) {
-                lat = parseFloat(matchBang[1]);
-                lng = parseFloat(matchBang[2]);
-            }
-        }
-
-        if (lat && lng) {
-            updatePickerMarker(lat, lng);
-            if(adminMap) adminMap.setZoom(16);
-            window.showToast("已成功從網址解析出座標！");
-        } else {
-            window.showToast("無法解析！請確保貼上的是「完整網址」(包含 @緯度,經度)，若為短網址請先用瀏覽器打開。");
-        }
-    };
-
-    // 自動定位 (Nominatim API)
-    window.geocodeAddress = async function() {
-        const address = document.getElementById('form-address').value.trim();
-        const name = document.getElementById('form-name').value.trim();
-        const query = address || name;
-
-        if (!query) {
-            window.showToast("請先輸入地址或景點名稱");
-            return;
-        }
-
-        const btnIcon = document.querySelector('button[onclick="window.geocodeAddress()"] i');
-        if(btnIcon) btnIcon.className = 'fa-solid fa-spinner fa-spin mr-1.5';
-        window.showToast("搜尋座標中...");
-
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lng = parseFloat(data[0].lon);
-
-                updatePickerMarker(lat, lng);
-                adminMap.setZoom(16);
-                window.showToast("自動定位成功！");
-            } else {
-                window.showToast("找不到精確座標，請嘗試補充城市名稱或手動點擊地圖。");
-            }
-        } catch (e) {
-            console.error(e);
-            window.showToast("自動定位失敗");
-        } finally {
-            if(btnIcon) btnIcon.className = 'fa-solid fa-search-location mr-1.5';
-        }
-    };
-
     window.openSpotModal = function(id = null) {
         // 重置表單
         document.getElementById('form-id').value = id || '';
-        document.getElementById('form-gmap-url').value = '';
         document.getElementById('form-name').value = '';
         document.getElementById('form-foreign1').value = '';
         document.getElementById('form-foreign2').value = '';
@@ -606,7 +514,7 @@
              setTimeout(() => { if(adminMap) adminMap.setView([23.5, 121], 7); }, 200);
         }
 
-        // 滿版進場動畫 (由下往上滑出)
+        // 滿版進場動畫
         const modal = document.getElementById('spot-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -621,7 +529,6 @@
     };
 
     window.closeSpotModal = function() {
-        // 退場動畫 (往下縮回)
         const modal = document.getElementById('spot-modal');
         modal.classList.remove('translate-y-0', 'opacity-100');
         modal.classList.add('translate-y-full', 'opacity-0');
@@ -634,7 +541,7 @@
 
     // ========== CRUD 操作 ==========
     window.saveSpot = async function() {
-        if (!isAdmin) return; // 二次防呆
+        if (!isAdmin) return;
         
         const id = document.getElementById('form-id').value;
         const name = document.getElementById('form-name').value.trim();
@@ -683,7 +590,7 @@
     };
 
     window.deleteSpot = async function(id) {
-        if (!isAdmin) return; // 二次防呆
+        if (!isAdmin) return;
         if(!confirm("確定要刪除此景點嗎？刪除後前台也將無法搜尋到。")) return;
 
         try {
@@ -695,7 +602,6 @@
         }
     };
 
-    // Start App
     async function startApp() {
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
