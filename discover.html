@@ -51,6 +51,7 @@
     /* 覆寫 Leaflet 預設樣式以符合設計語言 */
     .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 8px !important; border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; background: #fff !important; margin-bottom: 4px !important; }
     .leaflet-control-zoom { border: none !important; margin-top: 24px !important; margin-right: 24px !important; }
+    .leaflet-control-layers { border-radius: 12px !important; border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; font-family: 'LINE Seed TW', sans-serif !important; font-weight: 700 !important; color: #2C3E50 !important; padding: 6px !important; margin-top: 24px !important; margin-right: 24px !important;}
     .leaflet-popup-content-wrapper { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 0; }
     .leaflet-popup-content { margin: 0; }
     .leaflet-popup-tip-container { display: none; }
@@ -59,12 +60,24 @@
     .custom-marker { background: transparent; border: none; }
     .marker-pin { width: 36px; height: 36px; border-radius: 50%; background: #748CAB; border: 3px solid white; box-shadow: 0 4px 10px rgba(116, 140, 171, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; transition: transform 0.2s; }
     .marker-pin:hover { transform: scale(1.15) translateY(-4px); z-index: 1000 !important; background: #3E5C76;}
+    
+    /* 動畫類別 */
+    .bottom-sheet { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .bottom-sheet.open { transform: translateY(0); }
+    .bottom-sheet.closed { transform: translateY(100%); }
+    .overlay { transition: opacity 0.3s ease; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .overlay.closed { opacity: 0; pointer-events: none; }
+    
+    /* 地圖中央準星 (新增景點用) */
+    .map-crosshair { pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    .map-crosshair.active { opacity: 1; }
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
 
   <!-- 提示訊息 Toast -->
-  <div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[100] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
+  <div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[2500] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
     <i class="fa-solid fa-circle-info text-brand-primary"></i> <span id="toast-msg">提示訊息</span>
   </div>
 
@@ -107,10 +120,16 @@
     </aside>
 
     <!-- ================= 主內容區域 (滿版地圖) ================= -->
-    <main class="flex-1 relative overflow-hidden bg-brand-light">
+    <main class="flex-1 relative overflow-hidden bg-brand-light flex">
       
       <!-- 滿版地圖容器 (z-index 0) -->
       <div id="map" class="absolute inset-0 z-0"></div>
+
+      <!-- 地圖中央準星 (新增景點時顯示) -->
+      <div id="map-crosshair" class="map-crosshair absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[400] flex flex-col items-center">
+         <div class="bg-brand-dark text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg mb-2">拖曳地圖以定位</div>
+         <i class="fa-solid fa-crosshairs text-3xl text-[#D5896F] drop-shadow-md"></i>
+      </div>
 
       <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
       <div class="absolute inset-0 pointer-events-none flex flex-col z-[400] overflow-hidden
@@ -151,9 +170,27 @@
          </div>
       </div>
 
+      <!-- 浮動新增按鈕 (FAB) -->
+      <div class="absolute bottom-[90px] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto">
+        <button onclick="window.startAddSpotMode()" class="w-14 h-14 bg-[#D5896F] text-white rounded-full shadow-lg shadow-[#D5896F]/40 flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all">
+           <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- 新增模式時的底部確認面板 (預設隱藏) -->
+      <div id="add-spot-toolbar" class="absolute bottom-[80px] md:bottom-6 left-1/2 transform -translate-x-1/2 z-[450] pointer-events-auto hidden w-[90%] md:w-auto max-w-sm">
+         <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-brand-light p-4 flex flex-col gap-3">
+            <div class="text-center font-bold text-brand-dark text-sm">請將要新增的景點移至畫面中央十字準星處</div>
+            <div class="flex gap-2">
+               <button onclick="window.cancelAddSpotMode()" class="flex-1 py-2.5 bg-brand-bg text-brand-textSub font-bold rounded-xl hover:bg-brand-light transition-all">取消</button>
+               <button onclick="window.openAddSpotForm()" class="flex-1 py-2.5 bg-[#D5896F] text-white font-bold rounded-xl shadow-md shadow-[#D5896F]/30 active:scale-95 transition-all">確認位置</button>
+            </div>
+         </div>
+      </div>
+
     </main>
 
-    <!-- ================= 手機版：底部導覽列 (z-index 要比地圖高) ================= -->
+    <!-- ================= 手機版：底部導覽列 ================= -->
     <nav class="md:hidden absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-light shrink-0 z-[500] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div class="flex justify-around items-center h-[65px]">
         <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
@@ -179,13 +216,57 @@
 
   </div>
 
+  <!-- ================= Modal: 填寫新增景點資訊 ================= -->
+  <div id="modal-overlay" onclick="window.closeAllModals()" class="overlay closed fixed inset-0 z-[2000] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
+
+  <div id="sheet-add-public-spot" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[2001] flex flex-col justify-end pointer-events-none">
+    <div class="pointer-events-auto relative bg-brand-bg w-full max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col h-[85vh]">
+      <div class="shrink-0 bg-brand-bg rounded-t-[32px] z-10 border-b border-brand-light/80 pb-2">
+        <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2"></div>
+        <div class="px-6 py-2 flex justify-between items-center">
+          <h3 class="text-[18px] font-bold text-brand-dark">分享新景點</h3>
+          <button onclick="window.closeAllModals()" class="w-8 h-8 flex items-center justify-center bg-white shadow-sm rounded-full text-brand-textSub hover:text-brand-textMain transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
+        <div class="bg-brand-primary/10 rounded-2xl p-4 text-center border border-brand-primary/20">
+          <i class="fa-solid fa-earth-asia text-2xl text-brand-primary mb-2"></i>
+          <p class="text-[13px] font-bold text-brand-dark">在此新增的地標將會發佈至公共地圖<br>幫助大家豐富旅程！</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-brand-light">
+          <span class="block text-[12px] font-bold text-brand-textSub mb-2 pl-1">選擇分類</span>
+          <div id="public-spot-modes-grid" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-brand-light space-y-3">
+          <div>
+            <span class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">景點名稱 <span class="text-[#E63946]">*</span></span>
+            <input type="text" id="input-public-name" placeholder="請輸入準確的地標名稱" class="w-full bg-[#F8FAFC] border border-transparent rounded-xl px-4 py-3 text-[15px] font-bold text-brand-dark outline-none focus:border-brand-primary/40 focus:bg-white transition-all">
+          </div>
+          <div>
+            <span class="block text-[12px] font-bold text-brand-textSub mb-1.5 pl-1">地址或備註資訊</span>
+            <textarea id="input-public-sub" placeholder="例：東京鐵塔、或簡易地址" rows="2" class="w-full bg-[#F8FAFC] border border-transparent rounded-xl px-4 py-3 text-[15px] font-bold text-brand-dark outline-none focus:border-brand-primary/40 focus:bg-white transition-all resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-brand-light/50 bg-white shrink-0 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+        <button onclick="window.saveNewSpot()" class="w-full bg-[#D5896F] text-white font-bold text-[16px] py-4 rounded-[16px] shadow-lg shadow-[#D5896F]/30 active:scale-95 transition-all flex justify-center items-center gap-2">
+          發佈至地圖
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Leaflet JS (地圖核心套件) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <!-- Firebase / 邏輯 -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-    import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+    import { getFirestore, collection, onSnapshot, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
     // Firebase Init
     const firebaseConfig = { 
@@ -224,7 +305,6 @@
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
-    // 為了地圖展示，替預設景點加上真實經緯度 (lat, lng)
     const DEFAULT_PUBLIC_SPOTS = [
        { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', lat: 25.0339, lng: 121.5644, createdAt: Date.now() },
        { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', lat: 34.9948, lng: 135.7850, createdAt: Date.now() },
@@ -239,44 +319,53 @@
     let publicSpots = [];
     const isGuest = localStorage.getItem('isGuest') === 'true';
 
-    // ========== 地圖初始化 (Leaflet) ==========
+    // ========== 地圖初始化與控制 (Leaflet) ==========
     let map = null;
     let markersLayer = null;
-    let markersDict = {}; // 保存 marker 實例，方便點擊列表時觸發
+    let markersDict = {};
 
     function initMap() {
-        // 隱藏預設縮放按鈕，後續自訂位置
-        map = L.map('map', { zoomControl: false }).setView([23.5, 121], 6); // 預設視角：台灣
+        // 建立兩種圖層：1.高質感街道圖 (CartoDB) 2.衛星影像 (Esri World Imagery)
+        const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            maxZoom: 19
+        });
         
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; Esri',
+            maxZoom: 19
+        });
+
+        // 隱藏預設縮放按鈕
+        map = L.map('map', { 
+            zoomControl: false,
+            layers: [streetLayer] // 預設顯示街道圖
+        }).setView([23.5, 121], 6); 
+        
+        // 加入圖層控制面板 (右上角)
+        const baseMaps = {
+            "街道圖": streetLayer,
+            "衛星圖": satelliteLayer
+        };
+        L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
         // 將縮放控制鈕放到右上方
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        // 使用高質感的 CartoDB Voyager 圖層 (現代、乾淨，很適合旅遊 App)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 19
-        }).addTo(map);
-
         markersLayer = L.layerGroup().addTo(map);
-        
-        // 延遲更新地圖尺寸 (避免在框架或手機上渲染錯位)
         setTimeout(() => { map.invalidateSize(); }, 500);
     }
 
-    // 將景點畫在地圖上
     function renderMarkersOnMap(spots) {
         markersLayer.clearLayers();
         markersDict = {};
-        
         let validCoords = [];
 
         spots.forEach(spot => {
-            // 若該資料有座標才畫 Marker
             if (spot.lat && spot.lng) {
                 validCoords.push([spot.lat, spot.lng]);
                 const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
                 
-                // 自訂 HTML Marker 圖示
                 const customIcon = L.divIcon({
                     className: 'custom-marker',
                     html: `<div class="marker-pin"><i class="${locObj.icon}"></i></div>`,
@@ -286,8 +375,6 @@
                 });
 
                 const marker = L.marker([spot.lat, spot.lng], { icon: customIcon });
-                
-                // 點擊 Marker 顯示的 Popup 卡片
                 const popupContent = `
                    <div class="p-4 w-48 text-center bg-white rounded-2xl relative overflow-hidden">
                       <div class="w-10 h-10 mx-auto rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg mb-2"><i class="${locObj.icon}"></i></div>
@@ -296,35 +383,26 @@
                       <button onclick="window.showToast('前往我的行程以加入：${spot.name}')" class="w-full py-2 bg-brand-primary text-white text-[12px] font-bold rounded-lg shadow-sm active:scale-95 transition-all">加入行程</button>
                    </div>
                 `;
-                
                 marker.bindPopup(popupContent);
                 markersLayer.addLayer(marker);
-                markersDict[spot.id] = marker; // 紀錄實例
+                markersDict[spot.id] = marker;
             }
         });
 
-        // 自動縮放以包含所有點 (若有搜尋過濾，會自動聚焦到搜尋結果)
         if (validCoords.length > 0) {
             const bounds = L.latLngBounds(validCoords);
-            // 視窗左側/下方有 UI 遮擋，設定 padding
             const isDesktop = window.innerWidth >= 768;
             const padOptions = isDesktop ? { paddingTopLeft: [400, 0], padding: [50, 50] } : { paddingBottomRight: [0, 300], padding: [30, 30] };
             map.flyToBounds(bounds, { ...padOptions, duration: 1.2, maxZoom: 15 });
         }
     }
 
-    // 從列表點擊：平滑飛至該地圖點
     window.flyToSpot = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
         if (spot && spot.lat && spot.lng) {
-            // 平移視角
             const isDesktop = window.innerWidth >= 768;
-            // 如果是手機，讓中心點稍微偏上 (因為下面有列表擋住)
             const targetLat = isDesktop ? spot.lat : spot.lat - 0.002;
-            
             map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
-            
-            // 打開氣泡窗
             if (markersDict[spotId]) {
                 setTimeout(() => { markersDict[spotId].openPopup(); }, 800);
             }
@@ -332,7 +410,94 @@
             window.showToast('這個景點尚未設定精確座標！');
         }
     };
-    // ==========================================
+
+    // ========== 新增景點邏輯 ==========
+    let tempLatLng = null;
+    let addSpotMode = 'spot';
+
+    window.startAddSpotMode = function() {
+        // 顯示十字準星與工具列
+        document.getElementById('map-crosshair').classList.add('active');
+        document.getElementById('add-spot-toolbar').classList.remove('hidden');
+    };
+
+    window.cancelAddSpotMode = function() {
+        // 隱藏十字準星與工具列
+        document.getElementById('map-crosshair').classList.remove('active');
+        document.getElementById('add-spot-toolbar').classList.add('hidden');
+    };
+
+    window.openAddSpotForm = function() {
+        // 取得目前地圖中心點座標
+        tempLatLng = map.getCenter();
+        
+        // 隱藏取點工具列
+        window.cancelAddSpotMode();
+
+        // 重置並開啟表單
+        document.getElementById('input-public-name').value = '';
+        document.getElementById('input-public-sub').value = '';
+        addSpotMode = 'spot';
+        window.renderPublicSpotModes();
+
+        document.getElementById('modal-overlay').classList.remove('closed');
+        document.getElementById('modal-overlay').classList.add('open');
+        document.getElementById('sheet-add-public-spot').classList.remove('closed');
+        document.getElementById('sheet-add-public-spot').classList.add('open');
+    };
+
+    window.renderPublicSpotModes = function() {
+       const container = document.getElementById('public-spot-modes-grid');
+       const modes = LOCATION_MODES.filter(m => m.id !== 'station' && m.id !== 'airport' && m.id !== 'hotel');
+       container.innerHTML = modes.map(mode => `
+            <button type="button" onclick="addSpotMode='${mode.id}'; window.renderPublicSpotModes()"
+              class="py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
+                addSpotMode === mode.id ? 'bg-[#D5896F] text-white border-[#D5896F] shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent'
+              }"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
+       `).join('');
+    };
+
+    window.saveNewSpot = async function() {
+        const name = document.getElementById('input-public-name').value.trim();
+        const sub = document.getElementById('input-public-sub').value.trim();
+        
+        if(!name) { window.showToast("請輸入景點名稱"); return; }
+        if(!tempLatLng) { window.showToast("無法取得座標，請重試"); return; }
+
+        const spotData = {
+            name: name,
+            subtitle: sub,
+            locMode: addSpotMode,
+            lat: tempLatLng.lat,
+            lng: tempLatLng.lng,
+            createdAt: Date.now()
+        };
+
+        if (isGuest) {
+            publicSpots.push({ id: Date.now().toString(), ...spotData });
+            localStorage.setItem('guest_spots', JSON.stringify(publicSpots));
+            window.closeAllModals();
+            window.showToast("已成功新增至地圖！");
+            renderListAndMap();
+        } else {
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
+                window.closeAllModals();
+                window.showToast("已成功發佈至公共地圖庫！");
+            } catch(e) {
+                console.error(e);
+                window.showToast("發生錯誤，無法發佈");
+            }
+        }
+    };
+
+    window.closeAllModals = function() {
+        document.getElementById('modal-overlay').classList.remove('open');
+        document.getElementById('modal-overlay').classList.add('closed');
+        document.getElementById('sheet-add-public-spot').classList.remove('open');
+        document.getElementById('sheet-add-public-spot').classList.add('closed');
+    };
+    // ===================================
 
     function loadSpots() {
       if (isGuest) {
@@ -365,9 +530,7 @@
           );
       }
 
-      // 更新地圖上的標記
       if (map) renderMarkersOnMap(spots);
-
       document.getElementById('spot-count').innerText = `${spots.length} 個地標`;
 
       if (spots.length === 0) {
@@ -381,16 +544,13 @@
 
       const sortedSpots = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      // 產生側邊/下方清單卡片
       container.innerHTML = sortedSpots.map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
           return `
           <div onclick="window.flyToSpot('${spot.id}')" class="bg-white p-3 md:p-4 rounded-[16px] md:rounded-[20px] border border-brand-light shadow-sm flex items-center gap-3 md:gap-4 cursor-pointer hover:shadow-md hover:border-brand-primary/40 active:scale-[0.98] transition-all group">
-             <!-- 圖示區域 -->
              <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg md:text-xl shrink-0 group-hover:scale-110 transition-transform">
                  <i class="${locObj.icon}"></i>
              </div>
-             <!-- 文字資訊 -->
              <div class="flex-1 overflow-hidden w-full">
                 <div class="text-[14px] md:text-[15px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">${spot.name}</div>
                 <div class="text-[11px] md:text-[12px] font-bold text-brand-textSub mt-0.5 truncate flex items-center gap-1.5">
@@ -398,23 +558,18 @@
                    ${spot.subtitle ? `<span class="truncate opacity-80">${spot.subtitle}</span>` : ''}
                 </div>
              </div>
-             <!-- 箭頭提示 -->
              <i class="fa-solid fa-location-arrow text-brand-light group-hover:text-brand-primary text-sm transition-colors"></i>
           </div>
           `;
       }).join('');
     }
 
-    // 綁定搜尋輸入
     document.getElementById('input-explore-search').addEventListener('input', (e) => {
         renderListAndMap(e.target.value);
     });
 
-    // 初始化順序
     initMap();
     loadSpots();
-
-    // 監聽視窗大小改變，重繪地圖尺寸
     window.addEventListener('resize', () => { if(map) map.invalidateSize(); });
   </script>
 </body>
