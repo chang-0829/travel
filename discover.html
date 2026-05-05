@@ -156,7 +156,7 @@
       <div id="map" class="absolute inset-0 z-0"></div>
 
       <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
-      <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 md:block pb-[65px] md:pb-0">
+      <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[65px]">
          
          <!-- 卡片容器 (修正背景：統一由外層設定毛玻璃，移除內部分層色差) -->
          <div class="md:w-[400px] md:h-full md:bg-white/80 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white/60 flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
@@ -173,8 +173,8 @@
             <!-- 手機版彈性空白區 -->
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-            <!-- 列表區 (統一加上高透視毛玻璃背景，並綁定觸控拖曳行為) -->
-            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent md:backdrop-blur-none rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none">
+            <!-- 列表區 (統一加上高透視毛玻璃背景，確保滾動區正常運作加入 min-h-0) -->
+            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent md:backdrop-blur-none rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none min-h-0">
                
                <!-- 可拖曳的 Header 區域 -->
                <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing">
@@ -187,10 +187,10 @@
                   </div>
                </div>
 
-               <!-- 捲動列表 (加入 flex flex-col 以利內部空狀態置中) -->
-               <div id="explore-list" class="flex-1 overflow-y-auto px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative space-y-3.5">
+               <!-- 捲動列表 (修正：使用 gap-3.5 替代 space-y，並加上 min-h-0 讓內部子元件可正確延伸) -->
+               <div id="explore-list" class="flex-1 overflow-y-auto px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0">
                   <!-- JS 空狀態渲染區 -->
-                  <div class="flex-1 flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 min-h-[200px]">
+                  <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 m-auto">
                      <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                         <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-primary"></i>
                      </div>
@@ -690,10 +690,10 @@
       if (map) renderMarkersOnMap(spots);
       document.getElementById('spot-count').innerText = `${spots.length} 個地標`;
 
-      // 修正垂直置中：利用 flex-1 以及 justify-center，達成無結果時的完美置中
+      // 修正垂直置中：利用 h-full 與 m-auto 確保內部元件在沒有結果時也能完美置中
       if (spots.length === 0) {
           container.innerHTML = `
-            <div class="flex-1 flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10">
+            <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 m-auto">
                <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                   <i class="fa-solid fa-map-location-dot text-2xl text-brand-primary"></i>
                </div>
@@ -703,11 +703,11 @@
           return;
       }
 
-      // 全新卡片式清單渲染 (移除卡片上的地址顯示)
+      // 全新卡片式清單渲染 (補上 items-center 確保內部方塊與文字互相置中對齊)
       container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
           return `
-          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/70 backdrop-blur-xl p-3 rounded-[24px] border border-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex gap-4 cursor-pointer hover:bg-white hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
+          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/70 backdrop-blur-xl p-3 rounded-[24px] border border-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex items-center gap-4 cursor-pointer hover:bg-white hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
              
              <!-- 卡片左側：大型圖示區塊 -->
              <div class="w-[72px] h-[72px] rounded-[18px] bg-gradient-to-br from-brand-primary/80 to-brand-dark text-white flex flex-col items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform relative overflow-hidden">
