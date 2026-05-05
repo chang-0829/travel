@@ -218,22 +218,19 @@
             <!-- 大面積封面圖區 -->
             <div class="h-[280px] md:h-[320px] bg-brand-dark relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
                
-               <!-- 景點真實圖片背景 (必須補上這段 id，否則 JS 會報錯) -->
-               <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-0"></div>
-               
-               <div class="absolute inset-0 bg-gradient-to-b from-brand-primary to-brand-dark opacity-90 mix-blend-multiply z-0 pointer-events-none"></div>
-               <!-- 裝飾性圖案與光影 -->
-               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
-               
-               <!-- 景點意象大圖標 -->
+               <!-- 景點意象大圖標與裝飾 (作為底層，無圖片時顯示) -->
+               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none z-0"></div>
+               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl pointer-events-none z-0"></div>
                <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300"></i>
                
-               <!-- 頂部漸層遮罩 (讓按鈕清楚) -->
-               <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/40 to-transparent z-10 pointer-events-none"></div>
+               <!-- 景點真實圖片背景 (蓋在預設圖示上方，確保原圖清晰顯示) -->
+               <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
+               
+               <!-- 頂部漸層遮罩 (讓返回按鈕清楚) -->
+               <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-20 pointer-events-none"></div>
                
                <!-- 左上角返回按鈕 -->
-               <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/40 transition-all shadow-md z-20">
+               <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/40 transition-all shadow-md z-30">
                   <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
                   <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
                </button>
