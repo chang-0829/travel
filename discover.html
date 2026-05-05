@@ -162,7 +162,6 @@
          <div class="md:w-[400px] md:h-full md:bg-white/80 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white/60 flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
             
             <!-- 搜尋區 (頂部) -->
-            <!-- 修正對齊：統一左右 padding 為 px-5 md:px-6 -->
             <div class="px-5 md:px-6 pt-safe md:pt-6 pb-3 md:pb-4 shrink-0 pointer-events-auto transition-transform relative z-20">
                <!-- 電腦版搜尋框改為實心白色，移除內層 backdrop-blur 防止渲染疊加色差 -->
                <div class="relative shadow-[0_8px_24px_rgba(0,0,0,0.06)] md:shadow-[0_2px_12px_rgba(0,0,0,0.05)] rounded-[24px] bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none border border-brand-light/80 md:border-transparent group focus-within:border-brand-primary/50 focus-within:md:border-brand-primary/50 transition-all">
@@ -174,23 +173,24 @@
             <!-- 手機版彈性空白區 -->
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-            <!-- 列表區 (修正背景：移除電腦版的額外渲染效果 md:backdrop-blur-none) -->
+            <!-- 列表區 (統一加上高透視毛玻璃背景，並綁定觸控拖曳行為) -->
             <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent md:backdrop-blur-none rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none">
-               <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-2 shrink-0"></div>
                
-               <!-- 修正對齊：統一左右 padding 為 px-5 md:px-6 -->
-               <div class="px-5 md:px-6 pb-3 md:pt-0 flex justify-between items-center shrink-0">
-                  <h3 class="font-extrabold text-brand-dark text-lg flex items-center gap-2">
-                     <i class="fa-solid fa-map-pin text-brand-primary text-[16px]"></i> 探索周邊
-                  </h3>
-                  <span id="spot-count" class="text-[12px] font-extrabold bg-brand-primary/10 text-brand-primary px-3 py-1.5 rounded-full shadow-sm">-- 個地標</span>
+               <!-- 可拖曳的 Header 區域 -->
+               <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing">
+                  <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-2 shrink-0"></div>
+                  <div class="px-5 md:px-6 pb-3 md:pt-0 flex justify-between items-center shrink-0">
+                     <h3 class="font-extrabold text-brand-dark text-lg flex items-center gap-2 pointer-events-none">
+                        <i class="fa-solid fa-map-pin text-brand-primary text-[16px]"></i> 探索周邊
+                     </h3>
+                     <span id="spot-count" class="text-[12px] font-extrabold bg-brand-primary/10 text-brand-primary px-3 py-1.5 rounded-full shadow-sm pointer-events-none">-- 個地標</span>
+                  </div>
                </div>
 
-               <!-- 捲動列表 -->
-               <!-- 修正對齊：統一左右 padding 為 px-5 md:px-6 -->
-               <div id="explore-list" class="flex-1 overflow-y-auto px-5 md:px-6 pb-8 pt-2 hide-scrollbar space-y-3.5 relative">
+               <!-- 捲動列表 (加入 flex flex-col 以利內部空狀態置中) -->
+               <div id="explore-list" class="flex-1 overflow-y-auto px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative space-y-3.5">
                   <!-- JS 空狀態渲染區 -->
-                  <div class="h-full min-h-[40vh] flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10">
+                  <div class="flex-1 flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 min-h-[200px]">
                      <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                         <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-primary"></i>
                      </div>
@@ -236,7 +236,7 @@
             <!-- 下方白色重疊卡片區 (Bottom Sheet 風格) -->
             <div class="px-6 pt-8 pb-10 space-y-6 relative -mt-8 bg-brand-bg rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-10 min-h-[60vh]">
                
-               <!-- 移至圖片與資訊交界處的愛心 FAB (Floating Action Button) -->
+               <!-- 移至圖片與資訊交界處的愛心 FAB (修正為完全實心不透明) -->
                <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-brand-textSub shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-brand-light/60 hover:text-[#E63946] active:scale-90 transition-all z-20 group">
                   <i class="fa-regular fa-heart text-[24px] group-active:scale-90 transition-transform"></i>
                </button>
@@ -471,6 +471,69 @@
         }
     };
 
+    // ========== 手機版清單觸控拖曳邏輯 ==========
+    const sheetPanel = document.getElementById('mobile-list-panel');
+    const sheetHeader = document.getElementById('sheet-header');
+    let dragStartY = null;
+    let startHeight = 0;
+
+    sheetHeader.addEventListener('touchstart', (e) => {
+        if(window.innerWidth >= 768) return;
+        dragStartY = e.touches[0].clientY;
+        startHeight = sheetPanel.offsetHeight;
+        sheetPanel.style.transition = 'none';
+    }, {passive: true});
+
+    sheetHeader.addEventListener('touchmove', (e) => {
+        if(window.innerWidth >= 768 || dragStartY === null) return;
+        const dy = dragStartY - e.touches[0].clientY;
+        let newHeight = startHeight + dy;
+        
+        // 限制拖曳範圍
+        if (newHeight < window.innerHeight * 0.1) newHeight = window.innerHeight * 0.1;
+        if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
+        
+        sheetPanel.style.height = `${newHeight}px`;
+        
+        // 連動 FAB 按鈕位置
+        document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 20px)`;
+    }, {passive: true});
+
+    sheetHeader.addEventListener('touchend', () => {
+        if(window.innerWidth >= 768 || dragStartY === null) return;
+        dragStartY = null;
+        sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        document.getElementById('fab-group').style.transition = 'bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        
+        const vh = window.innerHeight;
+        const currentH = sheetPanel.offsetHeight;
+        let targetHeight = '';
+        
+        // 依據拖曳放開時的高度自動吸附 (Snap)
+        if (currentH > vh * 0.6) {
+            targetHeight = '85vh';
+        } else if (currentH < vh * 0.3) {
+            targetHeight = '15vh';
+        } else {
+            targetHeight = '48vh';
+        }
+        
+        sheetPanel.style.height = targetHeight;
+        document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 20px)`;
+        
+        // 移除行內過渡樣式讓 CSS class 接手
+        setTimeout(() => {
+           document.getElementById('fab-group').style.transition = '';
+        }, 300);
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            sheetPanel.style.height = ''; 
+            document.getElementById('fab-group').style.bottom = '';
+        }
+    });
+
     // ========== 景點資訊面板邏輯 ==========
     window.showSpotDetail = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
@@ -566,10 +629,13 @@
         
         if (isFav) {
             icon.className = 'fa-solid fa-heart text-[#E63946]';
-            favBtn.classList.add('border-[#E63946]/30', 'bg-[#FFE5E5]/50');
+            // 改為完全不透明實心底色 bg-[#FFE5E5]
+            favBtn.classList.add('border-[#E63946]/30', 'bg-[#FFE5E5]');
+            favBtn.classList.remove('bg-white');
         } else {
             icon.className = 'fa-regular fa-heart';
-            favBtn.classList.remove('border-[#E63946]/30', 'bg-[#FFE5E5]/50');
+            favBtn.classList.remove('border-[#E63946]/30', 'bg-[#FFE5E5]');
+            favBtn.classList.add('bg-white');
         }
     }
 
@@ -624,10 +690,10 @@
       if (map) renderMarkersOnMap(spots);
       document.getElementById('spot-count').innerText = `${spots.length} 個地標`;
 
-      // 修正垂直置中：加入 h-full min-h-[40vh] 與 justify-center
+      // 修正垂直置中：利用 flex-1 以及 justify-center，達成無結果時的完美置中
       if (spots.length === 0) {
           container.innerHTML = `
-            <div class="h-full min-h-[40vh] flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10">
+            <div class="flex-1 flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10">
                <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                   <i class="fa-solid fa-map-location-dot text-2xl text-brand-primary"></i>
                </div>
@@ -637,10 +703,9 @@
           return;
       }
 
-      // 全新卡片式清單渲染 (Card Layout)
+      // 全新卡片式清單渲染 (移除卡片上的地址顯示)
       container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-          const displayAddress = spot.address || spot.subtitle || '無詳細地址';
           return `
           <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/70 backdrop-blur-xl p-3 rounded-[24px] border border-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex gap-4 cursor-pointer hover:bg-white hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
              
@@ -656,9 +721,6 @@
                    <span class="px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
                 </div>
                 <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
-                <div class="text-[12px] font-bold text-brand-textSub mt-1.5 truncate flex items-center gap-1.5 opacity-90">
-                    <i class="fa-solid fa-location-dot opacity-60 text-[10px] text-brand-primary"></i> ${displayAddress}
-                </div>
              </div>
              
              <!-- 裝飾用右側箭頭 -->
@@ -680,7 +742,6 @@
     }
 
     startApp();
-    window.addEventListener('resize', () => { if(map) map.invalidateSize(); });
   </script>
 </body>
 </html>
