@@ -541,6 +541,21 @@
 
         const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
 
+        // 處理頂部封面圖片與預設圖示的動態切換
+        const coverEl = document.getElementById('detail-cover-image');
+        const defaultIconEl = document.getElementById('detail-default-icon');
+        
+        if (spot.imageUrl) {
+            coverEl.style.backgroundImage = `url('${spot.imageUrl}')`;
+            coverEl.classList.remove('opacity-0');
+            defaultIconEl.classList.add('opacity-0');
+        } else {
+            coverEl.style.backgroundImage = 'none';
+            coverEl.classList.add('opacity-0');
+            defaultIconEl.className = `fa-solid ${locObj.icon} text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300`;
+            defaultIconEl.classList.remove('opacity-0');
+        }
+
         // 綁定最新設計的標題與分類 Badge
         document.getElementById('detail-category').innerHTML = `<i class="${locObj.icon}"></i> ${locObj.label}`;
         document.getElementById('detail-name').innerText = spot.name;
