@@ -169,7 +169,7 @@
            <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-5">
                <input type="hidden" id="form-id">
                
-               <!-- 從 Google 地圖網址解析 (新功能) -->
+               <!-- 從 Google 地圖網址解析 -->
                <div class="bg-brand-bg/50 p-4 rounded-2xl border border-brand-light shadow-sm">
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1"><i class="fa-brands fa-google text-[#4285F4] mr-1"></i>從 Google Maps 網址獲取座標</label>
                   <div class="flex gap-2">
@@ -232,16 +232,16 @@
                </div>
            </div>
            
-           <!-- 左側底部：座標顯示 -->
+           <!-- 左側底部：座標開放手動輸入 -->
            <div class="p-6 bg-brand-bg/50 border-t border-brand-light shrink-0 z-10">
                <div class="grid grid-cols-2 gap-3">
                   <div>
                      <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Latitude</label>
-                     <input type="number" id="form-lat" step="any" placeholder="自動獲取" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
+                     <input type="number" id="form-lat" step="any" placeholder="例: 25.0339" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none focus:border-brand-primary/50 transition-all">
                   </div>
                   <div>
                      <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Longitude</label>
-                     <input type="number" id="form-lng" step="any" placeholder="自動獲取" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
+                     <input type="number" id="form-lng" step="any" placeholder="例: 121.5644" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none focus:border-brand-primary/50 transition-all">
                   </div>
                </div>
            </div>
@@ -250,7 +250,7 @@
         <!-- 右側：滿版地圖選點器 -->
         <div class="flex-1 h-[400px] md:h-full bg-brand-light relative flex flex-col shrink-0 z-0">
            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-lg text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-2 z-[400]">
-              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 點擊地圖、解析 Google 網址、或用地址搜尋
+              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 點擊地圖、解析 Google 網址、地址搜尋或手動輸入
            </div>
            <div id="admin-map" class="flex-1 w-full h-full relative z-0"></div>
         </div>
@@ -465,6 +465,29 @@
         adminMap.panTo([lat, lng]);
     }
 
+    // ★ 新增功能：手動輸入經緯度連動地圖 ★
+    window.handleManualCoordChange = function() {
+        const lat = parseFloat(document.getElementById('form-lat').value);
+        const lng = parseFloat(document.getElementById('form-lng').value);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            if (pickerMarker) {
+                pickerMarker.setLatLng([lat, lng]);
+            } else {
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="marker-pin"><i class="fa-solid fa-location-dot"></i></div>`,
+                    iconSize: [32, 32], iconAnchor: [16, 16]
+                });
+                pickerMarker = L.marker([lat, lng], { icon: customIcon }).addTo(adminMap);
+            }
+            if(adminMap) {
+                adminMap.panTo([lat, lng]);
+                adminMap.setZoom(16);
+            }
+        }
+    };
+
     // ★ 新增功能：從 Google Maps 網址解析座標 ★
     window.parseGoogleMapsUrl = function() {
         const url = document.getElementById('form-gmap-url').value.trim();
@@ -628,7 +651,7 @@
 
         if(!name) { window.showToast("景點中文名稱為必填"); return; }
         if(!address) { window.showToast("地址為必填"); return; }
-        if(isNaN(lat) || isNaN(lng)) { window.showToast("請提供精確地圖座標"); return; }
+        if(isNaN(lat) || isNaN(lng)) { window.showToast("請輸入或取得精確地圖座標"); return; }
 
         const spotData = {
             name: name,
