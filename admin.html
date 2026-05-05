@@ -26,9 +26,36 @@
   </script>
 
   <style>
+    /* --- LINE Seed 字體整合 (優先順序: TW, W, JP, KR, TH) --- */
+    
+    /* 1. 繁體中文 (TW) */
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-    body { font-family: 'LINE Seed TW', ui-sans-serif, system-ui, sans-serif; background-color: #F8FAFC; }
+
+    /* 2. 英文/通用 (W - Sans) */
+    @font-face { font-family: 'LINE Seed W'; src: url('./fonts/LINESeedSans_W_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed W'; src: url('./fonts/LINESeedSans_W_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed W'; src: url('./fonts/LINESeedSans_W_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    /* 3. 日文 (JP) */
+    @font-face { font-family: 'LINE Seed JP'; src: url('./fonts/LINESeedJP_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed JP'; src: url('./fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed JP'; src: url('./fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    /* 4. 韓文 (KR) */
+    @font-face { font-family: 'LINE Seed KR'; src: url('./fonts/LINESeedKR-Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed KR'; src: url('./fonts/LINESeedKR-Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed KR'; src: url('./fonts/LINESeedKR-Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    /* 5. 泰文 (TH) */
+    @font-face { font-family: 'LINE Seed TH'; src: url('./fonts/LINESeedSansTH_W_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TH'; src: url('./fonts/LINESeedSansTH_W_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TH'; src: url('./fonts/LINESeedSansTH_W_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    /* 套用字體優先順序 */
+    body { font-family: 'LINE Seed TW', 'LINE Seed W', 'LINE Seed JP', 'LINE Seed KR', 'LINE Seed TH', ui-sans-serif, system-ui, sans-serif; background-color: #F8FAFC; }
+    
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
