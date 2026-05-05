@@ -272,10 +272,11 @@
   <!-- Firebase / 邏輯 -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
     import { getFirestore, collection, onSnapshot, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
     // Firebase Init
-    const firebaseConfig = { 
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
       apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
       authDomain: "travel-96009.firebaseapp.com", 
       projectId: "travel-96009", 
@@ -284,8 +285,19 @@
       appId: "1:578860064042:web:b147880df3a01dd8f75253" 
     };
     const app = initializeApp(firebaseConfig); 
+    const auth = getAuth(app);
     const db = getFirestore(app); 
-    const appId = "travel-platform-v2";
+    const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
+
+    // 狀態管理
+    let currentUser = null;
+    let publicSpots = [];
+    const isGuest = localStorage.getItem('isGuest') === 'true';
+
+    // 監聽登入狀態
+    onAuthStateChanged(auth, user => {
+        currentUser = user;
+    });
 
     // Toast 顯示
     window.showToast = function(msg) {
@@ -316,14 +328,8 @@
        { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', lat: 34.9948, lng: 135.7850, createdAt: Date.now() },
        { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', lat: 33.5933, lng: 130.4044, createdAt: Date.now() },
        { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', lat: 35.6329, lng: 139.8804, createdAt: Date.now() },
-       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', lat: 34.6712, lng: 135.5015, createdAt: Date.now() },
-       { id: 's6', name: '淺草寺', subtitle: '東京都台東區淺草', locMode: 'spot', lat: 35.7147, lng: 139.7966, createdAt: Date.now() - 1000 },
-       { id: 's7', name: '環球影城', subtitle: '大阪府大阪市此花區', locMode: 'park', lat: 34.6654, lng: 135.4323, createdAt: Date.now() - 2000 },
-       { id: 's8', name: '敘敘苑拉麵', subtitle: '東京都新宿區', locMode: 'food', lat: 35.6938, lng: 139.7034, createdAt: Date.now() - 3000 }
+       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', lat: 34.6712, lng: 135.5015, createdAt: Date.now() }
     ];
-
-    let publicSpots = [];
-    const isGuest = localStorage.getItem('isGuest') === 'true';
 
     // ========== 地圖初始化與控制 (Leaflet) ==========
     let map = null;
@@ -332,7 +338,6 @@
     let userMarker = null;
 
     function initMap() {
-        // 建立兩種圖層：1. Google 街道圖 2. Google 衛星混合圖
         const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google',
             maxZoom: 20,
@@ -347,7 +352,6 @@
             updateWhenIdle: true
         });
 
-        // 初始化地圖設定
         map = L.map('map', { 
             zoomControl: false,
             layers: [streetLayer]
@@ -362,10 +366,9 @@
 
         markersLayer = L.layerGroup().addTo(map);
         
-        // 綁定定位成功事件
+        // 定位成功事件
         map.on('locationfound', function(e) {
             if (!userMarker) {
-                // 繪製定位專用的藍色發光圓點
                 const userIcon = L.divIcon({
                     className: 'user-marker',
                     html: `<div class="w-4 h-4 bg-[#4285F4] rounded-full border-2 border-white shadow-[0_0_10px_rgba(66,133,244,0.6)]"></div>`,
@@ -376,7 +379,6 @@
             } else {
                 userMarker.setLatLng(e.latlng);
             }
-            
             const btnIcon = document.querySelector('#btn-locate i');
             if (btnIcon) btnIcon.className = 'fa-solid fa-location-crosshairs text-[#4285F4]';
             window.showToast("已取得目前位置");
@@ -387,7 +389,6 @@
             const btnIcon = document.querySelector('#btn-locate i');
             if (btnIcon) btnIcon.className = 'fa-solid fa-location-crosshairs';
             window.showToast("無法取得位置，請確認設備定位權限");
-            console.warn("Location error:", e.message);
         });
 
         setTimeout(() => { map.invalidateSize(); }, 500);
@@ -396,12 +397,8 @@
     // 觸發使用者定位
     window.locateUser = function() {
         const btnIcon = document.querySelector('#btn-locate i');
-        if (btnIcon) {
-            btnIcon.className = 'fa-solid fa-spinner fa-spin text-brand-primary';
-        }
+        if (btnIcon) btnIcon.className = 'fa-solid fa-spinner fa-spin text-brand-primary';
         window.showToast("正在尋找您的位置...");
-        
-        // 要求定位權限並縮放至該座標，超時設為 10 秒
         map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
     };
 
@@ -464,34 +461,30 @@
     let tempLatLng = null;
     let addSpotMode = 'spot';
 
+    // 解決按鈕變數作用域的關鍵函式
+    window.setAddSpotMode = function(modeId) {
+        addSpotMode = modeId;
+        window.renderPublicSpotModes();
+    };
+
     window.startAddSpotMode = function() {
-        // 隱藏手機版列表與 FAB，提供全螢幕地圖視野
         document.getElementById('mobile-list-panel').classList.add('max-md:hidden');
         document.getElementById('fab-group').classList.add('hidden');
-        
-        // 顯示十字準星與確認工具列
         document.getElementById('map-crosshair').classList.add('active');
         document.getElementById('add-spot-toolbar').classList.remove('hidden');
     };
 
     window.cancelAddSpotMode = function() {
-        // 恢復手機版列表與 FAB
         document.getElementById('mobile-list-panel').classList.remove('max-md:hidden');
         document.getElementById('fab-group').classList.remove('hidden');
-        
-        // 隱藏十字準星與工具列
         document.getElementById('map-crosshair').classList.remove('active');
         document.getElementById('add-spot-toolbar').classList.add('hidden');
     };
 
     window.openAddSpotForm = function() {
-        // 取得目前地圖中心點座標
         tempLatLng = map.getCenter();
-        
-        // 隱藏取點工具列
         window.cancelAddSpotMode();
 
-        // 重置並開啟表單
         document.getElementById('input-public-name').value = '';
         document.getElementById('input-public-sub').value = '';
         addSpotMode = 'spot';
@@ -506,8 +499,9 @@
     window.renderPublicSpotModes = function() {
        const container = document.getElementById('public-spot-modes-grid');
        const modes = LOCATION_MODES.filter(m => m.id !== 'station' && m.id !== 'airport' && m.id !== 'hotel');
+       // 將 onclick 換成呼叫掛載在 window 的 setAddSpotMode
        container.innerHTML = modes.map(mode => `
-            <button type="button" onclick="addSpotMode='${mode.id}'; window.renderPublicSpotModes()"
+            <button type="button" onclick="window.setAddSpotMode('${mode.id}')"
               class="py-2.5 rounded-xl flex flex-col items-center gap-1.5 transition-all border ${
                 addSpotMode === mode.id ? 'bg-[#D5896F] text-white border-[#D5896F] shadow-sm' : 'bg-brand-bg text-brand-textSub border-transparent'
               }"><i class="${mode.icon} text-[16px]"></i><span class="text-[11px] font-bold">${mode.label}</span></button>
@@ -537,13 +531,20 @@
             window.showToast("已成功新增至地圖！");
             renderListAndMap();
         } else {
+            // 確保非訪客模式下，使用者有成功驗證 (包含匿名) 才能寫入
+            if (!currentUser) {
+                window.showToast("連線中，請稍候再試...");
+                return;
+            }
+            spotData.creatorId = currentUser.uid;
+
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
                 window.closeAllModals();
                 window.showToast("已成功發佈至公共地圖庫！");
             } catch(e) {
                 console.error(e);
-                window.showToast("發生錯誤，無法發佈");
+                window.showToast("發生錯誤，無法發佈，請確認網路與權限");
             }
         }
     };
@@ -554,8 +555,8 @@
         document.getElementById('sheet-add-public-spot').classList.remove('open');
         document.getElementById('sheet-add-public-spot').classList.add('closed');
     };
-    // ===================================
 
+    // ========== 資料載入 ==========
     function loadSpots() {
       if (isGuest) {
         const localSpots = localStorage.getItem('guest_spots');
@@ -625,8 +626,22 @@
         renderListAndMap(e.target.value);
     });
 
-    initMap();
-    loadSpots();
+    // ========== App 初始化流程 ==========
+    async function startApp() {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (e) {
+            console.log('Auth Init Fallback', e);
+        }
+        initMap();
+        loadSpots();
+    }
+
+    startApp();
     window.addEventListener('resize', () => { if(map) map.invalidateSize(); });
   </script>
 </body>
