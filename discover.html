@@ -67,15 +67,15 @@
     /* --- Leaflet 介面優化 --- */
     .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
     .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
-    .leaflet-control-zoom { border: none !important; margin-right: 24px !important; }
-    .leaflet-control-layers { border-radius: 16px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); font-family: inherit !important; font-weight: 700 !important; color: #2C3E50 !important; padding: 10px 12px !important; margin-top: 24px !important; margin-right: 24px !important;}
+    .leaflet-control-zoom { border: none !important; margin-right: 24px !important; margin-top: 24px !important; }
     
-    /* 讓版權控制項精準顯示在定位按鈕下方 */
-    .leaflet-bottom.leaflet-right { bottom: calc(48vh + 4px) !important; right: 20px !important; transition: all 0.3s; z-index: 400; }
-    @media (min-width: 768px) {
-        .leaflet-bottom.leaflet-right { bottom: 12px !important; right: 32px !important; }
+    /* 讓版權控制項精準顯示在網頁最右下角 */
+    .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
+    @media (max-width: 767px) {
+        /* 在手機版，為了避免被底部導覽列遮擋，往上推移 */
+        .leaflet-bottom.leaflet-right { bottom: calc(65px + env(safe-area-inset-bottom)) !important; }
     }
-    .leaflet-control-attribution { background: rgba(255,255,255,0.7) !important; backdrop-filter: blur(4px); border-radius: 6px; padding: 2px 6px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
     /* --- 現代化水滴型 Marker (Teardrop Pin) --- */
     .custom-marker { background: transparent; border: none; }
@@ -159,12 +159,12 @@
       <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
       <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 md:block pb-[65px] md:pb-0">
          
-         <!-- 卡片容器 (Glassmorphism 毛玻璃風格) -->
-         <div class="md:w-[400px] md:h-full md:bg-white/85 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
+         <!-- 卡片容器 (解決色差：統一整體的毛玻璃質感) -->
+         <div class="md:w-[400px] md:h-full md:bg-white/70 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
             
             <!-- 搜尋區 (頂部) -->
             <div class="p-4 md:p-6 pt-safe md:pt-6 shrink-0 pointer-events-auto transition-transform relative z-20">
-               <div class="relative shadow-[0_8px_24px_rgba(0,0,0,0.06)] md:shadow-sm rounded-[24px] bg-white/95 md:bg-brand-bg/60 backdrop-blur-md border border-brand-light/80 md:border-transparent group focus-within:border-brand-primary/50 focus-within:bg-white transition-all">
+               <div class="relative shadow-[0_4px_16px_rgba(0,0,0,0.04)] rounded-[24px] bg-white/95 md:bg-white/60 backdrop-blur-md border border-brand-light/80 md:border-white/60 group focus-within:border-brand-primary/50 focus-within:bg-white/90 transition-all">
                   <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-brand-textSub group-focus-within:text-brand-primary transition-colors"></i>
                   <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="w-full bg-transparent rounded-[24px] py-4 md:py-3.5 pl-[46px] pr-4 outline-none text-[15px] font-extrabold text-brand-dark placeholder-brand-textSub/60">
                </div>
@@ -173,8 +173,8 @@
             <!-- 手機版彈性空白區 -->
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-            <!-- 列表區 (統一加上高透視毛玻璃背景 bg-white/85) -->
-            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white md:border-none">
+            <!-- 列表區 (統一加上高透視毛玻璃背景) -->
+            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none">
                <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-2 shrink-0"></div>
                <div class="px-6 pb-3 md:pt-1 flex justify-between items-center shrink-0">
                   <h3 class="font-extrabold text-brand-dark text-lg flex items-center gap-2">
@@ -205,98 +205,93 @@
          </button>
       </div>
 
-      <!-- ================= 景點資訊面板 (Slide-in Panel) ================= -->
+      <!-- ================= 全新設計：景點資訊面板 (Detail Panel) ================= -->
       <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[440px] bg-brand-bg z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50">
          
-         <!-- 頂部返回區 (懸浮透明) -->
-         <div class="h-[72px] shrink-0 flex items-center justify-start px-5 pt-safe md:pt-0 absolute top-0 w-full z-20 pointer-events-none">
-            <button onclick="window.closeSpotDetail()" class="pointer-events-auto w-11 h-11 flex items-center justify-center rounded-full bg-white/40 backdrop-blur-md text-white border border-white/30 hover:bg-white/60 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-saturate-150">
-               <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
-               <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
-            </button>
-         </div>
-
-         <!-- 內容捲動區 -->
-         <div class="flex-1 overflow-y-auto hide-scrollbar bg-brand-bg relative pb-10">
+         <!-- 內容捲動區 (含封面與內文) -->
+         <div class="flex-1 overflow-y-auto hide-scrollbar bg-brand-bg relative pb-28">
             
-            <!-- 現代化封面圖區 (單純圖片與漸層，移除文字) -->
-            <div class="h-[240px] md:h-[280px] bg-brand-dark relative flex flex-col justify-end overflow-hidden shrink-0">
-               <div class="absolute inset-0 bg-gradient-to-br from-brand-primary to-[#D5896F] opacity-90 mix-blend-multiply"></div>
-               <!-- 裝飾性幾何圖形 -->
-               <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
-               <div class="absolute left-10 top-1/4 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+            <!-- 大面積封面圖區 -->
+            <div class="h-[280px] md:h-[320px] bg-brand-dark relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
+               <div class="absolute inset-0 bg-gradient-to-b from-brand-primary to-brand-dark opacity-90"></div>
+               <!-- 裝飾性圖案與光影 -->
+               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl"></div>
+               <!-- 景點意象大圖標 -->
+               <i class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0 drop-shadow-2xl"></i>
+               <!-- 頂部漸層遮罩 (讓按鈕清楚) -->
+               <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/40 to-transparent z-10"></div>
                
-               <i class="fa-solid fa-mountain-sun text-[100px] text-white/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0"></i>
+               <!-- 左上角返回按鈕 -->
+               <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/40 transition-all shadow-md z-20">
+                  <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
+                  <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
+               </button>
             </div>
 
-            <!-- 詳細資訊區塊 -->
-            <div class="px-6 pt-6 pb-8 space-y-5 relative -mt-6 bg-white rounded-t-[24px] shadow-[0_-8px_24px_rgba(0,0,0,0.05)] z-10 min-h-[50vh]">
+            <!-- 下方白色重疊卡片區 (Bottom Sheet 風格) -->
+            <div class="px-6 pt-8 pb-10 space-y-6 relative -mt-8 bg-brand-bg rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-10 min-h-[60vh]">
                
-               <!-- 移至圖片與資訊中間交界處的愛心按鈕 (Floating Action Button 風格) -->
-               <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-brand-textSub shadow-[0_8px_16px_rgba(0,0,0,0.12)] border border-brand-light/50 hover:text-[#E63946] active:scale-90 transition-all z-20 group">
+               <!-- 移至圖片與資訊交界處的愛心 FAB (Floating Action Button) -->
+               <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-brand-textSub shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-brand-light/60 hover:text-[#E63946] active:scale-90 transition-all z-20 group">
                   <i class="fa-regular fa-heart text-[24px] group-active:scale-90 transition-transform"></i>
                </button>
 
-               <!-- 標題與分類標籤 (移至此處，標題在前，分類在後) -->
-               <div class="pr-16 pt-2">
-                  <div class="flex items-center gap-3 flex-wrap">
-                     <h2 id="detail-name" class="text-[26px] font-extrabold text-brand-dark leading-tight">景點名稱</h2>
-                     <span id="detail-category" class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-brand-primary text-[12px] font-extrabold shadow-sm shrink-0">
-                        <i class="fa-solid fa-tag"></i> 景點
-                     </span>
-                  </div>
+               <!-- 標題與分類標籤 -->
+               <div class="pr-12">
+                  <span id="detail-category" class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-brand-primary text-[11px] font-extrabold shadow-sm mb-3"></span>
+                  <h2 id="detail-name" class="text-[28px] font-extrabold text-brand-dark leading-tight"></h2>
                   
-                  <!-- 移至下方的外文名稱 -->
-                  <div id="detail-foreign-names" class="text-[14px] font-bold text-brand-textSub hidden flex-col mt-2">
+                  <div id="detail-foreign-names" class="text-[14px] font-bold text-brand-textSub hidden flex-col mt-1.5">
                      <span id="detail-foreign-1" class="block"></span>
                      <span id="detail-foreign-2" class="block"></span>
                   </div>
                </div>
 
-               <!-- 地址 -->
-               <div class="bg-brand-bg/50 p-4 rounded-[20px] border border-brand-light/60 flex items-start gap-3 mt-1">
-                  <div class="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0 mt-0.5">
-                     <i class="fa-solid fa-location-dot"></i>
-                  </div>
-                  <span id="detail-address" class="flex-1 text-[14px] font-extrabold text-brand-dark leading-relaxed">地址或備註資訊</span>
-               </div>
-
-               <!-- 現代化按鈕列 (Grid 排版) -->
-               <div class="grid grid-cols-3 gap-3 py-2">
-                  <a id="circle-nav-btn" href="#" target="_blank" class="flex flex-col items-center justify-center gap-2 p-3 bg-white rounded-[20px] border border-brand-light shadow-sm hover:shadow-md hover:border-[#4285F4]/30 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#4285F4]/10 text-[#4285F4] flex items-center justify-center text-lg group-hover:bg-[#4285F4] group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-location-arrow"></i>
+               <!-- 全新現代化按鈕列 (大圓角矩形 Grid) -->
+               <div class="grid grid-cols-3 gap-3 py-1">
+                  <a id="circle-nav-btn" href="#" target="_blank" class="flex flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#4285F4]/40 hover:-translate-y-0.5 group transition-all">
+                     <div class="w-10 h-10 rounded-full bg-[#4285F4]/10 text-[#4285F4] flex items-center justify-center text-[18px] group-hover:bg-[#4285F4] group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-diamond-turn-right"></i>
                      </div>
-                     <span class="text-[12px] font-extrabold text-brand-dark">規劃路線</span>
+                     <span class="text-[12px] font-extrabold text-brand-dark">路線導航</span>
                   </a>
-                  <a id="circle-web-btn" href="#" target="_blank" class="hidden flex-col items-center justify-center gap-2 p-3 bg-white rounded-[20px] border border-brand-light shadow-sm hover:shadow-md hover:border-[#2A9D8F]/30 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-lg group-hover:bg-[#2A9D8F] group-hover:text-white transition-colors">
+                  <a id="circle-web-btn" href="#" target="_blank" class="hidden flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#2A9D8F]/40 hover:-translate-y-0.5 group transition-all">
+                     <div class="w-10 h-10 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-[18px] group-hover:bg-[#2A9D8F] group-hover:text-white transition-colors">
                         <i class="fa-solid fa-globe"></i>
                      </div>
                      <span class="text-[12px] font-extrabold text-brand-dark">官方網站</span>
                   </a>
-                  <a id="circle-phone-btn" href="#" class="hidden flex-col items-center justify-center gap-2 p-3 bg-white rounded-[20px] border border-brand-light shadow-sm hover:shadow-md hover:border-[#D4A33B]/30 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-lg group-hover:bg-[#E9C46A] group-hover:text-white transition-colors">
+                  <a id="circle-phone-btn" href="#" class="hidden flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#D4A33B]/40 hover:-translate-y-0.5 group transition-all">
+                     <div class="w-10 h-10 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-[18px] group-hover:bg-[#E9C46A] group-hover:text-white transition-colors">
                         <i class="fa-solid fa-phone"></i>
                      </div>
                      <span class="text-[12px] font-extrabold text-brand-dark">聯絡電話</span>
                   </a>
                </div>
+
+               <!-- 地址資訊塊 -->
+               <div class="bg-white p-4.5 rounded-[20px] border border-brand-light shadow-sm flex items-start gap-3.5 p-4">
+                  <div class="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
+                     <i class="fa-solid fa-location-dot text-[15px]"></i>
+                  </div>
+                  <span id="detail-address" class="flex-1 text-[14px] font-extrabold text-brand-dark leading-relaxed mt-1"></span>
+               </div>
                
-               <!-- 景點介紹 -->
-               <div id="detail-desc-container" class="hidden">
-                  <h3 class="text-[15px] font-extrabold text-brand-dark mb-3 flex items-center gap-2">
-                     <i class="fa-solid fa-circle-info text-brand-primary"></i> 景點介紹
+               <!-- 景點介紹資訊塊 -->
+               <div id="detail-desc-container" class="hidden bg-white p-5 rounded-[24px] border border-brand-light shadow-sm flex-col gap-3">
+                  <h3 class="text-[14px] font-extrabold text-brand-textSub uppercase tracking-wider flex items-center gap-2">
+                     <i class="fa-solid fa-file-lines text-brand-primary"></i> 介紹與備註
                   </h3>
-                  <p id="detail-desc" class="text-[14px] text-brand-textMain font-medium leading-loose bg-[#F8FAFC] p-5 rounded-[24px] border border-brand-light/80"></p>
+                  <p id="detail-desc" class="text-[14px] text-brand-textMain font-medium leading-loose whitespace-pre-wrap"></p>
                </div>
             </div>
          </div>
 
-         <!-- 底部加入行程按鈕 -->
-         <div class="p-5 md:p-6 bg-white/95 backdrop-blur-md shrink-0 border-t border-brand-light/50 pb-safe shadow-[0_-12px_32px_rgba(0,0,0,0.06)] z-20">
-            <button id="btn-add-to-trip" class="w-full py-4 bg-brand-primary text-white text-[16px] font-extrabold rounded-[20px] shadow-[0_8px_20px_rgba(116,140,171,0.3)] hover:bg-brand-dark hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2.5">
-               <i class="fa-solid fa-calendar-plus text-xl"></i> 將景點加入行程
+         <!-- 底部固定加入行程按鈕 -->
+         <div class="absolute bottom-0 inset-x-0 p-5 bg-white/95 backdrop-blur-xl border-t border-brand-light/80 z-30 pb-safe shadow-[0_-12px_40px_rgba(0,0,0,0.06)]">
+            <button id="btn-add-to-trip" class="w-full py-4 bg-brand-dark text-white text-[16px] font-extrabold rounded-[20px] shadow-[0_8px_20px_rgba(62,92,118,0.3)] hover:bg-brand-primary hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2.5">
+               <i class="fa-solid fa-calendar-plus text-xl"></i> 排入我的行程
             </button>
          </div>
       </div>
@@ -390,22 +385,20 @@
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
-    // ========== 地圖初始化與控制 ==========
+    // ========== 地圖初始化與控制 (移除衛星模式) ==========
     let map = null;
     let markersLayer = null;
     let markersDict = {};
     let userMarker = null;
 
     function initMap() {
+        // 僅保留街道圖層
         const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google', maxZoom: 20, keepBuffer: 4, updateWhenIdle: true
         });
-        const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            attribution: '&copy; Google', maxZoom: 20, keepBuffer: 4, updateWhenIdle: true
-        });
 
+        // 移除圖層切換控制項 (L.control.layers)
         map = L.map('map', { zoomControl: false, layers: [streetLayer] }).setView([23.5, 121], 6); 
-        L.control.layers({ "街道圖": streetLayer, "衛星圖": satelliteLayer }, null, { position: 'topright' }).addTo(map);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         markersLayer = L.layerGroup().addTo(map);
@@ -481,6 +474,7 @@
 
         const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
 
+        // 綁定最新設計的標題與分類 Badge
         document.getElementById('detail-category').innerHTML = `<i class="${locObj.icon}"></i> ${locObj.label}`;
         document.getElementById('detail-name').innerText = spot.name;
         
@@ -510,8 +504,10 @@
         if (spot.description) {
             descEl.innerHTML = spot.description.replace(/\n/g, '<br>');
             descContainer.classList.remove('hidden');
+            descContainer.classList.add('flex');
         } else {
             descContainer.classList.add('hidden');
+            descContainer.classList.remove('flex');
         }
 
         const navBtn = document.getElementById('circle-nav-btn');
@@ -566,12 +562,10 @@
         
         if (isFav) {
             icon.className = 'fa-solid fa-heart text-[#E63946]';
-            favBtn.classList.add('text-[#E63946]');
-            favBtn.classList.remove('text-brand-textSub');
+            favBtn.classList.add('border-[#E63946]/30', 'bg-[#FFE5E5]/50');
         } else {
             icon.className = 'fa-regular fa-heart';
-            favBtn.classList.remove('text-[#E63946]');
-            favBtn.classList.add('text-brand-textSub');
+            favBtn.classList.remove('border-[#E63946]/30', 'bg-[#FFE5E5]/50');
         }
     }
 
@@ -598,7 +592,7 @@
         }
     };
 
-    // ========== 資料載入 ==========
+    // ========== 資料載入 (清單重製實作) ==========
     function loadSpots() {
       if (isGuest) {
         const localSpots = localStorage.getItem('guest_spots');
@@ -638,20 +632,33 @@
           return;
       }
 
+      // 全新卡片式清單渲染 (Card Layout)
       container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-          const displayAddress = spot.address || spot.subtitle || '';
+          const displayAddress = spot.address || spot.subtitle || '無詳細地址';
           return `
-          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/50 backdrop-blur-xl p-4 rounded-[24px] border border-white/60 shadow-[0_8px_20px_rgba(0,0,0,0.04)] flex items-center gap-4 cursor-pointer hover:bg-white/70 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-white/80 hover:-translate-y-1 active:scale-95 transition-all group">
-             <div class="w-12 h-12 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl shrink-0 group-hover:scale-110 group-hover:bg-brand-primary group-hover:text-white transition-all shadow-sm">
-                 <i class="${locObj.icon}"></i>
+          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white/70 backdrop-blur-xl p-3 rounded-[24px] border border-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex gap-4 cursor-pointer hover:bg-white hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
+             
+             <!-- 卡片左側：大型圖示區塊 -->
+             <div class="w-[72px] h-[72px] rounded-[18px] bg-gradient-to-br from-brand-primary/80 to-brand-dark text-white flex flex-col items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform relative overflow-hidden">
+                 <i class="${locObj.icon} text-[28px] relative z-10 drop-shadow-sm"></i>
+                 <div class="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
              </div>
-             <div class="flex-1 overflow-hidden w-full">
-                <div class="text-[16px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">${spot.name}</div>
-                <div class="text-[12px] font-bold text-brand-textSub mt-0.5 truncate opacity-90">${displayAddress}</div>
+             
+             <!-- 卡片右側：資訊區塊 -->
+             <div class="flex-1 flex flex-col justify-center py-1 pr-2 min-w-0">
+                <div class="flex items-center gap-2 mb-1.5">
+                   <span class="px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
+                </div>
+                <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
+                <div class="text-[12px] font-bold text-brand-textSub mt-1.5 truncate flex items-center gap-1.5 opacity-90">
+                    <i class="fa-solid fa-location-dot opacity-60 text-[10px] text-brand-primary"></i> ${displayAddress}
+                </div>
              </div>
-             <div class="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center text-brand-light group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-colors shrink-0">
-                 <i class="fa-solid fa-chevron-right text-sm"></i>
+             
+             <!-- 裝飾用右側箭頭 -->
+             <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-primary">
+                <i class="fa-solid fa-chevron-right text-sm"></i>
              </div>
           </div>`;
       }).join('');
