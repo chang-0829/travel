@@ -188,15 +188,12 @@
                </button>
 
                <div>
-                   <div class="flex items-center gap-2 flex-wrap pr-12">
-                       <h2 id="detail-name" class="text-2xl font-extrabold text-brand-dark leading-tight">景點名稱</h2>
-                       <span id="detail-cat" class="px-2 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-md">分類</span>
-                   </div>
+                   <h2 id="detail-name" class="text-2xl font-extrabold text-brand-dark leading-tight pr-12">景點名稱</h2>
                    
                    <!-- 外文名稱 (分行) -->
                    <div id="detail-foreign-names" class="text-[13px] font-bold text-brand-textSub mt-2 hidden flex flex-col gap-0.5">
-                      <span id="detail-foreign-1"></span>
-                      <span id="detail-foreign-2"></span>
+                      <span id="detail-foreign-1" class="block"></span>
+                      <span id="detail-foreign-2" class="block"></span>
                    </div>
                    
                    <!-- 地址 -->
@@ -207,7 +204,7 @@
                </div>
 
                <!-- 三個圓圈功能按鈕 -->
-               <div class="flex justify-around items-center py-4 border-y border-brand-light/50 bg-white">
+               <div class="flex justify-around items-center py-6 border-y border-brand-light/50 bg-white">
                   <a id="circle-nav-btn" href="#" target="_blank" class="flex flex-col items-center gap-2 group">
                      <div class="w-12 h-12 rounded-full bg-[#4285F4]/10 text-[#4285F4] flex items-center justify-center shadow-sm group-hover:bg-[#4285F4] group-hover:text-white transition-all">
                         <i class="fa-solid fa-location-arrow"></i>
@@ -299,7 +296,7 @@
     let userFavorites = new Set();
     const isGuest = localStorage.getItem('isGuest') === 'true';
 
-    // 監聽登入與資料初始化
+    // 監聽登入
     onAuthStateChanged(auth, user => { 
         currentUser = user; 
         if (user && !isGuest) {
@@ -331,7 +328,7 @@
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
-    // ========== 地圖與 Marker 控制 ==========
+    // ========== 地圖初始化與控制 ==========
     let map = null;
     let markersLayer = null;
     let markersDict = {};
@@ -408,17 +405,16 @@
         }
     };
 
-    // ========== 景點資訊面板邏輯 (UI 改版) ==========
+    // ========== 景點資訊面板邏輯 ==========
     window.showSpotDetail = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
         if (!spot) return;
 
         const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
 
-        // 圖示、標題與分類
+        // 標題與圖示
         document.getElementById('detail-icon').innerHTML = `<i class="${locObj.icon}"></i>`;
         document.getElementById('detail-name').innerText = spot.name;
-        document.getElementById('detail-cat').innerText = locObj.label;
         
         // 處理外文名稱 (分行)
         const foreign1 = spot.foreignName1;
@@ -450,8 +446,6 @@
         }
 
         // --- 三個圓圈功能按鈕設定 ---
-        
-        // 1. 導航
         const navBtn = document.getElementById('circle-nav-btn');
         if (spot.lat && spot.lng) {
             navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
@@ -459,52 +453,46 @@
             navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(displayAddress)}`;
         }
 
-        // 2. 官網
         const webBtn = document.getElementById('circle-web-btn');
         if (spot.website) {
             webBtn.href = spot.website;
-            webBtn.style.display = 'flex';
+            webBtn.classList.replace('hidden', 'flex');
         } else {
-            webBtn.style.display = 'none';
+            webBtn.classList.replace('flex', 'hidden');
         }
 
-        // 3. 電話
         const phoneBtn = document.getElementById('circle-phone-btn');
         if (spot.phone) {
             phoneBtn.href = `tel:${spot.phone}`;
-            phoneBtn.style.display = 'flex';
+            phoneBtn.classList.replace('hidden', 'flex');
         } else {
-            phoneBtn.style.display = 'none';
+            phoneBtn.classList.replace('flex', 'hidden');
         }
 
-        // 更新收藏按鈕狀態
+        // 綁定收藏與行程按鈕
         updateFavoriteUI(spot.id);
-
-        // 綁定其他功能
-        document.getElementById('btn-add-to-trip').onclick = () => window.showToast(`已觸發！請至「我的行程」將「${spot.name}」排入行程表`);
+        document.getElementById('btn-add-to-trip').onclick = () => window.showToast(`請至「我的行程」將「${spot.name}」排入行程表`);
         document.getElementById('btn-favorite-spot').onclick = () => window.toggleFavorite(spot.id);
 
         // 滑入面板
-        const panel = document.getElementById('spot-detail-panel');
-        panel.classList.remove('translate-x-full');
-        panel.classList.add('translate-x-0');
+        document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
     };
 
     window.closeSpotDetail = function() {
         document.getElementById('spot-detail-panel').classList.add('translate-x-full');
     };
 
-    // ========== 收藏功能持久化邏輯 ==========
+    // ========== 收藏功能持久化 ==========
 
     function listenToFavorites(userId) {
-        // 從私有路徑讀取收藏
         const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
         onSnapshot(favRef, (snapshot) => {
             userFavorites = new Set(snapshot.docs.map(doc => doc.id));
-            // 如果當前詳情面板開著，且剛好是正在更新的這一個，重新整理 UI
+            // 若當前詳情面板正顯示該景點，即時更新
             const panel = document.getElementById('spot-detail-panel');
-            if (panel && panel.classList.contains('translate-x-0')) {
-                // 這裡簡單處理，暫不重新渲染全文，僅更新按鈕
+            const detailName = document.getElementById('detail-name').innerText;
+            if (panel && !panel.classList.contains('translate-x-full')) {
+                // 這裡我們需要知道當前 panel 的 spotId，簡單起見點擊時會觸發 updateUI
             }
         });
     }
@@ -512,11 +500,10 @@
     function updateFavoriteUI(spotId) {
         const favBtn = document.getElementById('btn-favorite-spot');
         const isFav = userFavorites.has(spotId);
-        
         if (isFav) {
             favBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-            favBtn.classList.remove('text-brand-textSub', 'bg-brand-bg');
             favBtn.classList.add('text-[#E63946]', 'bg-[#FFE5E5]');
+            favBtn.classList.remove('text-brand-textSub', 'bg-brand-bg');
         } else {
             favBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
             favBtn.classList.remove('text-[#E63946]', 'bg-[#FFE5E5]');
@@ -525,36 +512,28 @@
     }
 
     window.toggleFavorite = async function(spotId) {
-        if (!currentUser && !isGuest) {
-            window.showToast("請先登入後再使用收藏功能");
-            return;
-        }
-
+        if (!currentUser && !isGuest) { window.showToast("請先登入後再使用收藏功能"); return; }
         const isFav = userFavorites.has(spotId);
         
-        if (isGuest) {
-            // 訪客模式存 LocalStorage
-            if (isFav) userFavorites.delete(spotId); else userFavorites.add(spotId);
-            localStorage.setItem('guest_favorites', JSON.stringify([...userFavorites]));
-            updateFavoriteUI(spotId);
-            window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
-            return;
-        }
+        // 1. 立即更新 UI (Optimistic UI)
+        if (isFav) userFavorites.delete(spotId); else userFavorites.add(spotId);
+        updateFavoriteUI(spotId);
 
-        // Firebase 模式
-        try {
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
-            if (isFav) {
-                await deleteDoc(docRef);
-                window.showToast("已取消收藏");
-            } else {
-                await setDoc(docRef, { timestamp: Date.now() });
-                window.showToast("已加入收藏！");
+        // 2. 進行存儲
+        if (isGuest) {
+            localStorage.setItem('guest_favorites', JSON.stringify([...userFavorites]));
+            window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
+        } else {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
+                if (isFav) await deleteDoc(docRef); else await setDoc(docRef, { timestamp: Date.now() });
+                window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
+            } catch (e) {
+                // 若出錯回滾 UI
+                if (isFav) userFavorites.add(spotId); else userFavorites.delete(spotId);
+                updateFavoriteUI(spotId);
+                window.showToast("收藏失敗，請檢查權限");
             }
-            // 狀態會由 onSnapshot 自動更新
-        } catch (e) {
-            console.error(e);
-            window.showToast("收藏失敗，請檢查權限");
         }
     };
 
@@ -571,9 +550,6 @@
         onSnapshot(qSpots, (snapshot) => {
           publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           renderListAndMap();
-        }, err => {
-          console.error(err);
-          renderListAndMap();
         });
       }
     }
@@ -581,13 +557,9 @@
     function renderListAndMap(filter = '') {
       const container = document.getElementById('explore-list');
       let spots = publicSpots;
-      
       if (filter) {
           const kw = filter.toLowerCase();
-          spots = spots.filter(s => 
-              (s.name || '').toLowerCase().includes(kw) || 
-              (s.address || s.subtitle || '').toLowerCase().includes(kw)
-          );
+          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw) || (s.address || s.subtitle || '').toLowerCase().includes(kw));
       }
 
       if (map) renderMarkersOnMap(spots);
@@ -598,9 +570,7 @@
           return;
       }
 
-      const sortedSpots = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-      container.innerHTML = sortedSpots.map(spot => {
+      container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
           const displayAddress = spot.address || spot.subtitle || '';
           return `
@@ -610,10 +580,7 @@
              </div>
              <div class="flex-1 overflow-hidden w-full">
                 <div class="text-[14px] md:text-[15px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">${spot.name}</div>
-                <div class="text-[11px] md:text-[12px] font-bold text-brand-textSub mt-0.5 truncate flex items-center gap-1.5">
-                   <span class="text-brand-primary/80 shrink-0 bg-brand-primary/10 px-1.5 py-[2px] rounded text-[9px] md:text-[10px]">${locObj.label}</span>
-                   ${displayAddress ? `<span class="truncate opacity-80">${displayAddress}</span>` : ''}
-                </div>
+                <div class="text-[11px] md:text-[12px] font-bold text-brand-textSub mt-0.5 truncate truncate opacity-80">${displayAddress}</div>
              </div>
              <i class="fa-solid fa-location-arrow text-brand-light group-hover:text-brand-primary text-sm transition-colors"></i>
           </div>`;
@@ -622,17 +589,12 @@
 
     document.getElementById('input-explore-search').addEventListener('input', (e) => renderListAndMap(e.target.value));
 
-    // ========== App 初始化流程 ==========
     async function startApp() {
         try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        } catch (e) { console.log('Auth Init Fallback', e); }
-        initMap();
-        loadSpots();
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+            else await signInAnonymously(auth);
+        } catch (e) {}
+        initMap(); loadSpots();
     }
 
     startApp();
