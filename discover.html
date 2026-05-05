@@ -325,15 +325,20 @@
     let markersDict = {};
 
     function initMap() {
-        // 建立兩種圖層：1.高質感街道圖 (CartoDB) 2.衛星影像 (Esri World Imagery)
-        const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            maxZoom: 19
+        // 建立兩種圖層：1. Google 街道圖 2. Google 衛星混合圖
+        const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            attribution: '&copy; Google',
+            maxZoom: 20,
+            keepBuffer: 4,         // 預先載入鄰近圖塊以減少白邊
+            updateWhenIdle: true   // 拖曳停止後再更新以提升效能
         });
         
-        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '&copy; Esri',
-            maxZoom: 19
+        // lyrs=y 代表混合模式：衛星圖加上街道、標籤名稱
+        const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            attribution: '&copy; Google',
+            maxZoom: 20,
+            keepBuffer: 4,
+            updateWhenIdle: true
         });
 
         // 隱藏預設縮放按鈕
