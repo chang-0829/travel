@@ -174,9 +174,6 @@
             <div class="h-64 md:h-72 bg-brand-light relative flex items-center justify-center overflow-hidden shrink-0">
                <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/40 to-brand-accent/40"></div>
                <i class="fa-solid fa-mountain-sun text-6xl text-white/50 z-0 drop-shadow-md"></i>
-               <div id="detail-icon" class="absolute -bottom-6 left-6 w-16 h-16 rounded-full bg-white shadow-md border-4 border-white flex items-center justify-center text-brand-primary text-2xl z-10">
-                   <i class="fa-solid fa-camera"></i>
-               </div>
             </div>
 
             <!-- 詳細資訊區 -->
@@ -412,8 +409,7 @@
 
         const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
 
-        // 標題與圖示
-        document.getElementById('detail-icon').innerHTML = `<i class="${locObj.icon}"></i>`;
+        // 標題與圖示 (移除了原本位於頂部的 detail-icon)
         document.getElementById('detail-name').innerText = spot.name;
         
         // 處理外文名稱 (分行)
@@ -488,12 +484,6 @@
         const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
         onSnapshot(favRef, (snapshot) => {
             userFavorites = new Set(snapshot.docs.map(doc => doc.id));
-            // 若當前詳情面板正顯示該景點，即時更新
-            const panel = document.getElementById('spot-detail-panel');
-            const detailName = document.getElementById('detail-name').innerText;
-            if (panel && !panel.classList.contains('translate-x-full')) {
-                // 這裡我們需要知道當前 panel 的 spotId，簡單起見點擊時會觸發 updateUI
-            }
         });
     }
 
@@ -515,11 +505,11 @@
         if (!currentUser && !isGuest) { window.showToast("請先登入後再使用收藏功能"); return; }
         const isFav = userFavorites.has(spotId);
         
-        // 1. 立即更新 UI (Optimistic UI)
+        // 1. 立即更新本地狀態並更新 UI (Optimistic UI)
         if (isFav) userFavorites.delete(spotId); else userFavorites.add(spotId);
         updateFavoriteUI(spotId);
 
-        // 2. 進行存儲
+        // 2. 進行異步存儲
         if (isGuest) {
             localStorage.setItem('guest_favorites', JSON.stringify([...userFavorites]));
             window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
@@ -529,10 +519,10 @@
                 if (isFav) await deleteDoc(docRef); else await setDoc(docRef, { timestamp: Date.now() });
                 window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
             } catch (e) {
-                // 若出錯回滾 UI
+                // 出錯回滾
                 if (isFav) userFavorites.add(spotId); else userFavorites.delete(spotId);
                 updateFavoriteUI(spotId);
-                window.showToast("收藏失敗，請檢查權限");
+                window.showToast("收藏失敗，請檢查網路權限");
             }
         }
     };
