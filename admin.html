@@ -147,100 +147,100 @@
     </div>
   </main>
 
-  <!-- ================= 景點編輯/新增 Modal ================= -->
-  <div id="spot-modal" class="fixed inset-0 z-[5000] hidden items-center justify-center px-4">
-     <div class="absolute inset-0 bg-brand-dark/40 backdrop-blur-sm transition-opacity opacity-0" id="spot-modal-backdrop" onclick="window.closeSpotModal()"></div>
+  <!-- ================= 滿版景點編輯/新增 Modal (Full Screen) ================= -->
+  <div id="spot-modal" class="fixed inset-0 z-[5000] hidden bg-white flex-col transform transition-transform translate-y-full duration-300 opacity-0 overflow-hidden">
      
-     <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl relative z-10 flex flex-col max-h-[95vh] h-full md:h-[85vh] transition-transform transform scale-95 opacity-0 overflow-hidden" id="spot-modal-content">
-        <!-- Modal Header -->
-        <div class="px-6 py-4 border-b border-brand-light/80 flex justify-between items-center bg-brand-bg/30 shrink-0">
+     <!-- Modal Header -->
+     <div class="px-6 h-[72px] border-b border-brand-light/80 flex justify-between items-center bg-white shrink-0 shadow-sm z-20 relative">
+        <div class="flex items-center gap-4">
+           <button onclick="window.closeSpotModal()" class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-textMain hover:bg-brand-light hover:text-brand-dark transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
            <h3 id="modal-title" class="text-xl font-extrabold text-brand-dark">新增景點</h3>
-           <button onclick="window.closeSpotModal()" class="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center text-brand-textSub hover:text-brand-dark transition-colors"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        <button onclick="window.saveSpot()" class="px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md shadow-brand-primary/30 hover:bg-brand-dark active:scale-95 transition-all flex items-center gap-2">
+           <i class="fa-solid fa-floppy-disk"></i> <span class="hidden sm:inline">儲存景點資料</span><span class="sm:hidden">儲存</span>
+        </button>
+     </div>
+     
+     <!-- Modal Body (左側表單與右側滿版地圖) -->
+     <div class="flex-1 overflow-hidden flex flex-col md:flex-row bg-white relative">
         
-        <!-- Modal Body (表單與地圖並排) -->
-        <div class="flex-1 overflow-hidden flex flex-col md:flex-row bg-white">
-           
-           <!-- 左側：詳細表單 (新增垂直捲動) -->
-           <div class="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-brand-light">
-              <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-4">
-                  <input type="hidden" id="form-id">
-                  
+        <!-- 左側：詳細表單 (固定寬度或佔 1/3) -->
+        <div class="w-full md:w-[450px] lg:w-[500px] flex flex-col border-b md:border-b-0 md:border-r border-brand-light shrink-0 z-10 bg-white">
+           <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-5">
+               <input type="hidden" id="form-id">
+               
+               <div>
+                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點中文名稱 <span class="text-[#E63946]">*</span></label>
+                  <input type="text" id="form-name" placeholder="輸入景點/地標中文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+               </div>
+
+               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點中文名稱 <span class="text-[#E63946]">*</span></label>
-                     <input type="text" id="form-name" placeholder="輸入景點/地標中文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 1 (選填)</label>
+                     <input type="text" id="form-foreign1" placeholder="如日文/英文" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
                   </div>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 1 (選填)</label>
-                        <input type="text" id="form-foreign1" placeholder="如日文/英文" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
-                     </div>
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 2 (選填)</label>
-                        <input type="text" id="form-foreign2" placeholder="其他外文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
-                     </div>
-                  </div>
-
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">分類 <span class="text-[#E63946]">*</span></label>
-                     <select id="form-mode" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all appearance-none cursor-pointer">
-                        <!-- JS 動態填入 -->
-                     </select>
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 2 (選填)</label>
+                     <input type="text" id="form-foreign2" placeholder="其他外文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
                   </div>
+               </div>
 
+               <div>
+                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">分類 <span class="text-[#E63946]">*</span></label>
+                  <select id="form-mode" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all appearance-none cursor-pointer">
+                     <!-- JS 動態填入 -->
+                  </select>
+               </div>
+
+               <!-- 地址與自動定位功能 -->
+               <div>
+                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">地址 <span class="text-[#E63946]">*</span></label>
+                  <div class="flex gap-2">
+                     <input type="text" id="form-address" placeholder="輸入完整地址" class="flex-1 w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <button type="button" onclick="window.geocodeAddress()" class="px-4 py-3 bg-brand-bg text-brand-primary border border-brand-light font-bold rounded-xl hover:bg-brand-primary hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0" title="自動將地址轉換為地圖座標">
+                        <i class="fa-solid fa-location-crosshairs mr-1.5"></i> <span class="text-sm">定位</span>
+                     </button>
+                  </div>
+               </div>
+
+               <div>
+                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點介紹 (選填)</label>
+                  <textarea id="form-description" placeholder="輸入景點的詳細介紹或特色..." rows="4" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all resize-none"></textarea>
+               </div>
+
+               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">地址 <span class="text-[#E63946]">*</span> <span class="font-normal opacity-70">(前台將以此提供 Google 導航)</span></label>
-                     <input type="text" id="form-address" placeholder="輸入完整地址" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">網址 (選填)</label>
+                     <input type="url" id="form-website" placeholder="https://" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
                   </div>
-
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點介紹 (選填)</label>
-                     <textarea id="form-description" placeholder="輸入景點的詳細介紹或特色..." rows="3" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all resize-none"></textarea>
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">電話 (選填)</label>
+                     <input type="tel" id="form-phone" placeholder="輸入聯絡電話" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
                   </div>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">網址 (選填)</label>
-                        <input type="url" id="form-website" placeholder="https://" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
-                     </div>
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">電話 (選填)</label>
-                        <input type="tel" id="form-phone" placeholder="輸入聯絡電話" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
-                     </div>
-                  </div>
-              </div>
-              
-              <!-- 左側底部：座標顯示 -->
-              <div class="p-6 bg-brand-bg/50 border-t border-brand-light shrink-0">
-                  <div class="grid grid-cols-2 gap-3">
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">緯度 (Latitude)</label>
-                        <input type="number" id="form-lat" step="any" placeholder="自動獲取" class="w-full bg-brand-light/30 border border-brand-light/50 rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
-                     </div>
-                     <div>
-                        <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">經度 (Longitude)</label>
-                        <input type="number" id="form-lng" step="any" placeholder="自動獲取" class="w-full bg-brand-light/30 border border-brand-light/50 rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
-                     </div>
-                  </div>
-              </div>
+               </div>
            </div>
-
-           <!-- 右側地圖選點器 -->
-           <div class="w-full md:w-1/2 h-[250px] md:h-full bg-brand-bg relative flex flex-col shrink-0">
-              <div class="bg-brand-dark text-white text-[11px] font-bold py-2 px-3 text-center shrink-0 flex items-center justify-center gap-2 shadow-md relative z-10">
-                 <i class="fa-solid fa-hand-pointer text-[#D5896F]"></i> 點擊地圖快速設定精準座標
-              </div>
-              <div id="admin-map" class="flex-1 w-full relative z-0"></div>
+           
+           <!-- 左側底部：座標顯示 -->
+           <div class="p-6 bg-brand-bg/50 border-t border-brand-light shrink-0 z-10">
+               <div class="grid grid-cols-2 gap-3">
+                  <div>
+                     <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Latitude</label>
+                     <input type="number" id="form-lat" step="any" placeholder="自動獲取" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
+                  </div>
+                  <div>
+                     <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Longitude</label>
+                     <input type="number" id="form-lng" step="any" placeholder="自動獲取" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none" readonly>
+                  </div>
+               </div>
            </div>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="px-6 py-4 border-t border-brand-light/80 bg-brand-bg/30 flex justify-end gap-3 shrink-0">
-           <button onclick="window.closeSpotModal()" class="px-5 py-2.5 bg-white border border-brand-light text-brand-textMain font-bold rounded-xl hover:bg-brand-light/50 transition-colors">取消</button>
-           <button onclick="window.saveSpot()" class="px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md shadow-brand-primary/30 hover:bg-brand-dark active:scale-95 transition-all flex items-center gap-2">
-              <i class="fa-solid fa-floppy-disk"></i> 儲存景點資料
-           </button>
+        <!-- 右側：滿版地圖選點器 -->
+        <div class="flex-1 h-[400px] md:h-full bg-brand-light relative flex flex-col shrink-0 z-0">
+           <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-lg text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-2 z-[400]">
+              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 使用左側「自動定位」或點擊地圖設定座標
+           </div>
+           <div id="admin-map" class="flex-1 w-full h-full relative z-0"></div>
         </div>
      </div>
   </div>
@@ -304,6 +304,7 @@
     // 初始化下拉選單
     function initSelect() {
         const select = document.getElementById('form-mode');
+        select.innerHTML = '';
         LOCATION_MODES.forEach(mode => {
             select.add(new Option(`${mode.label}`, mode.id));
         });
@@ -316,20 +317,17 @@
         const errorMsg = document.getElementById('login-error-msg');
 
         if (user && user.email === ADMIN_EMAIL) {
-            // ✅ 通過驗證：是管理員
             isAdmin = true;
             nameEl.innerText = user.displayName || "超級管理員";
-            loginOverlay.classList.add('hidden'); // 解除鎖定
+            loginOverlay.classList.add('hidden');
             initSelect();
-            loadSpots(); // 開始載入資料庫
+            loadSpots();
         } else {
-            // ❌ 驗證失敗：非管理員 或 未登入
             isAdmin = false;
             nameEl.innerText = "未授權";
-            loginOverlay.classList.remove('hidden'); // 顯示鎖定遮罩
+            loginOverlay.classList.remove('hidden');
             document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-[#E63946] font-bold">拒絕存取：無權限讀取</td></tr>`;
             
-            // 如果是用「不合法的 Google 帳號」登入，顯示錯誤提示
             if (user && !user.isAnonymous && user.email !== ADMIN_EMAIL) {
                errorMsg.innerText = `目前帳號 (${user.email}) 無權限進入後台。`;
                errorMsg.classList.remove('hidden');
@@ -349,7 +347,7 @@
 
     window.adminLogout = function() {
         signOut(auth).then(() => {
-            window.location.href = './discover.html'; // 登出後退回前台
+            window.location.href = './discover.html';
         });
     };
 
@@ -387,8 +385,6 @@
           const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
           const hasCoords = spot.lat && spot.lng;
           const coordsStr = hasCoords ? `${parseFloat(spot.lat).toFixed(4)}, ${parseFloat(spot.lng).toFixed(4)}` : '<span class="text-brand-accent italic">未設定</span>';
-          
-          // 支援舊資料的 subtitle 轉換為 address 顯示
           const displayAddress = spot.address || spot.subtitle || '-';
 
           return `
@@ -421,7 +417,6 @@
       }).join('');
     }
 
-    // 搜尋功能
     document.getElementById('search-input').addEventListener('input', (e) => renderTable(e.target.value));
 
     // ========== 地圖與 Modal 邏輯 ==========
@@ -458,6 +453,44 @@
         adminMap.panTo([lat, lng]);
     }
 
+    // ★ 新增功能：地址轉座標 (Nominatim API) ★
+    window.geocodeAddress = async function() {
+        const address = document.getElementById('form-address').value.trim();
+        const name = document.getElementById('form-name').value.trim();
+        const query = address || name;
+
+        if (!query) {
+            window.showToast("請先輸入地址或景點名稱");
+            return;
+        }
+
+        const btnIcon = document.querySelector('button[onclick="window.geocodeAddress()"] i');
+        if(btnIcon) btnIcon.className = 'fa-solid fa-spinner fa-spin mr-1.5';
+        window.showToast("搜尋座標中...");
+
+        try {
+            // 使用 OpenStreetMap Nominatim 免費 API 轉碼
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+
+                updatePickerMarker(lat, lng);
+                adminMap.setZoom(16);
+                window.showToast("自動定位成功！");
+            } else {
+                window.showToast("找不到精確座標，請嘗試補充城市名稱或手動點擊地圖。");
+            }
+        } catch (e) {
+            console.error(e);
+            window.showToast("自動定位失敗");
+        } finally {
+            if(btnIcon) btnIcon.className = 'fa-solid fa-location-crosshairs mr-1.5';
+        }
+    };
+
     window.openSpotModal = function(id = null) {
         // 重置表單
         document.getElementById('form-id').value = id || '';
@@ -479,7 +512,6 @@
 
         document.getElementById('modal-title').innerText = id ? '編輯景點' : '新增景點';
 
-        // 載入既有資料
         if (id) {
             const spot = adminSpots.find(s => s.id === id);
             if (spot) {
@@ -487,29 +519,30 @@
                 document.getElementById('form-foreign1').value = spot.foreignName1 || '';
                 document.getElementById('form-foreign2').value = spot.foreignName2 || '';
                 document.getElementById('form-mode').value = spot.locMode || 'spot';
-                // 向下相容舊的 subtitle 欄位
                 document.getElementById('form-address').value = spot.address || spot.subtitle || '';
                 document.getElementById('form-description').value = spot.description || '';
                 document.getElementById('form-website').value = spot.website || '';
                 document.getElementById('form-phone').value = spot.phone || '';
 
                 if(spot.lat && spot.lng) {
-                    setTimeout(() => updatePickerMarker(spot.lat, spot.lng), 100);
+                    setTimeout(() => {
+                        updatePickerMarker(spot.lat, spot.lng);
+                        if(adminMap) adminMap.setZoom(15);
+                    }, 200);
                 }
             }
         } else {
-             setTimeout(() => { if(adminMap) adminMap.setView([23.5, 121], 7); }, 100);
+             setTimeout(() => { if(adminMap) adminMap.setView([23.5, 121], 7); }, 200);
         }
 
+        // 滿版進場動畫 (由下往上滑出)
         const modal = document.getElementById('spot-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
         setTimeout(() => {
-            document.getElementById('spot-modal-backdrop').classList.remove('opacity-0');
-            const content = document.getElementById('spot-modal-content');
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
+            modal.classList.remove('translate-y-full', 'opacity-0');
+            modal.classList.add('translate-y-0', 'opacity-100');
             
             if(!adminMap) initAdminMap();
             adminMap.invalidateSize();
@@ -517,13 +550,12 @@
     };
 
     window.closeSpotModal = function() {
-        document.getElementById('spot-modal-backdrop').classList.add('opacity-0');
-        const content = document.getElementById('spot-modal-content');
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
+        // 退場動畫 (往下縮回)
+        const modal = document.getElementById('spot-modal');
+        modal.classList.remove('translate-y-0', 'opacity-100');
+        modal.classList.add('translate-y-full', 'opacity-0');
         
         setTimeout(() => {
-            const modal = document.getElementById('spot-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }, 300);
@@ -548,6 +580,7 @@
 
         if(!name) { window.showToast("景點中文名稱為必填"); return; }
         if(!address) { window.showToast("地址為必填"); return; }
+        if(isNaN(lat) || isNaN(lng)) { window.showToast("請使用自動定位或在地圖上點擊以產生座標"); return; }
 
         const spotData = {
             name: name,
@@ -558,8 +591,8 @@
             description: description,
             website: website,
             phone: phone,
-            lat: isNaN(lat) ? null : lat,
-            lng: isNaN(lng) ? null : lng
+            lat: lat,
+            lng: lng
         };
 
         try {
