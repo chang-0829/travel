@@ -4,81 +4,244 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>趣旅行 - 探索與規劃</title>
+  
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { theme: { extend: { colors: { brand: { primary: '#748CAB', dark: '#3E5C76', light: '#E6EBEF', bg: '#F2F5F8', card: '#FFFFFF', textMain: '#2C3E50', textSub: '#8796A5', accent: '#D5896F' } } } } }
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#748CAB',
+              dark: '#3E5C76',
+              light: '#E6EBEF',
+              bg: '#F2F5F8',
+              card: '#FFFFFF',
+              textMain: '#2C3E50',
+              textSub: '#8796A5',
+              accent: '#D5896F'
+            }
+          }
+        }
+      }
+    }
   </script>
-  <style>
-    /* --- 多國語言字體整合 (TW -> W -> JP -> KR -> TH) --- */
-    /* Thin 300 */
-    @font-face { font-family: 'AppFont'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'), url('./fonts/LINESeedSans_W_Th.woff2') format('woff2'), url('./fonts/LINESeedJP_OTF_Th.woff2') format('woff2'), url('./fonts/LINESeedKR-Th.woff2') format('woff2'), url('./fonts/LINESeedSansTH_W_Th.woff2') format('woff2'); font-weight: 300; }
-    /* Regular 400 */
-    @font-face { font-family: 'AppFont'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'), url('./fonts/LINESeedSans_W_Rg.woff2') format('woff2'), url('./fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'), url('./fonts/LINESeedKR-Rg.woff2') format('woff2'), url('./fonts/LINESeedSansTH_W_Rg.woff2') format('woff2'); font-weight: 400; }
-    /* Bold 700 */
-    @font-face { font-family: 'AppFont'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'), url('./fonts/LINESeedSans_W_Bd.woff2') format('woff2'), url('./fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'), url('./fonts/LINESeedKR-Bd.woff2') format('woff2'), url('./fonts/LINESeedSansTH_W_Bd.woff2') format('woff2'); font-weight: 700; }
-    /* ExtraBold 800 */
-    @font-face { font-family: 'AppFont'; src: url('./fonts/LINESeedTW_OTF_Eb.woff2') format('woff2'), url('./fonts/LINESeedSans_W_XBd.woff2') format('woff2'), url('./fonts/LINESeedJP_OTF_Eb.woff2') format('woff2'), url('./fonts/LINESeedSansTH_W_XBd.woff2') format('woff2'); font-weight: 800; }
 
-    body { font-family: 'AppFont', ui-sans-serif, system-ui, sans-serif; background-color: #F2F5F8; }
+  <style>
+    /* --- LINE Seed TW 字體整合 --- */
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    body { font-family: 'LINE Seed TW', ui-sans-serif, system-ui, sans-serif; background-color: #F2F5F8; }
+
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
   </style>
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
+
+  <!-- 提示訊息 -->
   <div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[100] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
     <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg">成功！</span>
   </div>
+
   <div class="max-w-md mx-auto h-[100dvh] bg-brand-bg shadow-xl relative flex flex-col">
+
+    <!-- 標準 Header -->
     <header class="bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
-      <div><p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Explore & Plan</p><h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">趣旅行</h1></div>
-      <button onclick="showToast('目前沒有新通知')" class="w-10 h-10 flex items-center justify-center bg-white border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all"><i class="fa-solid fa-bell text-lg"></i></button>
+      <div>
+        <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Explore & Plan</p>
+        <h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">趣旅行</h1>
+      </div>
+      <button onclick="showToast('目前沒有新通知')" class="w-10 h-10 flex items-center justify-center bg-white border border-brand-light shadow-sm rounded-full text-brand-textSub hover:text-brand-primary active:scale-95 transition-all">
+        <i class="fa-solid fa-bell text-lg"></i>
+      </button>
     </header>
-    <div class="flex-1 overflow-y-auto px-6 pb-6 relative pt-6">
+
+    <!-- 主內容區：首頁 -->
+    <div class="flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar relative bg-brand-bg pt-6">
+       <!-- 歡迎卡片 -->
        <div class="bg-brand-primary text-white rounded-[24px] p-6 shadow-md mb-6 relative overflow-hidden">
           <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
           <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-[#3E5C76] opacity-30 rounded-full blur-xl"></div>
+          
           <h2 id="welcome-msg" class="text-2xl font-extrabold mb-1 relative z-10">早安，旅行者！</h2>
           <p class="text-white/80 font-bold text-[13px] relative z-10">探索新景點，規劃下一趟完美旅程</p>
        </div>
+       
+       <!-- 兩大主功能按鈕 -->
        <div class="grid grid-cols-2 gap-4 mb-8">
-          <a href="./discover.html" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all"><div class="w-14 h-14 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-2xl"><i class="fa-solid fa-earth-americas"></i></div><span class="font-extrabold text-brand-dark">探索景點</span></a>
-          <a href="./mytrip.html" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all"><div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl"><i class="fa-solid fa-suitcase-rolling"></i></div><span class="font-extrabold text-brand-dark">我的行程</span></a>
+          <a href="./discover.html" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all">
+             <div class="w-14 h-14 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-2xl"><i class="fa-solid fa-earth-americas"></i></div>
+             <span class="font-extrabold text-brand-dark">探索景點</span>
+          </a>
+          <a href="./mytrip.html" class="bg-white p-5 rounded-[24px] shadow-sm border border-brand-light flex flex-col items-center justify-center gap-3 hover:shadow-md active:scale-[0.98] transition-all">
+             <div class="w-14 h-14 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-2xl"><i class="fa-solid fa-suitcase-rolling"></i></div>
+             <span class="font-extrabold text-brand-dark">我的行程</span>
+          </a>
        </div>
-       <div><div class="flex justify-between items-center mb-4"><h3 class="text-[15px] font-extrabold text-brand-dark">近期熱門探索</h3><a href="./discover.html" class="text-[12px] font-bold text-brand-primary">查看全部</a></div><div id="home-trending-spots" class="flex overflow-x-auto gap-4 snap-x pb-4"></div></div>
+       
+       <!-- 近期熱門探索 -->
+       <div>
+         <div class="flex justify-between items-center mb-4">
+           <h3 class="text-[15px] font-extrabold text-brand-dark">近期熱門探索</h3>
+           <a href="./discover.html" class="text-[12px] font-bold text-brand-primary">查看全部</a>
+         </div>
+         <div id="home-trending-spots" class="flex overflow-x-auto gap-4 hide-scrollbar snap-x pb-4">
+            <!-- 推薦景點動態載入區 -->
+         </div>
+       </div>
     </div>
+
+    <!-- 底部導覽列 -->
     <nav class="bg-white border-t border-brand-light shrink-0 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
       <div class="flex justify-around items-center h-[65px]">
-        <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors"><i class="fa-solid fa-house mb-1 text-[18px]"></i><span class="text-[10px] font-bold">首頁</span></a>
-        <a href="./discover.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors"><i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i><span class="text-[10px] font-bold">探索</span></a>
-        <a href="./mytrip.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors"><i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i><span class="text-[10px] font-bold">行程</span></a>
-        <a href="./account.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors"><i class="fa-solid fa-user mb-1 text-[18px]"></i><span class="text-[10px] font-bold">會員</span></a>
+        <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-primary transition-colors">
+          <i class="fa-solid fa-house mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">首頁</span>
+        </a>
+        <a href="./discover.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-earth-americas mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">探索</span>
+        </a>
+        <a href="./mytrip.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-suitcase-rolling mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">行程</span>
+        </a>
+        <a href="./account.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
+          <i class="fa-solid fa-user mb-1 text-[18px]"></i>
+          <span class="text-[10px] font-bold">會員</span>
+        </a>
       </div>
     </nav>
+
   </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-    import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-    const firebaseConfig = { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
-    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = "travel-platform-v2";
-    const LOCATION_MODES = [{ id: 'spot', icon: 'fa-solid fa-camera' },{ id: 'food', icon: 'fa-solid fa-utensils' },{ id: 'shop', icon: 'fa-solid fa-bag-shopping' },{ id: 'hotel', icon: 'fa-solid fa-hotel' },{ id: 'park', icon: 'fa-solid fa-wand-magic-sparkles' },{ id: 'car_rental', icon: 'fa-solid fa-key' },{ id: 'station', icon: 'fa-solid fa-train' },{ id: 'airport', icon: 'fa-solid fa-plane-arrival' },{ id: 'other', icon: 'fa-solid fa-location-dot' }];
+    import { getFirestore, collection, onSnapshot, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    // Firebase Init (保留原本完整的設定檔)
+    const firebaseConfig = { 
+      apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
+      authDomain: "travel-96009.firebaseapp.com", 
+      projectId: "travel-96009", 
+      storageBucket: "travel-96009.firebasestorage.app", 
+      messagingSenderId: "578860064042", 
+      appId: "1:578860064042:web:b147880df3a01dd8f75253" 
+    };
+    const app = initializeApp(firebaseConfig); 
+    const auth = getAuth(app); 
+    const db = getFirestore(app); 
+    const appId = "travel-platform-v2";
+
+    // 地點圖示對應
+    const LOCATION_MODES = [
+      { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
+      { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
+      { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
+      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
+      { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
+      { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
+      { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
+      { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
+      { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
+    ];
+
+    // 預設公共景點
+    const DEFAULT_PUBLIC_SPOTS = [
+       { id: 's1', name: '台北 101', subtitle: '信義區市府路45號', locMode: 'spot', createdAt: Date.now() },
+       { id: 's2', name: '清水寺', subtitle: '京都府京都市東山區', locMode: 'spot', createdAt: Date.now() },
+       { id: 's3', name: '一蘭拉麵 (總本店)', subtitle: '福岡縣福岡市', locMode: 'food', createdAt: Date.now() },
+       { id: 's4', name: '東京迪士尼樂園', subtitle: '千葉縣浦安市', locMode: 'park', createdAt: Date.now() },
+       { id: 's5', name: '心齋橋筋商店街', subtitle: '大阪府大阪市', locMode: 'shop', createdAt: Date.now() }
+    ];
+
+    // 狀態管理
+    let publicSpots = [];
     const isGuest = localStorage.getItem('isGuest') === 'true';
-    window.showToast = (msg) => { const el = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; el.classList.remove('opacity-0', 'pointer-events-none'); el.classList.add('opacity-100'); setTimeout(() => el.classList.add('opacity-0'), 3000); };
-    onAuthStateChanged(auth, user => { if (user) document.getElementById('welcome-msg').innerText = `早安，${user.displayName || (isGuest?'訪客':'旅行者')}！`; });
-    async function loadData() {
-      if(!isGuest && !auth.currentUser) await signInAnonymously(auth);
-      if (isGuest) { renderTrending(JSON.parse(localStorage.getItem('guest_spots') || '[]')); }
-      else { onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), s => renderTrending(s.docs.map(d => ({id:d.id, ...d.data()})))); }
+
+    // Toast 顯示邏輯
+    window.showToast = function(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      el.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+      el.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        el.classList.remove('opacity-100', 'translate-y-0');
+        el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+      }, 3000);
     }
-    function renderTrending(spots) {
+
+    // Auth 監聽 - 更新歡迎名稱
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isGuest) {
+        document.getElementById('welcome-msg').innerText = `早安，${user.displayName || '旅行者'}！`;
+      } else if (isGuest) {
+        document.getElementById('welcome-msg').innerText = `早安，訪客！`;
+      }
+    });
+
+    // 載入公共資料
+    async function loadData() {
+      // 確保匿名登入或自定義登入已執行 (如果不是訪客模式)
+      if(!isGuest && !auth.currentUser) {
+          try { await signInAnonymously(auth); } catch(e) { console.error(e); }
+      }
+
+      if (isGuest) {
+        const localSpots = localStorage.getItem('guest_spots');
+        publicSpots = localSpots ? JSON.parse(localSpots) : DEFAULT_PUBLIC_SPOTS;
+        if (!localSpots) localStorage.setItem('guest_spots', JSON.stringify(DEFAULT_PUBLIC_SPOTS));
+        renderHomeTrending();
+      } else {
+        const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+        onSnapshot(qSpots, (snapshot) => {
+          publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          if(publicSpots.length === 0) {
+              // Seed defaults if empty
+              DEFAULT_PUBLIC_SPOTS.forEach(s => addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), s));
+          }
+          renderHomeTrending();
+        }, err => console.error(err));
+      }
+    }
+
+    // 渲染熱門推薦
+    function renderHomeTrending() {
       const container = document.getElementById('home-trending-spots');
-      if (!spots.length) return;
-      container.innerHTML = spots.sort(() => 0.5 - Math.random()).slice(0, 4).map(spot => {
-        const mode = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-        return `<a href="./discover.html" class="snap-start shrink-0 w-40 bg-white rounded-[20px] p-4 border border-brand-light shadow-sm flex flex-col block"><div class="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-lg mb-3"><i class="${mode.icon}"></i></div><h4 class="font-extrabold text-[14px] text-brand-dark leading-snug line-clamp-2">${spot.name}</h4></a>`;
+      if (!publicSpots || publicSpots.length === 0) {
+          container.innerHTML = `<div class="text-brand-textSub text-sm pl-2 py-4">尚無熱門景點</div>`; return;
+      }
+      
+      // 隨機取 4 個當作推薦
+      const shuffled = [...publicSpots].sort(() => 0.5 - Math.random()).slice(0, 4);
+      container.innerHTML = shuffled.map(spot => {
+          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+          return `
+          <a href="./discover.html" class="snap-start shrink-0 w-40 bg-white rounded-[20px] p-4 border border-brand-light shadow-sm flex flex-col justify-between block active:scale-95 transition-all">
+            <div class="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center mb-3">
+              <i class="${locObj.icon}"></i>
+            </div>
+            <div>
+              <h4 class="font-extrabold text-[14px] text-brand-dark leading-snug line-clamp-2">${spot.name}</h4>
+              <p class="text-[11px] font-bold text-brand-textSub mt-1 line-clamp-1">${spot.subtitle || locObj.label}</p>
+            </div>
+          </a>
+          `;
       }).join('');
     }
+
+    // 初始化
     loadData();
   </script>
 </body>
