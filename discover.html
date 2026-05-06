@@ -52,7 +52,6 @@
     .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
     .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
     
-    /* 修正手機版被搜尋框擋住的問題 */
     .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 100px !important; }
     @media (min-width: 768px) {
         .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
@@ -138,15 +137,12 @@
     <!-- ================= 主內容區域 (滿版地圖) ================= -->
     <main class="flex-1 relative overflow-hidden bg-brand-light flex">
       
-      <!-- 滿版地圖容器 -->
       <div id="map" class="absolute inset-0 z-0"></div>
 
-      <!-- 疊加在地圖上方的浮動 UI (搜尋框 + 列表) -->
       <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[65px]">
          
          <div class="md:w-[400px] md:h-full md:bg-white/80 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white/60 flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
             
-            <!-- 搜尋區 -->
             <div class="px-5 md:px-6 pt-safe md:pt-6 pb-3 md:pb-4 shrink-0 pointer-events-auto transition-transform relative z-20">
                <div class="relative shadow-[0_8px_24px_rgba(0,0,0,0.06)] md:shadow-[0_2px_12px_rgba(0,0,0,0.05)] rounded-[24px] bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none border border-brand-light/80 md:border-transparent group focus-within:border-brand-primary/50 transition-all">
                   <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-brand-textSub group-focus-within:text-brand-primary transition-colors"></i>
@@ -156,7 +152,6 @@
 
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-            <!-- 列表區 -->
             <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent md:backdrop-blur-none rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none min-h-0">
                
                <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing">
@@ -168,7 +163,8 @@
                   </div>
                </div>
 
-               <div id="explore-list" class="flex-1 overflow-y-auto px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0">
+               <!-- 列表區：預設為 flex-col 垂直排列。將透過 JS 動態切換水平模式 -->
+               <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all">
                   <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 m-auto">
                      <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                         <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-primary"></i>
@@ -181,8 +177,6 @@
          </div>
       </div>
 
-      <!-- 右下角浮動定位按鈕 (FAB) -->
-      <!-- 手機版避開底導覽列(65px)與面板間距，改為 bottom-[calc(48vh+85px)] -->
       <div id="fab-group" class="absolute bottom-[calc(48vh+85px)] md:bottom-8 right-5 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
          <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 md:w-14 md:h-14 bg-white/95 backdrop-blur-md text-brand-dark rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-white flex items-center justify-center text-xl hover:text-[#4285F4] hover:shadow-[0_12px_32px_rgba(66,133,244,0.2)] hover:border-[#4285F4]/30 hover:-translate-y-1 active:scale-95 transition-all">
             <i class="fa-solid fa-location-crosshairs"></i>
@@ -191,7 +185,6 @@
 
       <!-- ================= 景點資訊面板 ================= -->
       <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[440px] bg-brand-bg z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50">
-         
          <div class="flex-1 overflow-y-auto hide-scrollbar bg-brand-bg relative pb-28">
             <div class="h-[280px] md:h-[320px] bg-brand-dark relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
                <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none z-0"></div>
@@ -298,9 +291,8 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc, query, where, getDocs, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    // Firebase Config
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
       apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
       authDomain: "travel-96009.firebaseapp.com", 
@@ -314,13 +306,12 @@
     const db = getFirestore(app); 
     const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
 
-    // 狀態管理
     let currentUser = null;
     let publicSpots = [];
     let userFavorites = new Set();
     const isGuest = localStorage.getItem('isGuest') === 'true';
+    let isListCollapsed = false; // 追蹤列表是否處於水平(最下方)模式
 
-    // 監聽登入
     onAuthStateChanged(auth, user => { 
         currentUser = user; 
         if (user && !isGuest) {
@@ -328,7 +319,6 @@
         }
     });
 
-    // Toast 顯示
     window.showToast = function(msg) {
       const el = document.getElementById('toast');
       document.getElementById('toast-msg').innerText = msg;
@@ -364,7 +354,6 @@
             attribution: '&copy; Google', maxZoom: 20, keepBuffer: 4, updateWhenIdle: true
         });
 
-        // 預設將地圖比例尺放大近一點 (Zoom: 13)
         map = L.map('map', { zoomControl: false, layers: [streetLayer] }).setView([23.5, 121], 13); 
         L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -411,7 +400,6 @@
             }
         });
 
-        // 取消每次都自動縮放全景。改為只有第一次載入時，將鏡頭對準第一筆有效座標，保持較大比例尺
         if (isFirstLoad && validCoords.length > 0) {
             map.setView(validCoords[0], 14);
             isFirstLoad = false;
@@ -436,11 +424,44 @@
         window.showSpotDetail(spotId);
     };
 
-    // ========== 手機版清單觸控拖曳邏輯 ==========
+    // ========== 手機版清單觸控拖曳 & 佈局切換 ==========
     const sheetPanel = document.getElementById('mobile-list-panel');
     const sheetHeader = document.getElementById('sheet-header');
     let dragStartY = null;
     let startHeight = 0;
+
+    // 將清單切換為 水平滑動 (Horizontal) 或 垂直滑動 (Vertical)
+    function applyListLayoutMode() {
+        const list = document.getElementById('explore-list');
+        const cards = document.querySelectorAll('.spot-card');
+        
+        if (window.innerWidth >= 768) {
+             list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all';
+             cards.forEach(c => { c.classList.remove('w-[85vw]', 'snap-start'); c.classList.add('w-full'); });
+             return;
+        }
+
+        if (isListCollapsed) {
+            // 切換為水平滑動模式 (最下方狀態)
+            list.className = 'flex-1 overflow-x-auto overflow-y-hidden px-5 pb-4 pt-0 hide-scrollbar flex flex-row relative gap-3.5 min-h-0 snap-x snap-mandatory transition-all';
+            cards.forEach(c => {
+                c.classList.remove('w-full');
+                c.classList.add('w-[85vw]', 'snap-start'); // 85vw 讓卡片維持完美比例且能看到下一個景點的邊緣
+            });
+            // 自動滾回最左側
+            list.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            // 切換為垂直滑動模式 (半版/滿版狀態)
+            list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all';
+            cards.forEach(c => {
+                c.classList.remove('w-[85vw]', 'snap-start');
+                c.classList.add('w-full');
+            });
+        }
+    }
+    
+    // 監聽螢幕旋轉/縮放以校正佈局
+    window.addEventListener('resize', applyListLayoutMode);
 
     sheetHeader.addEventListener('touchstart', (e) => {
         if(window.innerWidth >= 768) return;
@@ -458,8 +479,6 @@
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
         
         sheetPanel.style.height = `${newHeight}px`;
-        
-        // 修正定位按鈕重疊：加上導覽列高度的安全距離 (85px = 導覽列65px + 間距20px)
         document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 85px)`;
     }, {passive: true});
 
@@ -475,15 +494,22 @@
         
         if (currentH > vh * 0.6) {
             targetHeight = '85vh';
-        } else if (currentH < vh * 0.3) {
-            targetHeight = '15vh';
+            isListCollapsed = false;
+        } else if (currentH < vh * 0.35) {
+            // 剛好容納標題區 + 一張橫向卡片的絕佳高度
+            targetHeight = '180px'; 
+            isListCollapsed = true;
         } else {
             targetHeight = '48vh';
+            isListCollapsed = false;
         }
         
         sheetPanel.style.height = targetHeight;
+        // 若為 180px (約底部)，定點位置剛好在卡片之上 265px，絕不會重疊卡片
         document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 85px)`;
         
+        applyListLayoutMode();
+
         setTimeout(() => { document.getElementById('fab-group').style.transition = ''; }, 300);
     });
 
@@ -581,13 +607,12 @@
         document.getElementById('spot-detail-panel').classList.add('translate-x-full');
     };
 
-    // ========== 收藏功能持久化 ==========
+    // ========== 收藏功能邏輯 ==========
 
     function listenToFavorites(userId) {
         const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
         onSnapshot(favRef, (snapshot) => {
             userFavorites = new Set(snapshot.docs.map(doc => doc.id));
-            // 同步更新畫面上所有的愛心狀態
             publicSpots.forEach(spot => updateFavoriteUI(spot.id));
         });
     }
@@ -595,7 +620,6 @@
     function updateFavoriteUI(spotId) {
         const isFav = userFavorites.has(spotId);
 
-        // 1. 更新詳情面版的愛心按鈕
         const favBtn = document.getElementById('btn-favorite-spot');
         if(favBtn) {
            const icon = favBtn.querySelector('i');
@@ -610,54 +634,75 @@
            }
         }
 
-        // 2. 更新清單列表的愛心按鈕 (如果存在於 DOM 中)
         const listFavBtnIcon = document.querySelector(`#list-fav-btn-${spotId} i`);
         if (listFavBtnIcon) {
+            // 將按鈕大小從 text-[22px] 改為 text-[18px]
             if (isFav) {
-                listFavBtnIcon.className = 'fa-solid fa-heart text-[#E63946] text-[22px] transition-transform active:scale-90';
+                listFavBtnIcon.className = 'fa-solid fa-heart text-[#E63946] text-[18px] transition-transform active:scale-90';
             } else {
-                listFavBtnIcon.className = 'fa-regular fa-heart text-brand-textSub text-[22px] transition-transform active:scale-90';
+                listFavBtnIcon.className = 'fa-regular fa-heart text-brand-textSub text-[18px] transition-transform active:scale-90';
             }
         }
     }
 
-    window.toggleFavorite = async function(spotId) {
-        if (!currentUser && !isGuest) { window.showToast("請先登入後再使用收藏功能"); return; }
-        const isFav = userFavorites.has(spotId);
-        
-        if (isFav) userFavorites.delete(spotId); else userFavorites.add(spotId);
-        updateFavoriteUI(spotId);
+    // 針對單一景點即時更新畫面上的收藏數字
+    function updateFavoriteCountUI(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+        const countEls = document.querySelectorAll(`.fav-count-${spotId}`);
+        countEls.forEach(el => el.innerText = spot.favoriteCount || 0);
+    }
 
-        if (isGuest) {
-            localStorage.setItem('guest_favorites', JSON.stringify([...userFavorites]));
-            window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
+    window.toggleFavorite = async function(spotId) {
+        // 【1. 判斷未登錄限制收藏】
+        if (isGuest || !currentUser) { 
+            window.showToast("請先登入後才能使用收藏功能"); 
+            return; 
+        }
+
+        const isFav = userFavorites.has(spotId);
+        const spot = publicSpots.find(s => s.id === spotId);
+        
+        // 【即時樂觀更新 (Optimistic Update)】：立刻反映在畫面上
+        if (isFav) {
+            userFavorites.delete(spotId);
+            if (spot) spot.favoriteCount = Math.max(0, (spot.favoriteCount || 0) - 1);
         } else {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
-                if (isFav) await deleteDoc(docRef); else await setDoc(docRef, { timestamp: Date.now() });
-                window.showToast(isFav ? "已取消收藏" : "已收藏景點！");
-            } catch (e) {
-                if (isFav) userFavorites.add(spotId); else userFavorites.delete(spotId);
-                updateFavoriteUI(spotId);
-                window.showToast("收藏失敗，請檢查網路權限");
+            userFavorites.add(spotId);
+            if (spot) spot.favoriteCount = (spot.favoriteCount || 0) + 1;
+        }
+        
+        updateFavoriteUI(spotId);
+        updateFavoriteCountUI(spotId);
+
+        try {
+            // 更新個人的收藏清單
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
+            if (isFav) {
+                await deleteDoc(docRef);
+            } else {
+                await setDoc(docRef, { timestamp: Date.now() });
+                window.showToast("已收藏景點！");
             }
+
+            // 同時更新公開景點庫的總收藏數，讓所有人都能看到
+            if (spot) {
+                const spotRef = doc(db, 'artifacts', appId, 'public', 'data', 'spots', spotId);
+                await updateDoc(spotRef, { favoriteCount: spot.favoriteCount });
+            }
+
+        } catch (e) {
+            console.error("更新收藏失敗:", e);
         }
     };
 
     // ========== 資料載入 ==========
     function loadSpots() {
-      // 不管是否登入，統一從公用資料庫載入所有景點
       const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
       onSnapshot(qSpots, (snapshot) => {
         publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderListAndMap();
+        renderListAndMap(document.getElementById('input-explore-search').value);
       });
-
-      // 如果是訪客，載入暫存於本地的收藏狀態
-      if (isGuest) {
-        const localFavs = localStorage.getItem('guest_favorites');
-        if (localFavs) userFavorites = new Set(JSON.parse(localFavs));
-      }
     }
 
     function renderListAndMap(filter = '') {
@@ -672,7 +717,7 @@
 
       if (spots.length === 0) {
           container.innerHTML = `
-            <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 m-auto">
+            <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 m-auto shrink-0">
                <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                   <i class="fa-solid fa-map-location-dot text-2xl text-brand-primary"></i>
                </div>
@@ -692,8 +737,9 @@
           const isFav = userFavorites.has(spot.id);
           const favIconClass = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-brand-textSub';
 
+          // 加入 spot-card 與 shrink-0 類別確保卡片排版穩定
           return `
-          <div onclick="window.flyToSpot('${spot.id}')" class="bg-white p-3.5 rounded-[28px] border border-brand-light/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex items-center gap-4 cursor-pointer hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-brand-primary/30 hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
+          <div onclick="window.flyToSpot('${spot.id}')" class="spot-card w-full shrink-0 bg-white p-3.5 rounded-[28px] border border-brand-light/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex items-center gap-4 cursor-pointer hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-brand-primary/30 hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
              
              <!-- 縮圖 -->
              <div class="w-[88px] h-[88px] rounded-[20px] bg-brand-bg shrink-0 shadow-inner relative overflow-hidden border border-brand-light/50">
@@ -704,23 +750,26 @@
              <div class="flex-1 flex flex-col justify-center py-1 pr-10 min-w-0">
                 <div class="flex items-center gap-2 mb-1.5">
                    <span class="px-2.5 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
-                   <!-- 如實呈現收藏人數 (直接讀取資料庫的 favoriteCount) -->
+                   <!-- 綁定專屬的數字 Class 以便立即更新 -->
                    <div class="flex items-center gap-1 text-[11px] font-bold text-brand-textSub">
                        <i class="fa-solid fa-heart text-[#E63946] opacity-70"></i>
-                       <span>${spot.favoriteCount || 0}</span>
+                       <span class="fav-count-${spot.id}">${spot.favoriteCount || 0}</span>
                    </div>
                 </div>
                 <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
              </div>
              
-             <!-- 列表快速收藏按鈕 -->
+             <!-- 列表快速收藏按鈕 (調整大小 text-[18px]) -->
              <div class="absolute right-4 top-1/2 -translate-y-1/2 z-10">
                 <button id="list-fav-btn-${spot.id}" onclick="event.stopPropagation(); window.toggleFavorite('${spot.id}')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-brand-bg transition-colors">
-                    <i class="${favIconClass} text-[22px] transition-transform active:scale-90"></i>
+                    <i class="${favIconClass} text-[18px] transition-transform active:scale-90"></i>
                 </button>
              </div>
           </div>`;
       }).join('');
+
+      // 重新生成清單後，確保卡片的佈局符合目前的面板高低模式
+      applyListLayoutMode();
     }
 
     document.getElementById('input-explore-search').addEventListener('input', (e) => renderListAndMap(e.target.value));
