@@ -8,7 +8,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Leaflet CSS (地圖核心) -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   
   <!-- Tailwind CSS -->
@@ -23,7 +23,6 @@
               dark: '#3E5C76',
               light: '#E6EBEF',
               bg: '#F2F5F8',
-              card: '#FFFFFF',
               textMain: '#2C3E50',
               textSub: '#8796A5',
               accent: '#D5896F'
@@ -35,7 +34,6 @@
   </script>
 
   <style>
-    /* --- LINE Seed 字體整合 --- */
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
@@ -48,11 +46,11 @@
     .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-    /* --- Leaflet 介面優化 --- */
+    /* Leaflet 介面優化，因應頂部新 UI，將縮放按鈕再往下移 */
     .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
     .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
     
-    .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 100px !important; }
+    .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 150px !important; }
     @media (min-width: 768px) {
         .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
     }
@@ -63,15 +61,15 @@
     }
     .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
-    /* --- 現代化水滴型 Marker --- */
+    /* 現代化地圖標籤 */
     .custom-marker { background: transparent; border: none; }
     .marker-pin { 
         width: 44px; height: 44px; 
         border-radius: 50% 50% 50% 0; 
         transform: rotate(-45deg); 
-        background: linear-gradient(135deg, #748CAB 0%, #3E5C76 100%); 
+        background: linear-gradient(135deg, #1890FF 0%, #0050B3 100%); 
         border: 3px solid #FFFFFF; 
-        box-shadow: 0 6px 16px rgba(62, 92, 118, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1); 
+        box-shadow: 0 6px 16px rgba(0, 80, 179, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1); 
         display: flex; align-items: center; justify-content: center; 
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
     }
@@ -83,8 +81,7 @@
     .marker-pin:hover { 
         transform: rotate(-45deg) scale(1.15) translateY(-6px); 
         z-index: 1000 !important; 
-        box-shadow: 0 12px 24px rgba(62, 92, 118, 0.4), inset 0 -2px 4px rgba(0,0,0,0.1);
-        background: linear-gradient(135deg, #8796A5 0%, #3E5C76 100%); 
+        box-shadow: 0 12px 24px rgba(0, 80, 179, 0.4);
     }
     
     #spot-detail-panel { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -92,24 +89,23 @@
 </head>
 <body class="bg-brand-bg text-brand-textMain antialiased overflow-hidden">
 
-  <!-- 提示訊息 Toast -->
+  <!-- Toast -->
   <div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-brand-textMain/95 backdrop-blur-md text-white px-6 py-3.5 rounded-full shadow-2xl z-[2500] transition-all duration-400 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2.5 font-bold text-sm mt-2 border border-white/10">
     <i class="fa-solid fa-circle-info text-brand-primary"></i> <span id="toast-msg">提示訊息</span>
   </div>
 
   <div class="w-full h-[100dvh] flex overflow-hidden relative">
 
-    <!-- ================= 電腦版：左側導覽列 ================= -->
+    <!-- 左側導覽列 (桌面版) -->
     <aside class="hidden md:flex flex-col w-[200px] lg:w-64 bg-white border-r border-brand-light z-[1000] shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0">
       <div class="h-[80px] flex items-center px-6 border-b border-brand-light/50 shrink-0">
-         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-primary to-brand-dark text-white flex items-center justify-center text-lg mr-3 shadow-md shadow-brand-primary/20 shrink-0">
+         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-primary to-brand-dark text-white flex items-center justify-center text-lg mr-3 shadow-md">
             <i class="fa-solid fa-plane"></i>
          </div>
          <span class="text-2xl font-extrabold text-brand-dark tracking-tight truncate">趣旅行</span>
       </div>
       
       <div class="flex-1 py-8 px-5 space-y-2.5 overflow-y-auto hide-scrollbar">
-        <div class="text-[11px] font-extrabold text-brand-textSub mb-4 px-2 tracking-[0.2em] uppercase opacity-80">Menu</div>
         <a href="./index.html" class="flex items-center gap-4 px-4 py-3.5 rounded-[16px] text-brand-textSub hover:bg-brand-bg hover:text-brand-primary transition-all font-bold">
           <i class="fa-solid fa-house text-[18px] w-6 text-center"></i> <span class="text-[15px]">首頁</span>
         </a>
@@ -120,56 +116,84 @@
           <i class="fa-solid fa-suitcase-rolling text-[18px] w-6 text-center"></i> <span class="text-[15px]">我的行程</span>
         </a>
       </div>
-
-      <div class="p-5 border-t border-brand-light/50 shrink-0 bg-brand-bg/30">
-        <a href="./account.html" class="flex items-center gap-3 px-4 py-3.5 rounded-[16px] bg-white hover:bg-brand-light/40 transition-all cursor-pointer shadow-sm border border-brand-light/80 hover:border-brand-primary/30 group">
-          <div class="w-9 h-9 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <i class="fa-solid fa-user text-sm"></i>
-          </div>
-          <div class="flex-1 overflow-hidden hidden lg:block">
-             <div class="text-[14px] font-extrabold text-brand-dark truncate group-hover:text-brand-primary transition-colors">會員中心</div>
-             <div class="text-[11px] font-bold text-brand-textSub truncate mt-0.5">點擊查看設定</div>
-          </div>
-        </a>
-      </div>
     </aside>
 
-    <!-- ================= 主內容區域 (滿版地圖) ================= -->
-    <main class="flex-1 relative overflow-hidden bg-brand-light flex">
+    <!-- 主內容區 -->
+    <main class="flex-1 relative overflow-hidden bg-[#EAEAEA] flex">
       
+      <!-- 地圖容器 -->
       <div id="map" class="absolute inset-0 z-0"></div>
 
-      <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[65px]">
+      <!-- 疊加 UI 區塊 -->
+      <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[65px] md:pb-6">
          
-         <div class="md:w-[400px] md:h-full md:bg-white/80 md:backdrop-blur-2xl md:rounded-[32px] md:shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:border md:border-white/60 flex flex-col pointer-events-none md:pointer-events-auto h-full overflow-hidden">
+         <!-- 佈局包裝 (桌面版側欄 / 手機版分離佈局) -->
+         <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
             
-            <div class="px-5 md:px-6 pt-safe md:pt-6 pb-3 md:pb-4 shrink-0 pointer-events-auto transition-transform relative z-20">
-               <div class="relative shadow-[0_8px_24px_rgba(0,0,0,0.06)] md:shadow-[0_2px_12px_rgba(0,0,0,0.05)] rounded-[24px] bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none border border-brand-light/80 md:border-transparent group focus-within:border-brand-primary/50 transition-all">
-                  <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-brand-textSub group-focus-within:text-brand-primary transition-colors"></i>
-                  <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="w-full bg-transparent rounded-[24px] py-4 md:py-3.5 pl-[46px] pr-4 outline-none text-[15px] font-extrabold text-brand-dark placeholder-brand-textSub/60">
+            <!-- ====== 頂部搜尋與篩選 (仿截圖設計) ====== -->
+            <div class="px-4 md:px-6 pt-safe md:pt-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3">
+               
+               <!-- 搜尋藥丸 -->
+               <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
+                  <!-- 選地區 (左側) -->
+                  <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-brand-dark font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-brand-primary transition-colors">
+                      選地區 <i class="fa-solid fa-caret-down text-[11px] mt-0.5"></i>
+                  </div>
+                  <!-- 輸入框 -->
+                  <input type="text" id="input-explore-search" placeholder="想找什麼......" class="flex-1 bg-transparent outline-none pl-4 text-[16px] font-extrabold text-brand-dark placeholder-gray-400">
+                  <!-- 麥克風 (右側) -->
+                  <button class="text-gray-500 hover:text-brand-primary px-2 transition-colors">
+                      <i class="fa-solid fa-microphone text-[18px]"></i>
+                  </button>
+               </div>
+
+               <!-- 篩選標籤列表 -->
+               <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pt-1 pb-2 px-1 -mx-1">
+                  <button class="shrink-0 bg-white shadow-sm border border-brand-light/80 hover:border-brand-primary/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-brand-dark flex items-center gap-2 transition-all">
+                      <i class="fa-solid fa-camera text-brand-textSub"></i> 景點
+                  </button>
+                  <button class="shrink-0 bg-white shadow-sm border border-brand-light/80 hover:border-brand-primary/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-brand-dark flex items-center gap-2 transition-all">
+                      <i class="fa-solid fa-heart text-brand-textSub"></i> 收藏
+                  </button>
+                  <button class="shrink-0 bg-white shadow-sm border border-brand-light/80 hover:border-brand-primary/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-brand-dark flex items-center gap-2 transition-all">
+                      <i class="fa-solid fa-utensils text-brand-textSub"></i> 美食
+                  </button>
+                  <button class="shrink-0 bg-white shadow-sm border border-brand-light/80 hover:border-brand-primary/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-brand-dark flex items-center gap-2 transition-all">
+                      <i class="fa-solid fa-bag-shopping text-brand-textSub"></i> 購物
+                  </button>
                </div>
             </div>
 
+            <!-- 手機版彈性空白區 (用來推擠 Bottom Sheet 到下方) -->
             <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white/85 backdrop-blur-2xl md:bg-transparent md:backdrop-blur-none rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.1)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 border-t border-white/60 md:border-none min-h-0">
+            <!-- ====== 底部景點列表 (Bottom Sheet) ====== -->
+            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
                
-               <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing">
-                  <div class="md:hidden w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-3 mb-2 shrink-0"></div>
-                  <div class="px-5 md:px-6 pb-3 md:pt-0 flex justify-between items-center shrink-0">
-                     <h3 class="font-extrabold text-brand-dark text-lg flex items-center gap-2 pointer-events-none">
-                        <i class="fa-solid fa-map-pin text-brand-primary text-[16px]"></i> 探索周邊
-                     </h3>
+               <!-- 拖曳 Header 區 -->
+               <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative">
+                  <!-- 把手 -->
+                  <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
+                  <!-- ↑↓ 推薦 與 圖示 -->
+                  <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
+                     <button class="font-extrabold text-brand-dark text-[16px] flex items-center gap-1.5 hover:text-brand-primary transition-colors">
+                        <i class="fa-solid fa-arrow-down-up-across-line text-[14px]"></i>
+                        <span>推薦</span>
+                     </button>
+                     <div class="flex gap-4 text-brand-textSub text-[18px]">
+                        <i class="fa-solid fa-border-all cursor-pointer hover:text-brand-dark transition-colors"></i>
+                        <i class="fa-solid fa-list cursor-pointer text-brand-dark transition-colors"></i>
+                     </div>
                   </div>
                </div>
 
-               <!-- 列表區：預設為 flex-col 垂直排列。將透過 JS 動態切換水平模式 -->
-               <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all">
+               <!-- 列表捲動區 (預設為 flex-col，當在最下方時將動態切換為 flex-row) -->
+               <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white">
                   <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 m-auto">
                      <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
                         <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-primary"></i>
                      </div>
-                     <p class="font-extrabold text-[15px]">地圖資訊載入中...</p>
+                     <p class="font-extrabold text-[15px]">載入中...</p>
                   </div>
                </div>
             </div>
@@ -177,60 +201,33 @@
          </div>
       </div>
 
-      <div id="fab-group" class="absolute bottom-[calc(48vh+85px)] md:bottom-8 right-5 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
-         <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 md:w-14 md:h-14 bg-white/95 backdrop-blur-md text-brand-dark rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-white flex items-center justify-center text-xl hover:text-[#4285F4] hover:shadow-[0_12px_32px_rgba(66,133,244,0.2)] hover:border-[#4285F4]/30 hover:-translate-y-1 active:scale-95 transition-all">
+      <!-- 右下角 FAB (隨 Sheet 高度連動) -->
+      <div id="fab-group" class="absolute bottom-[calc(48vh+85px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
+         <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-brand-dark rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
             <i class="fa-solid fa-location-crosshairs"></i>
          </button>
       </div>
 
-      <!-- ================= 景點資訊面板 ================= -->
+      <!-- ================= 景點資訊詳情面板 ================= -->
       <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[440px] bg-brand-bg z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50">
          <div class="flex-1 overflow-y-auto hide-scrollbar bg-brand-bg relative pb-28">
             <div class="h-[280px] md:h-[320px] bg-brand-dark relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
-               <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none z-0"></div>
-               <div class="absolute -left-10 bottom-0 w-40 h-40 bg-black/20 rounded-full blur-2xl pointer-events-none z-0"></div>
-               <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300"></i>
+               <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
                <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
                <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-20 pointer-events-none"></div>
-               <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/40 transition-all shadow-md z-30">
+               <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30">
                   <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
                   <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
                </button>
             </div>
 
             <div class="px-6 pt-8 pb-10 space-y-6 relative -mt-8 bg-brand-bg rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-10 min-h-[60vh]">
-               <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-brand-textSub shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-brand-light/60 hover:text-[#E63946] active:scale-90 transition-all z-20 group">
-                  <i class="fa-regular fa-heart text-[24px] group-active:scale-90 transition-transform"></i>
+               <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-brand-textSub shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-brand-light/60 active:scale-90 transition-all z-20 group">
+                  <i class="fa-regular fa-heart text-[24px]"></i>
                </button>
 
                <div class="pr-12">
-                  <span id="detail-category" class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-brand-primary text-[11px] font-extrabold shadow-sm mb-3"></span>
                   <h2 id="detail-name" class="text-[28px] font-extrabold text-brand-dark leading-tight"></h2>
-                  <div id="detail-foreign-names" class="text-[14px] font-bold text-brand-textSub hidden flex-col mt-1.5">
-                     <span id="detail-foreign-1" class="block"></span>
-                     <span id="detail-foreign-2" class="block"></span>
-                  </div>
-               </div>
-
-               <div class="grid grid-cols-3 gap-3 py-1">
-                  <a id="circle-nav-btn" href="#" target="_blank" class="flex flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#4285F4]/40 hover:-translate-y-0.5 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#4285F4]/10 text-[#4285F4] flex items-center justify-center text-[18px] group-hover:bg-[#4285F4] group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-diamond-turn-right"></i>
-                     </div>
-                     <span class="text-[12px] font-extrabold text-brand-dark">路線導航</span>
-                  </a>
-                  <a id="circle-web-btn" href="#" target="_blank" class="hidden flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#2A9D8F]/40 hover:-translate-y-0.5 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center text-[18px] group-hover:bg-[#2A9D8F] group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-globe"></i>
-                     </div>
-                     <span class="text-[12px] font-extrabold text-brand-dark">官方網站</span>
-                  </a>
-                  <a id="circle-phone-btn" href="#" class="hidden flex-col items-center justify-center gap-2 p-3.5 bg-white rounded-[20px] shadow-sm border border-brand-light hover:shadow-md hover:border-[#D4A33B]/40 hover:-translate-y-0.5 group transition-all">
-                     <div class="w-10 h-10 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center text-[18px] group-hover:bg-[#E9C46A] group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-phone"></i>
-                     </div>
-                     <span class="text-[12px] font-extrabold text-brand-dark">聯絡電話</span>
-                  </a>
                </div>
 
                <div class="bg-white p-4.5 rounded-[20px] border border-brand-light shadow-sm flex items-start gap-3.5 p-4">
@@ -248,18 +245,12 @@
                </div>
             </div>
          </div>
-
-         <div class="absolute bottom-0 inset-x-0 p-5 bg-white/95 backdrop-blur-xl border-t border-brand-light/80 z-30 pb-safe shadow-[0_-12px_40px_rgba(0,0,0,0.06)]">
-            <button id="btn-add-to-trip" class="w-full py-4 bg-brand-dark text-white text-[16px] font-extrabold rounded-[20px] shadow-[0_8px_20px_rgba(62,92,118,0.3)] hover:bg-brand-primary hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2.5">
-               <i class="fa-solid fa-calendar-plus text-xl"></i> 排入我的行程
-            </button>
-         </div>
       </div>
 
     </main>
 
-    <!-- ================= 手機版：底部導覽列 ================= -->
-    <nav class="md:hidden absolute bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-brand-light/80 shrink-0 z-[500] pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.08)]">
+    <!-- 底部導覽列 (手機版) -->
+    <nav class="md:hidden absolute bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-brand-light/80 shrink-0 z-[500] pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.08)]">
       <div class="flex justify-around items-center h-[65px] px-2">
         <a href="./index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-textSub hover:text-brand-primary transition-colors">
           <i class="fa-solid fa-house mb-1 text-[20px]"></i>
@@ -284,14 +275,12 @@
 
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
-  <!-- Firebase / 邏輯 -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc, query, where, getDocs, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
       apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
@@ -310,13 +299,11 @@
     let publicSpots = [];
     let userFavorites = new Set();
     const isGuest = localStorage.getItem('isGuest') === 'true';
-    let isListCollapsed = false; // 追蹤列表是否處於水平(最下方)模式
+    let isListCollapsed = false; // 是否在底部水平模式
 
     onAuthStateChanged(auth, user => { 
         currentUser = user; 
-        if (user && !isGuest) {
-            listenToFavorites(user.uid);
-        }
+        if (user && !isGuest) listenToFavorites(user.uid);
     });
 
     window.showToast = function(msg) {
@@ -334,18 +321,12 @@
       { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
       { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
       { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
-      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
-      { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
-      { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
-      { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
-      { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
       { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
     ];
 
-    // ========== 地圖初始化與控制 ==========
+    // ========== 地圖初始化 ==========
     let map = null;
     let markersLayer = null;
-    let markersDict = {};
     let userMarker = null;
     let isFirstLoad = true;
 
@@ -379,24 +360,22 @@
 
     function renderMarkersOnMap(spots) {
         markersLayer.clearLayers();
-        markersDict = {};
         let validCoords = [];
 
         spots.forEach(spot => {
             if (spot.lat && spot.lng) {
                 validCoords.push([spot.lat, spot.lng]);
-                const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
                 
+                // 仿造截圖的藍色標籤
                 const customIcon = L.divIcon({
                     className: 'custom-marker',
-                    html: `<div class="marker-pin"><i class="${locObj.icon}"></i></div>`,
+                    html: `<div class="marker-pin bg-[#1890FF]"><i class="fa-solid fa-camera"></i></div>`,
                     iconSize: [44, 44], iconAnchor: [22, 44], popupAnchor: [0, -44]
                 });
                 
                 const marker = L.marker([spot.lat, spot.lng], { icon: customIcon });
-                marker.on('click', () => { window.flyToSpot(spot.id); });
+                marker.on('click', () => window.flyToSpot(spot.id));
                 markersLayer.addLayer(marker);
-                markersDict[spot.id] = marker;
             }
         });
 
@@ -409,58 +388,50 @@
     window.flyToSpot = function(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
         if (!spot) return;
-
         if (spot.lat && spot.lng) {
-            const isMobile = window.innerWidth < 768;
             let targetLat = spot.lat;
-            if(isMobile) {
-                targetLat = spot.lat - 0.003; 
-            }
+            if(window.innerWidth < 768 && !isListCollapsed) targetLat -= 0.003; 
             map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
-        } else {
-            window.showToast('這個景點尚未設定精確座標！但可以查看詳細資訊。');
         }
-        
         window.showSpotDetail(spotId);
     };
 
-    // ========== 手機版清單觸控拖曳 & 佈局切換 ==========
+    // ========== 手機版清單佈局切換與拖曳 ==========
     const sheetPanel = document.getElementById('mobile-list-panel');
     const sheetHeader = document.getElementById('sheet-header');
     let dragStartY = null;
     let startHeight = 0;
 
-    // 將清單切換為 水平滑動 (Horizontal) 或 垂直滑動 (Vertical)
     function applyListLayoutMode() {
         const list = document.getElementById('explore-list');
         const cards = document.querySelectorAll('.spot-card');
         
         if (window.innerWidth >= 768) {
-             list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all';
-             cards.forEach(c => { c.classList.remove('w-[85vw]', 'snap-start'); c.classList.add('w-full'); });
+             list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
+             cards.forEach(c => {
+                c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[16px]', 'shadow-sm', 'm-1');
+                c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
+             });
              return;
         }
 
         if (isListCollapsed) {
-            // 切換為水平滑動模式 (最下方狀態)
-            list.className = 'flex-1 overflow-x-auto overflow-y-hidden px-5 pb-4 pt-0 hide-scrollbar flex flex-row relative gap-3.5 min-h-0 snap-x snap-mandatory transition-all';
+            // 水平模式 (卡片帶有框線與陰影)
+            list.className = 'flex-1 overflow-x-auto overflow-y-hidden px-4 pb-4 pt-1 hide-scrollbar flex flex-row relative gap-3 min-h-0 snap-x snap-mandatory transition-all bg-white';
             cards.forEach(c => {
-                c.classList.remove('w-full');
-                c.classList.add('w-[85vw]', 'snap-start'); // 85vw 讓卡片維持完美比例且能看到下一個景點的邊緣
+                c.classList.remove('w-full', 'border-b', 'pb-4', 'mb-4');
+                c.classList.add('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'border-gray-200', 'rounded-[20px]', 'shadow-sm', 'p-0.5'); 
             });
-            // 自動滾回最左側
-            list.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-            // 切換為垂直滑動模式 (半版/滿版狀態)
-            list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-3.5 min-h-0 transition-all';
+            // 垂直模式 (清單分隔線風格)
+            list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
             cards.forEach(c => {
-                c.classList.remove('w-[85vw]', 'snap-start');
-                c.classList.add('w-full');
+                c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[20px]', 'shadow-sm', 'p-0.5');
+                c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
             });
         }
     }
     
-    // 監聽螢幕旋轉/縮放以校正佈局
     window.addEventListener('resize', applyListLayoutMode);
 
     sheetHeader.addEventListener('touchstart', (e) => {
@@ -496,119 +467,22 @@
             targetHeight = '85vh';
             isListCollapsed = false;
         } else if (currentH < vh * 0.35) {
-            // 剛好容納標題區 + 一張橫向卡片的絕佳高度
-            targetHeight = '180px'; 
+            // 精準高度：標頭(~50px) + 卡片高度(~150px) + Padding = 220px 
+            targetHeight = '220px'; 
             isListCollapsed = true;
         } else {
-            targetHeight = '48vh';
+            targetHeight = '50vh';
             isListCollapsed = false;
         }
         
         sheetPanel.style.height = targetHeight;
-        // 若為 180px (約底部)，定點位置剛好在卡片之上 265px，絕不會重疊卡片
         document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 85px)`;
         
         applyListLayoutMode();
-
         setTimeout(() => { document.getElementById('fab-group').style.transition = ''; }, 300);
     });
 
-    // ========== 景點資訊面板邏輯 ==========
-    window.showSpotDetail = function(spotId) {
-        const spot = publicSpots.find(s => s.id === spotId);
-        if (!spot) return;
-
-        const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-
-        const coverEl = document.getElementById('detail-cover-image');
-        const defaultIconEl = document.getElementById('detail-default-icon');
-        
-        if (coverEl && defaultIconEl) {
-            if (spot.imageUrl) {
-                coverEl.style.backgroundImage = `url('${spot.imageUrl}')`;
-                coverEl.classList.remove('opacity-0');
-                defaultIconEl.classList.add('opacity-0');
-            } else {
-                coverEl.style.backgroundImage = 'none';
-                coverEl.classList.add('opacity-0');
-                defaultIconEl.className = `fa-solid ${locObj.icon} text-[120px] text-white/10 relative z-0 drop-shadow-2xl transition-opacity duration-300`;
-                defaultIconEl.classList.remove('opacity-0');
-            }
-        }
-
-        document.getElementById('detail-category').innerHTML = `<i class="${locObj.icon}"></i> ${locObj.label}`;
-        document.getElementById('detail-name').innerText = spot.name;
-        
-        const foreign1 = spot.foreignName1;
-        const foreign2 = spot.foreignName2;
-        const foreignContainer = document.getElementById('detail-foreign-names');
-        const f1El = document.getElementById('detail-foreign-1');
-        const f2El = document.getElementById('detail-foreign-2');
-        
-        if (foreign1 || foreign2) {
-            foreignContainer.classList.remove('hidden');
-            foreignContainer.classList.add('flex');
-            f1El.innerText = foreign1 || '';
-            f1El.style.display = foreign1 ? 'block' : 'none';
-            f2El.innerText = foreign2 || '';
-            f2El.style.display = foreign2 ? 'block' : 'none';
-        } else {
-            foreignContainer.classList.add('hidden');
-            foreignContainer.classList.remove('flex');
-        }
-
-        const displayAddress = spot.address || spot.subtitle || '無詳細地址備註';
-        document.getElementById('detail-address').innerText = displayAddress;
-        
-        const descEl = document.getElementById('detail-desc');
-        const descContainer = document.getElementById('detail-desc-container');
-        if (spot.description) {
-            descEl.innerHTML = spot.description.replace(/\n/g, '<br>');
-            descContainer.classList.remove('hidden');
-            descContainer.classList.add('flex');
-        } else {
-            descContainer.classList.add('hidden');
-            descContainer.classList.remove('flex');
-        }
-
-        const navBtn = document.getElementById('circle-nav-btn');
-        if (spot.lat && spot.lng) {
-            navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
-        } else {
-            navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(displayAddress)}`;
-        }
-
-        const webBtn = document.getElementById('circle-web-btn');
-        if (spot.website) {
-            webBtn.href = spot.website;
-            webBtn.classList.replace('hidden', 'flex');
-        } else {
-            webBtn.classList.replace('flex', 'hidden');
-        }
-
-        const phoneBtn = document.getElementById('circle-phone-btn');
-        if (spot.phone) {
-            phoneBtn.href = `tel:${spot.phone}`;
-            phoneBtn.classList.replace('hidden', 'flex');
-        } else {
-            phoneBtn.classList.replace('flex', 'hidden');
-        }
-
-        updateFavoriteUI(spot.id);
-        document.getElementById('btn-add-to-trip').onclick = () => window.showToast(`請至「我的行程」將「${spot.name}」排入行程表`);
-        
-        const favBtn = document.getElementById('btn-favorite-spot');
-        favBtn.onclick = () => window.toggleFavorite(spot.id);
-
-        document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
-    };
-
-    window.closeSpotDetail = function() {
-        document.getElementById('spot-detail-panel').classList.add('translate-x-full');
-    };
-
-    // ========== 收藏功能邏輯 ==========
-
+    // ========== 收藏邏輯 (樂觀渲染) ==========
     function listenToFavorites(userId) {
         const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
         onSnapshot(favRef, (snapshot) => {
@@ -619,42 +493,28 @@
 
     function updateFavoriteUI(spotId) {
         const isFav = userFavorites.has(spotId);
-
+        
+        // 詳情面板愛心
         const favBtn = document.getElementById('btn-favorite-spot');
         if(favBtn) {
            const icon = favBtn.querySelector('i');
-           if (isFav) {
-               icon.className = 'fa-solid fa-heart text-[#E63946]';
-               favBtn.classList.add('border-[#E63946]/30', 'bg-[#FFE5E5]');
-               favBtn.classList.remove('bg-white');
-           } else {
-               icon.className = 'fa-regular fa-heart';
-               favBtn.classList.remove('border-[#E63946]/30', 'bg-[#FFE5E5]');
-               favBtn.classList.add('bg-white');
-           }
+           icon.className = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-brand-textSub';
         }
 
+        // 列表卡片愛心
         const listFavBtnIcon = document.querySelector(`#list-fav-btn-${spotId} i`);
         if (listFavBtnIcon) {
-            // 將按鈕大小從 text-[22px] 改為 text-[18px]
-            if (isFav) {
-                listFavBtnIcon.className = 'fa-solid fa-heart text-[#E63946] text-[18px] transition-transform active:scale-90';
-            } else {
-                listFavBtnIcon.className = 'fa-regular fa-heart text-brand-textSub text-[18px] transition-transform active:scale-90';
-            }
+            listFavBtnIcon.className = isFav ? 'fa-solid fa-heart text-[#E63946] text-[18px]' : 'fa-regular fa-heart text-[#8796A5] text-[18px]';
         }
     }
 
-    // 針對單一景點即時更新畫面上的收藏數字
     function updateFavoriteCountUI(spotId) {
         const spot = publicSpots.find(s => s.id === spotId);
         if (!spot) return;
-        const countEls = document.querySelectorAll(`.fav-count-${spotId}`);
-        countEls.forEach(el => el.innerText = spot.favoriteCount || 0);
+        document.querySelectorAll(`.fav-count-${spotId}`).forEach(el => el.innerText = spot.favoriteCount || 0);
     }
 
     window.toggleFavorite = async function(spotId) {
-        // 【1. 判斷未登錄限制收藏】
         if (isGuest || !currentUser) { 
             window.showToast("請先登入後才能使用收藏功能"); 
             return; 
@@ -663,7 +523,7 @@
         const isFav = userFavorites.has(spotId);
         const spot = publicSpots.find(s => s.id === spotId);
         
-        // 【即時樂觀更新 (Optimistic Update)】：立刻反映在畫面上
+        // 樂觀渲染即時反應
         if (isFav) {
             userFavorites.delete(spotId);
             if (spot) spot.favoriteCount = Math.max(0, (spot.favoriteCount || 0) - 1);
@@ -676,27 +536,20 @@
         updateFavoriteCountUI(spotId);
 
         try {
-            // 更新個人的收藏清單
             const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
-            if (isFav) {
-                await deleteDoc(docRef);
-            } else {
-                await setDoc(docRef, { timestamp: Date.now() });
-                window.showToast("已收藏景點！");
-            }
+            if (isFav) await deleteDoc(docRef);
+            else await setDoc(docRef, { timestamp: Date.now() });
 
-            // 同時更新公開景點庫的總收藏數，讓所有人都能看到
             if (spot) {
                 const spotRef = doc(db, 'artifacts', appId, 'public', 'data', 'spots', spotId);
                 await updateDoc(spotRef, { favoriteCount: spot.favoriteCount });
             }
-
         } catch (e) {
-            console.error("更新收藏失敗:", e);
+            console.error(e);
         }
     };
 
-    // ========== 資料載入 ==========
+    // ========== 資料載入與渲染 ==========
     function loadSpots() {
       const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
       onSnapshot(qSpots, (snapshot) => {
@@ -710,69 +563,103 @@
       let spots = publicSpots;
       if (filter) {
           const kw = filter.toLowerCase();
-          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw) || (s.address || s.subtitle || '').toLowerCase().includes(kw));
+          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw) || (s.address || '').toLowerCase().includes(kw));
       }
 
       if (map) renderMarkersOnMap(spots);
 
       if (spots.length === 0) {
-          container.innerHTML = `
-            <div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub opacity-60 pb-10 m-auto shrink-0">
-               <div class="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4">
-                  <i class="fa-solid fa-map-location-dot text-2xl text-brand-primary"></i>
-               </div>
-               <p class="font-extrabold text-[15px]">未找到相關景點</p>
-               <p class="text-[12px] font-bold mt-1">請嘗試其他關鍵字</p>
-            </div>`;
+          container.innerHTML = `<div class="h-full w-full flex flex-col items-center justify-center text-center text-brand-textSub m-auto">未找到景點</div>`;
           return;
       }
 
+      // 復刻截圖的卡片 HTML 結構
       container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
-          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-          
           const thumbnailHtml = spot.imageUrl
-              ? `<img src="${spot.imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="${spot.name}">`
-              : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary/10 to-brand-dark/10 text-brand-primary"><i class="${locObj.icon} text-[26px] drop-shadow-sm"></i></div>`;
+              ? `<img src="${spot.imageUrl}" class="w-full h-full object-cover">`
+              : `<div class="w-full h-full bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-image text-gray-400"></i></div>`;
 
           const isFav = userFavorites.has(spot.id);
-          const favIconClass = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-brand-textSub';
+          const favIconClass = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-[#8796A5]';
+          // 假造一個隨機距離模擬 UI (因為無真實位置)
+          const mockDistance = Math.floor(Math.random() * 800 + 100) + 'm'; 
 
-          // 加入 spot-card 與 shrink-0 類別確保卡片排版穩定
           return `
-          <div onclick="window.flyToSpot('${spot.id}')" class="spot-card w-full shrink-0 bg-white p-3.5 rounded-[28px] border border-brand-light/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex items-center gap-4 cursor-pointer hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-brand-primary/30 hover:-translate-y-1 active:scale-95 transition-all group overflow-hidden relative">
+          <div onclick="window.flyToSpot('${spot.id}')" class="spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group">
              
-             <!-- 縮圖 -->
-             <div class="w-[88px] h-[88px] rounded-[20px] bg-brand-bg shrink-0 shadow-inner relative overflow-hidden border border-brand-light/50">
+             <!-- 左側正方形大圖 -->
+             <div class="w-[130px] h-[130px] rounded-[16px] overflow-hidden relative shrink-0">
                  ${thumbnailHtml}
+                 <div class="absolute bottom-1.5 left-2 text-white text-[11px] font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">台中市</div>
              </div>
              
-             <!-- 資訊區塊 -->
-             <div class="flex-1 flex flex-col justify-center py-1 pr-10 min-w-0">
-                <div class="flex items-center gap-2 mb-1.5">
-                   <span class="px-2.5 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold tracking-wider border border-brand-primary/10">${locObj.label}</span>
-                   <!-- 綁定專屬的數字 Class 以便立即更新 -->
-                   <div class="flex items-center gap-1 text-[11px] font-bold text-brand-textSub">
-                       <i class="fa-solid fa-heart text-[#E63946] opacity-70"></i>
-                       <span class="fav-count-${spot.id}">${spot.favoriteCount || 0}</span>
-                   </div>
+             <!-- 右側內容區 -->
+             <div class="flex-1 py-1 pr-1 flex flex-col min-w-0">
+                <!-- 標題與愛心 -->
+                <div class="flex justify-between items-start">
+                   <h3 class="text-[17px] font-extrabold text-[#2C3E50] leading-tight pr-2 truncate">${spot.name}</h3>
+                   <button id="list-fav-btn-${spot.id}" onclick="event.stopPropagation(); window.toggleFavorite('${spot.id}')" class="p-1 -mt-1 -mr-1">
+                       <i class="${favIconClass} text-[18px] transition-transform active:scale-90"></i>
+                   </button>
                 </div>
-                <div class="text-[16px] font-extrabold text-brand-dark truncate leading-tight group-hover:text-brand-primary transition-colors">${spot.name}</div>
-             </div>
-             
-             <!-- 列表快速收藏按鈕 (調整大小 text-[18px]) -->
-             <div class="absolute right-4 top-1/2 -translate-y-1/2 z-10">
-                <button id="list-fav-btn-${spot.id}" onclick="event.stopPropagation(); window.toggleFavorite('${spot.id}')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-brand-bg transition-colors">
-                    <i class="${favIconClass} text-[18px] transition-transform active:scale-90"></i>
-                </button>
+                
+                <!-- 收藏數與距離 -->
+                <div class="text-[13px] text-[#8796A5] font-bold mt-0.5 flex items-center gap-1">
+                   <i class="fa-regular fa-heart text-[11px]"></i>
+                   <span class="fav-count-${spot.id}">${spot.favoriteCount || 0}</span>
+                   <span>·</span>
+                   <span>${mockDistance}</span>
+                </div>
+                
+                <!-- 底部操作按鈕 -->
+                <div class="mt-auto flex gap-2">
+                   <button onclick="event.stopPropagation(); window.showToast('排入行程');" class="bg-[#F5F7FA] hover:bg-gray-200 text-[#2C3E50] text-[13px] font-extrabold py-1.5 px-3.5 rounded-full flex items-center gap-1.5 transition-colors">
+                       <i class="fa-solid fa-plus text-[#E58F65]"></i> 行程
+                   </button>
+                   <button onclick="event.stopPropagation(); window.flyToSpot('${spot.id}');" class="bg-[#F5F7FA] hover:bg-gray-200 text-[#2C3E50] text-[13px] font-extrabold py-1.5 px-3.5 rounded-full flex items-center gap-1.5 transition-colors">
+                       <i class="fa-solid fa-location-dot text-[#A0ABB7]"></i> 位置
+                   </button>
+                </div>
              </div>
           </div>`;
       }).join('');
 
-      // 重新生成清單後，確保卡片的佈局符合目前的面板高低模式
       applyListLayoutMode();
     }
 
     document.getElementById('input-explore-search').addEventListener('input', (e) => renderListAndMap(e.target.value));
+
+    // ========== 詳情面板相關 ==========
+    window.showSpotDetail = function(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+
+        if (spot.imageUrl) {
+            document.getElementById('detail-cover-image').style.backgroundImage = `url('${spot.imageUrl}')`;
+            document.getElementById('detail-cover-image').classList.remove('opacity-0');
+        } else {
+            document.getElementById('detail-cover-image').classList.add('opacity-0');
+        }
+
+        document.getElementById('detail-name').innerText = spot.name;
+        document.getElementById('detail-address').innerText = spot.address || spot.subtitle || '無詳細地址';
+        
+        if (spot.description) {
+            document.getElementById('detail-desc').innerHTML = spot.description.replace(/\n/g, '<br>');
+            document.getElementById('detail-desc-container').classList.remove('hidden');
+            document.getElementById('detail-desc-container').classList.add('flex');
+        }
+
+        updateFavoriteUI(spot.id);
+        const favBtn = document.getElementById('btn-favorite-spot');
+        favBtn.onclick = () => window.toggleFavorite(spot.id);
+
+        document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
+    };
+
+    window.closeSpotDetail = function() {
+        document.getElementById('spot-detail-panel').classList.add('translate-x-full');
+    };
 
     async function startApp() {
         try {
