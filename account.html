@@ -127,14 +127,18 @@
 <!-- Firebase 整合程式碼 (正式版) -->
 <!-- ========================================== -->
 <script type="module">
+    // ⚠️ 修正重點：import 語法必須放在 module 腳本的最頂層，不能被 if 區塊包圍
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
     // 只有在非直接存取的情況下，才執行 Firebase 初始化和渲染 UI
     if (window.location.hash || !window.location.pathname.endsWith('account.html')) {
+        
         // 顯示內容區塊
-        document.getElementById('account-page-content').style.display = 'block';
-
-        // 載入 Firebase 核心與 Auth 模組
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        const contentDiv = document.getElementById('account-page-content');
+        if (contentDiv) {
+            contentDiv.style.display = 'block';
+        }
 
         // 使用您專案真實的 Firebase 設定
         const firebaseConfig = {
