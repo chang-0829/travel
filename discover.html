@@ -1,163 +1,178 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <title>探索世界 - 旅圖製造所</title>
-    <!-- === 防破圖路由守衛 === -->
-    <script>
-        if (!window.location.hash && window.location.pathname.endsWith('discover.html')) {
-            window.location.replace('/#discover');
-        }
-    </script>
+<!-- ========================================== -->
+<!-- 探索地圖 (discover.html) - 地圖基礎版 -->
+<!-- ⚠️ 注意：此檔案由 index.html 動態載入，不需 head/body 標籤 -->
+<!-- ========================================== -->
 
-    <!-- Leaflet 資源 -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- === 防破圖路由守衛 === -->
+<script>
+    if (!window.location.hash && window.location.pathname.endsWith('discover.html')) {
+        window.location.replace('/#discover');
+    }
+</script>
 
-    <style>
-        /* 確保容器填滿 index.html 的主內容區 */
-        #map-wrapper {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f3f4f6;
-        }
+<!-- 將地圖依賴的資源直接寫在這裡，確保能被 index.html 抓取 -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        #map {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+<style>
+    /* 確保容器填滿 index.html 分配的主內容區，並完美避開側邊欄 */
+    #map-wrapper {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #f3f4f6;
+        z-index: 0;
+    }
 
-        /* 定位按鈕自訂樣式 */
-        .locate-control {
-            background: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s;
-        }
+    #map {
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
 
-        .locate-control:hover {
-            background-color: #f4f4f4;
-        }
+    /* 定位按鈕自訂樣式 */
+    .locate-control {
+        background: white;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+    }
 
-        .locate-control svg {
-            width: 24px;
-            height: 24px;
-            color: #4285F4; /* Google Blue */
-        }
+    .locate-control:hover {
+        background-color: #f4f4f4;
+    }
 
-        /* 隱藏 Leaflet 預設屬性 */
-        .leaflet-control-attribution {
-            display: none;
-        }
-    </style>
-</head>
-<body class="m-0 p-0">
+    .locate-control svg {
+        width: 24px;
+        height: 24px;
+        color: #4285F4; /* Google Blue */
+    }
 
-    <div id="map-wrapper">
-        <!-- 地圖本體 -->
-        <div id="map"></div>
-    </div>
+    /* 隱藏 Leaflet 預設屬性浮水印 */
+    .leaflet-control-attribution {
+        display: none;
+    }
+    
+    /* 微調預設縮放按鈕位置 */
+    .leaflet-top.leaflet-left {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+</style>
 
-    <script>
-        (function() {
-            let map;
-            let userMarker;
+<div id="map-wrapper">
+    <!-- 地圖本體 -->
+    <div id="map"></div>
+</div>
 
-            function initMap() {
-                // 如果已經有地圖實例則清除，避免 SPA 框架下的重複初始化錯誤
-                if (map) {
-                    map.remove();
-                }
+<script>
+    (function() {
+        let map;
+        let userMarker;
 
-                // 1. 初始化地圖中心 (預設台灣)
-                map = L.map('map', {
-                    zoomControl: true
-                }).setView([23.6978, 120.9605], 7);
+        // ⚠️ 關鍵修復：因為腳本是動態載入的，必須等待 Leaflet (window.L) 載入完成才能初始化地圖
+        let checkLeaflet = setInterval(() => {
+            if (window.L) {
+                clearInterval(checkLeaflet);
+                initMap();
+            }
+        }, 50);
 
-                // 2. 載入 Google Maps 街道圖磚 (Roadmap)
-                // 使用 Google 的圖磚伺服器：mt0, mt1, mt2, mt3
-                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-                }).addTo(map);
-
-                // 3. 加入自訂定位按鈕到地圖右上角
-                const LocateControl = L.Control.extend({
-                    options: { position: 'topright' },
-                    onAdd: function() {
-                        const btn = L.DomUtil.create('button', 'locate-control');
-                        btn.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>`;
-                        btn.title = "我的位置";
-                        btn.onclick = (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleGeolocation();
-                        };
-                        return btn;
-                    }
-                });
-                map.addControl(new LocateControl());
-
-                // 解決進入頁面時容器大小計算延遲導致的地圖破圖
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 300);
+        function initMap() {
+            // 如果已經有地圖實例則清除，避免 SPA 框架下來回切換導致的重複初始化錯誤
+            if (window.discoverMapInstance) {
+                window.discoverMapInstance.remove();
             }
 
-            // 定位邏輯
-            function handleGeolocation() {
-                if (!navigator.geolocation) {
-                    alert("您的瀏覽器不支援地理定位");
-                    return;
+            // 1. 初始化地圖中心 (預設台灣)
+            map = L.map('map', {
+                zoomControl: false // 先關閉預設，稍後手動加入以調整位置
+            }).setView([23.6978, 120.9605], 7);
+            
+            // 把實例存到全域，方便下次進來時清除
+            window.discoverMapInstance = map;
+
+            // 重新加入縮放按鈕
+            L.control.zoom({ position: 'topleft' }).addTo(map);
+
+            // 2. 載入 Google Maps 街道圖磚 (Roadmap)
+            L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }).addTo(map);
+
+            // 3. 加入自訂定位按鈕到地圖右上角
+            const LocateControl = L.Control.extend({
+                options: { position: 'topright' },
+                onAdd: function() {
+                    const btn = L.DomUtil.create('button', 'locate-control');
+                    // 加上 margin 避開邊緣
+                    btn.style.marginTop = '10px';
+                    btn.style.marginRight = '10px';
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>`;
+                    btn.title = "我的位置";
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleGeolocation();
+                    };
+                    return btn;
                 }
+            });
+            map.addControl(new LocateControl());
 
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        const latlng = [latitude, longitude];
+            // 解決進入頁面時容器大小計算延遲導致的地圖破圖 (灰畫面)
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 300);
+        }
 
-                        // 視角移動
-                        map.flyTo(latlng, 16, { duration: 1.5 });
-
-                        // 更新定位點標記
-                        if (userMarker) {
-                            userMarker.setLatLng(latlng);
-                        } else {
-                            userMarker = L.circleMarker(latlng, {
-                                radius: 8,
-                                fillColor: '#4285F4',
-                                color: '#fff',
-                                weight: 3,
-                                opacity: 1,
-                                fillOpacity: 0.9
-                            }).addTo(map);
-                        }
-                    },
-                    (error) => {
-                        console.error("定位出錯:", error);
-                        alert("無法取得您的位置，請確認是否已開啟定位權限。");
-                    }
-                );
+        // 定位邏輯
+        function handleGeolocation() {
+            if (!navigator.geolocation) {
+                alert("您的瀏覽器不支援地理定位");
+                return;
             }
 
-            // 啟動地圖
-            initMap();
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const latlng = [latitude, longitude];
 
-        })();
-    </script>
-</body>
-</html>
+                    // 視角移動 (放大至 level 16)
+                    map.flyTo(latlng, 16, { duration: 1.5 });
+
+                    // 更新定位點標記
+                    if (userMarker) {
+                        userMarker.setLatLng(latlng);
+                    } else {
+                        userMarker = L.circleMarker(latlng, {
+                            radius: 8,
+                            fillColor: '#4285F4',
+                            color: '#fff',
+                            weight: 3,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map);
+                    }
+                },
+                (error) => {
+                    console.error("定位出錯:", error);
+                    alert("無法取得您的位置，請確認是否已開啟裝置的定位權限。");
+                }
+            );
+        }
+    })();
+</script>
