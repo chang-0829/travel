@@ -1,361 +1,367 @@
 <!-- ========================================== -->
 <!-- 尋覓世界 (discover.html) - 動態載入內容 -->
 <!-- ⚠️ 注意：這份檔案不需要 html, head, body 標籤 -->
-<!-- ⚠️ Tailwind CSS 由 index.html 統一載入 -->
 <!-- ========================================== -->
 
-<!-- === 防破圖路由守衛 === -->
-<script>
-    if (!window.location.hash && window.location.pathname.endsWith('discover.html')) {
-        window.location.replace('/#discover');
-    }
-</script>
-
-<!-- === 載入 Leaflet 地圖與 FontAwesome 圖示 === -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-<style>
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+<!-- 💡 核心修復：將全部內容包在一個根容器內，防止 DOMParser 把 script 丟到 head 而遺失 -->
+<div id="discover-page-root" class="h-full">
     
-    /* 修正 Leaflet 層級 */
-    .leaflet-container { z-index: 10; font-family: inherit; }
-    .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    
-    /* 自訂地圖圖示 */
-    .custom-marker-wrapper {
-        display: flex; align-items: center; justify-content: center;
-        width: 36px; height: 36px; background-color: white; border-radius: 50%;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid #2563eb; color: #2563eb;
-        transition: transform 0.2s;
-    }
-    .custom-marker-wrapper:hover { transform: scale(1.1); background-color: #2563eb; color: white; }
-    
-    /* 確保 Tab 2 的滿版體驗 */
-    #tab-content-map { height: calc(100vh - 180px); }
-    @media (min-width: 768px) { #tab-content-map { height: calc(100vh - 120px); } }
-</style>
+    <!-- === 防破圖路由守衛 === -->
+    <script>
+        if (!window.location.hash && window.location.pathname.endsWith('discover.html')) {
+            window.location.replace('/#discover');
+        }
+    </script>
 
-<div class="h-full flex flex-col animate-fade-in">
-    
-    <!-- ========================================== -->
-    <!-- 頂部分頁控制列 (Tabs) -->
-    <!-- ========================================== -->
-    <div class="bg-white px-4 sm:px-6 lg:px-8 pt-6 border-b border-gray-200 shrink-0">
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-4">尋覓世界</h1>
-        <div class="flex space-x-6 overflow-x-auto hide-scrollbar">
-            <button id="tab-btn-curated" class="pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap">
-                精選推薦
-            </button>
-            <button id="tab-btn-map" class="pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap">
-                探索地圖 (舊版功能)
-            </button>
-        </div>
-    </div>
+    <!-- === 載入外部資源 (現在被包在 div 裡，可以順利被注入了) === -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-    <!-- ========================================== -->
-    <!-- Tab 1: 精選推薦 (新版現代化設計) -->
-    <!-- ========================================== -->
-    <div id="tab-content-curated" class="flex-1 overflow-y-auto pb-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            
-            <!-- 搜尋列 -->
-            <div class="relative max-w-2xl mb-8">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" placeholder="想去哪裡？搜尋城市、景點或主題..." class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all">
-            </div>
-
-            <!-- 分類標籤 -->
-            <div class="flex overflow-x-auto hide-scrollbar gap-3 mb-8 pb-2">
-                <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shrink-0 shadow-sm transition-colors">全部推薦</button>
-                <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">🔥 熱門排行</button>
-                <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">🌸 季節限定</button>
-                <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">⛰️ 秘境探險</button>
-            </div>
-
-            <!-- 精選主題 -->
-            <div class="mb-12">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 px-1">編輯精選</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <a href="#" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
-                        <div class="relative h-48 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="週末快閃">
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-2">週末快閃：兩天一夜提案</h3>
-                            <p class="text-sm text-gray-500 line-clamp-2">不用請假也能出國！精選鄰近城市快閃行程，用 48 小時體驗異國風情。</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
-                        <div class="relative h-48 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="秘境探險">
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-2">避開人潮：尋找隱藏秘境</h3>
-                            <p class="text-sm text-gray-500 line-clamp-2">受夠了人擠人的觀光景點？跟著達人腳步，探索鮮為人知的私房秘境。</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 熱門目的地 -->
-            <div>
-                <div class="flex justify-between items-end mb-4 px-1">
-                    <h2 class="text-xl font-bold text-gray-900">熱門目的地</h2>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <a href="#" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group flex flex-col">
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="東京">
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-base font-bold text-gray-900 mb-1">日本 東京</h3>
-                            <p class="text-xs text-gray-500">12,450 個景點</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group flex flex-col">
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1522083165195-3444dd61f2ce?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="首爾">
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-base font-bold text-gray-900 mb-1">韓國 首爾</h3>
-                            <p class="text-xs text-gray-500">8,320 個景點</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- Tab 2: 探索地圖 (舊版功能還原) -->
-    <!-- ========================================== -->
-    <div id="tab-content-map" class="hidden relative w-full flex-1">
+    <style>
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        <!-- 地圖容器 (滿版) -->
-        <div id="full-screen-map" class="w-full h-full z-0"></div>
+        /* 修正 Leaflet 層級與預設樣式 */
+        .leaflet-container { z-index: 10; font-family: inherit; }
+        .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        /* 自訂地圖圖示 */
+        .custom-marker-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; background-color: white; border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid #2563eb; color: #2563eb;
+            transition: transform 0.2s;
+        }
+        .custom-marker-wrapper:hover { transform: scale(1.1); background-color: #2563eb; color: white; }
+        
+        /* 確保 Tab 2 的滿版體驗，給予絕對高度以防止 Flex 收縮至 0 */
+        #tab-content-map { height: calc(100vh - 160px); }
+        @media (min-width: 768px) { #tab-content-map { height: calc(100vh - 100px); } }
+    </style>
 
-        <!-- 懸浮搜尋與篩選 (覆蓋於地圖上方) -->
-        <div class="absolute top-4 left-4 right-4 md:w-96 z-20 space-y-3">
-            <div class="bg-white rounded-xl shadow-lg flex items-center px-4 py-3">
-                <i class="fas fa-search text-gray-400 mr-3"></i>
-                <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-gray-700">
-            </div>
-            <!-- 快速篩選 -->
-            <div class="flex gap-2 overflow-x-auto hide-scrollbar">
-                <button class="px-4 py-1.5 bg-blue-600 text-white rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button>
-                <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-utensils mr-1"></i> 美食</button>
-                <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-mountain mr-1"></i> 自然</button>
-                <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-camera mr-1"></i> 景點</button>
+    <div class="h-full flex flex-col animate-fade-in">
+        
+        <!-- ========================================== -->
+        <!-- 頂部分頁控制列 (Tabs) -->
+        <!-- ========================================== -->
+        <div class="bg-white px-4 sm:px-6 lg:px-8 pt-6 border-b border-gray-200 shrink-0">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-4">尋覓世界</h1>
+            <div class="flex space-x-6 overflow-x-auto hide-scrollbar">
+                <button id="tab-btn-curated" class="pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap">
+                    精選推薦
+                </button>
+                <button id="tab-btn-map" class="pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap">
+                    探索地圖 (舊版功能)
+                </button>
             </div>
         </div>
 
-        <!-- 側邊/底部景點詳細資訊面板 (舊版 slide-in 效果) -->
-        <!-- translate-x-full 預設藏在右側 -->
-        <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[999] flex flex-col pb-safe">
-            
-            <!-- 景點圖片標頭 -->
-            <div class="relative h-64 shrink-0">
-                <img id="spot-detail-img" src="" alt="景點預覽" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <!-- 關閉按鈕 -->
-                <button onclick="window.closeSpotDetail()" class="absolute top-6 left-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-gray-900 transition-colors shadow-sm">
-                    <i class="fas fa-chevron-right md:hidden"></i>
-                    <i class="fas fa-times hidden md:block"></i>
-                </button>
-                <!-- 標題重疊於圖片 -->
-                <div class="absolute bottom-4 left-6 right-6 text-white">
-                    <h2 id="spot-detail-title" class="text-2xl font-bold mb-1 drop-shadow-md">載入中...</h2>
-                    <p class="text-sm text-gray-200 flex items-center"><i class="fas fa-star text-yellow-400 mr-1"></i> <span id="spot-detail-rating">4.5</span></p>
-                </div>
-            </div>
-
-            <!-- 景點內容與操作按鈕 -->
-            <div class="flex-1 overflow-y-auto p-6">
+        <!-- ========================================== -->
+        <!-- Tab 1: 精選推薦 (新版現代化設計) -->
+        <!-- ========================================== -->
+        <div id="tab-content-curated" class="flex-1 overflow-y-auto pb-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 
-                <!-- 舊版功能按鈕列 (導航、網站、電話、收藏) -->
-                <div class="flex justify-between mb-8 pb-6 border-b border-gray-100">
-                    <a id="circle-nav-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <i class="fas fa-directions text-lg"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-600">導航</span>
-                    </a>
-                    
-                    <a id="circle-web-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <i class="fas fa-globe text-lg"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-600">網站</span>
-                    </a>
-
-                    <a id="circle-phone-btn" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <i class="fas fa-phone text-lg"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-600">電話</span>
-                    </a>
-
-                    <button id="btn-favorite-spot" class="flex flex-col items-center group focus:outline-none">
-                        <div id="fav-icon-container" class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mb-2 transition-colors">
-                            <i class="fas fa-heart text-lg"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-600">收藏</span>
-                    </button>
+                <!-- 搜尋列 -->
+                <div class="relative max-w-2xl mb-8">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" placeholder="想去哪裡？搜尋城市、景點或主題..." class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all">
                 </div>
 
-                <!-- 詳細資訊 -->
-                <div class="space-y-4">
-                    <div class="flex items-start text-gray-600">
-                        <i class="fas fa-map-marker-alt mt-1 w-5 text-center text-gray-400 shrink-0"></i>
-                        <p id="spot-detail-address" class="ml-3 text-sm leading-relaxed"></p>
+                <!-- 分類標籤 -->
+                <div class="flex overflow-x-auto hide-scrollbar gap-3 mb-8 pb-2">
+                    <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shrink-0 shadow-sm transition-colors">全部推薦</button>
+                    <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">🔥 熱門排行</button>
+                    <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">🌸 季節限定</button>
+                    <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-full shrink-0 hover:bg-gray-50 transition-colors">⛰️ 秘境探險</button>
+                </div>
+
+                <!-- 精選主題 -->
+                <div class="mb-12">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 px-1">編輯精選</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="#" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="週末快閃">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">週末快閃：兩天一夜提案</h3>
+                                <p class="text-sm text-gray-500 line-clamp-2">不用請假也能出國！精選鄰近城市快閃行程，用 48 小時體驗異國風情。</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="秘境探險">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">避開人潮：尋找隱藏秘境</h3>
+                                <p class="text-sm text-gray-500 line-clamp-2">受夠了人擠人的觀光景點？跟著達人腳步，探索鮮為人知的私房秘境。</p>
+                            </div>
+                        </a>
                     </div>
-                    <div class="flex items-start text-gray-600">
-                        <i class="fas fa-info-circle mt-1 w-5 text-center text-gray-400 shrink-0"></i>
-                        <p id="spot-detail-desc" class="ml-3 text-sm leading-relaxed"></p>
+                </div>
+
+                <!-- 熱門目的地 -->
+                <div>
+                    <div class="flex justify-between items-end mb-4 px-1">
+                        <h2 class="text-xl font-bold text-gray-900">熱門目的地</h2>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        <a href="#" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group flex flex-col">
+                            <div class="relative aspect-[4/3] overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="東京">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-base font-bold text-gray-900 mb-1">日本 東京</h3>
+                                <p class="text-xs text-gray-500">12,450 個景點</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group flex flex-col">
+                            <div class="relative aspect-[4/3] overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1522083165195-3444dd61f2ce?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="首爾">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-base font-bold text-gray-900 mb-1">韓國 首爾</h3>
+                                <p class="text-xs text-gray-500">8,320 個景點</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Tab 2: 探索地圖 (舊版功能還原) -->
+        <!-- ========================================== -->
+        <div id="tab-content-map" class="hidden relative w-full shrink-0">
             
+            <!-- 地圖容器 (滿版) -->
+            <div id="full-screen-map" class="w-full h-full z-0 bg-gray-100"></div>
+
+            <!-- 懸浮搜尋與篩選 (覆蓋於地圖上方) -->
+            <div class="absolute top-4 left-4 right-4 md:w-96 z-20 space-y-3">
+                <div class="bg-white rounded-xl shadow-lg flex items-center px-4 py-3">
+                    <i class="fas fa-search text-gray-400 mr-3"></i>
+                    <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-gray-700">
+                </div>
+                <!-- 快速篩選 -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                    <button class="px-4 py-1.5 bg-blue-600 text-white rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button>
+                    <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-utensils mr-1"></i> 美食</button>
+                    <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-mountain mr-1"></i> 自然</button>
+                    <button class="px-4 py-1.5 bg-white text-gray-700 rounded-full shadow-md text-sm whitespace-nowrap"><i class="fas fa-camera mr-1"></i> 景點</button>
+                </div>
+            </div>
+
+            <!-- 側邊/底部景點詳細資訊面板 -->
+            <!-- translate-x-full 預設藏在右側 -->
+            <div id="spot-detail-panel" class="absolute inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[999] flex flex-col pb-safe">
+                
+                <!-- 景點圖片標頭 -->
+                <div class="relative h-64 shrink-0">
+                    <img id="spot-detail-img" src="" alt="景點預覽" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <!-- 關閉按鈕 -->
+                    <button onclick="window.closeSpotDetail()" class="absolute top-6 left-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-gray-900 transition-colors shadow-sm">
+                        <i class="fas fa-chevron-right md:hidden"></i>
+                        <i class="fas fa-times hidden md:block"></i>
+                    </button>
+                    <!-- 標題重疊於圖片 -->
+                    <div class="absolute bottom-4 left-6 right-6 text-white">
+                        <h2 id="spot-detail-title" class="text-2xl font-bold mb-1 drop-shadow-md">載入中...</h2>
+                        <p class="text-sm text-gray-200 flex items-center"><i class="fas fa-star text-yellow-400 mr-1"></i> <span id="spot-detail-rating">4.5</span></p>
+                    </div>
+                </div>
+
+                <!-- 景點內容與操作按鈕 -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    
+                    <!-- 按鈕列 (導航、網站、電話、收藏) -->
+                    <div class="flex justify-between mb-8 pb-6 border-b border-gray-100">
+                        <a id="circle-nav-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <i class="fas fa-directions text-lg"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600">導航</span>
+                        </a>
+                        
+                        <a id="circle-web-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <i class="fas fa-globe text-lg"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600">網站</span>
+                        </a>
+
+                        <a id="circle-phone-btn" class="flex flex-col items-center group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <i class="fas fa-phone text-lg"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600">電話</span>
+                        </a>
+
+                        <button id="btn-favorite-spot" class="flex flex-col items-center group focus:outline-none">
+                            <div id="fav-icon-container" class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mb-2 transition-colors">
+                                <i class="fas fa-heart text-lg"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600">收藏</span>
+                        </button>
+                    </div>
+
+                    <!-- 詳細資訊 -->
+                    <div class="space-y-4">
+                        <div class="flex items-start text-gray-600">
+                            <i class="fas fa-map-marker-alt mt-1 w-5 text-center text-gray-400 shrink-0"></i>
+                            <p id="spot-detail-address" class="ml-3 text-sm leading-relaxed"></p>
+                        </div>
+                        <div class="flex items-start text-gray-600">
+                            <i class="fas fa-info-circle mt-1 w-5 text-center text-gray-400 shrink-0"></i>
+                            <p id="spot-detail-desc" class="ml-3 text-sm leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- === 核心邏輯腳本 === -->
-<script>
-    (function() {
-        // --- Tab 切換邏輯 ---
-        const btnCurated = document.getElementById('tab-btn-curated');
-        const btnMap = document.getElementById('tab-btn-map');
-        const contentCurated = document.getElementById('tab-content-curated');
-        const contentMap = document.getElementById('tab-content-map');
-        let fullMapInitialized = false;
+    <!-- === 核心邏輯腳本 === -->
+    <script>
+        (function() {
+            // --- Tab 切換邏輯 ---
+            const btnCurated = document.getElementById('tab-btn-curated');
+            const btnMap = document.getElementById('tab-btn-map');
+            const contentCurated = document.getElementById('tab-content-curated');
+            const contentMap = document.getElementById('tab-content-map');
+            let fullMapInitialized = false;
 
-        function switchTab(tabName) {
-            if (tabName === 'curated') {
-                contentCurated.classList.remove('hidden');
-                contentMap.classList.add('hidden');
-                
-                // 按鈕樣式 (Active)
-                btnCurated.className = "pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap";
-                btnMap.className = "pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap";
-            } else {
-                contentCurated.classList.add('hidden');
-                contentMap.classList.remove('hidden');
-                
-                // 按鈕樣式 (Active)
-                btnMap.className = "pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap";
-                btnCurated.className = "pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap";
-                
-                // 首次切換到地圖時初始化
-                if (!fullMapInitialized) {
-                    initOldVersionMap();
-                    fullMapInitialized = true;
-                } else if (window.fullMapInstance) {
-                    // 修正地圖切換顯示後尺寸跑掉的問題
-                    setTimeout(() => window.fullMapInstance.invalidateSize(), 100);
+            function switchTab(tabName) {
+                if (tabName === 'curated') {
+                    contentCurated.classList.remove('hidden');
+                    contentMap.classList.add('hidden');
+                    
+                    // 按鈕樣式 (Active)
+                    btnCurated.className = "pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap";
+                    btnMap.className = "pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap";
+                } else {
+                    contentCurated.classList.add('hidden');
+                    contentMap.classList.remove('hidden');
+                    
+                    // 按鈕樣式 (Active)
+                    btnMap.className = "pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors whitespace-nowrap";
+                    btnCurated.className = "pb-3 text-sm font-bold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-colors whitespace-nowrap";
+                    
+                    // 首次切換到地圖時初始化
+                    if (!fullMapInitialized) {
+                        initOldVersionMap();
+                        fullMapInitialized = true;
+                    } else if (window.fullMapInstance) {
+                        // 修正地圖切換顯示後尺寸跑掉的問題 (強制多次重繪確保安全)
+                        setTimeout(() => window.fullMapInstance.invalidateSize(), 50);
+                        setTimeout(() => window.fullMapInstance.invalidateSize(), 200);
+                    }
                 }
             }
-        }
 
-        btnCurated.addEventListener('click', () => switchTab('curated'));
-        btnMap.addEventListener('click', () => switchTab('map'));
+            btnCurated.addEventListener('click', () => switchTab('curated'));
+            btnMap.addEventListener('click', () => switchTab('map'));
 
-        // --- 舊版地圖初始化與互動邏輯 ---
-        function initOldVersionMap() {
-            const checkL = setInterval(() => {
-                if (typeof L !== 'undefined') {
-                    clearInterval(checkL);
-                    
-                    const mapEl = document.getElementById('full-screen-map');
-                    if (mapEl._leaflet_id) return; // 避免重複初始化
-
-                    // 建立地圖
-                    const map = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
-                    window.fullMapInstance = map;
-
-                    // 載入 CartoDB 圖磚 (符合舊版優雅風格)
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                        maxZoom: 19
-                    }).addTo(map);
-
-                    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-                    // 模擬舊版的景點資料
-                    const spots = [
-                        { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
-                        { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
-                        { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
-                    ];
-
-                    // 渲染地圖標記
-                    spots.forEach(spot => {
-                        const iconHtml = `<div class="custom-marker-wrapper"><i class="${spot.name.includes('山') ? 'fas fa-mountain' : 'fas fa-camera'}"></i></div>`;
-                        const customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [36, 36], iconAnchor: [18, 36] });
+            // --- 舊版地圖初始化與互動邏輯 ---
+            function initOldVersionMap() {
+                const checkL = setInterval(() => {
+                    // 等待 Leaflet 腳本載入完成
+                    if (typeof L !== 'undefined') {
+                        const mapEl = document.getElementById('full-screen-map');
                         
-                        const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(map);
-                        
-                        // 點擊標記，開啟舊版側邊面板
-                        marker.on('click', () => window.openSpotDetail(spot));
-                    });
-                }
-            }, 100);
-        }
+                        // 💡 關鍵修復：等待容器確實渲染在畫面上且擁有高度，徹底解決灰畫面
+                        if (!mapEl || mapEl.clientHeight === 0) return; 
 
-        // --- 全域方法：開啟/關閉景點詳細面板 (移植舊版功能) ---
-        window.openSpotDetail = function(spot) {
-            document.getElementById('spot-detail-title').textContent = spot.name;
-            document.getElementById('spot-detail-address').textContent = spot.address;
-            document.getElementById('spot-detail-desc').textContent = spot.desc;
-            document.getElementById('spot-detail-rating').textContent = spot.rating;
-            document.getElementById('spot-detail-img').src = spot.img;
+                        clearInterval(checkL); // 條件滿足，停止輪詢
 
-            // 導航按鈕設定
-            const navBtn = document.getElementById('circle-nav-btn');
-            navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
+                        if (mapEl._leaflet_id) return; // 避免重複初始化
 
-            // 網站按鈕設定
-            const webBtn = document.getElementById('circle-web-btn');
-            if (spot.website) { webBtn.href = spot.website; webBtn.style.display = 'flex'; } 
-            else { webBtn.style.display = 'none'; }
+                        // 建立地圖
+                        const map = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
+                        window.fullMapInstance = map;
 
-            // 電話按鈕設定
-            const phoneBtn = document.getElementById('circle-phone-btn');
-            if (spot.phone) { phoneBtn.href = `tel:${spot.phone}`; phoneBtn.style.display = 'flex'; } 
-            else { phoneBtn.style.display = 'none'; }
+                        // 載入 CartoDB 圖磚 (符合舊版優雅風格)
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                            maxZoom: 19
+                        }).addTo(map);
 
-            // 模擬收藏功能 UI 切換
-            const favBtn = document.getElementById('btn-favorite-spot');
-            const favIconContainer = document.getElementById('fav-icon-container');
-            let isFav = false; // 此處暫以變數模擬，實際應接 Firebase
-            
-            favBtn.onclick = () => {
-                isFav = !isFav;
-                if (isFav) {
-                    favIconContainer.classList.replace('bg-gray-50', 'bg-red-50');
-                    favIconContainer.classList.replace('text-gray-400', 'text-red-500');
-                } else {
-                    favIconContainer.classList.replace('bg-red-50', 'bg-gray-50');
-                    favIconContainer.classList.replace('text-red-500', 'text-gray-400');
-                }
+                        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+                        // 模擬舊版的景點資料
+                        const spots = [
+                            { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
+                            { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
+                            { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
+                        ];
+
+                        // 渲染地圖標記
+                        spots.forEach(spot => {
+                            const iconHtml = `<div class="custom-marker-wrapper"><i class="${spot.name.includes('山') ? 'fas fa-mountain' : 'fas fa-camera'}"></i></div>`;
+                            const customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [36, 36], iconAnchor: [18, 36] });
+                            
+                            const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(map);
+                            
+                            // 點擊標記，開啟舊版側邊面板
+                            marker.on('click', () => window.openSpotDetail(spot));
+                        });
+
+                        // 再次強制重繪，確保尺寸準確
+                        setTimeout(() => map.invalidateSize(), 50);
+                    }
+                }, 100);
+            }
+
+            // --- 全域方法：開啟/關閉景點詳細面板 ---
+            window.openSpotDetail = function(spot) {
+                document.getElementById('spot-detail-title').textContent = spot.name;
+                document.getElementById('spot-detail-address').textContent = spot.address;
+                document.getElementById('spot-detail-desc').textContent = spot.desc;
+                document.getElementById('spot-detail-rating').textContent = spot.rating;
+                document.getElementById('spot-detail-img').src = spot.img;
+
+                const navBtn = document.getElementById('circle-nav-btn');
+                navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
+
+                const webBtn = document.getElementById('circle-web-btn');
+                if (spot.website) { webBtn.href = spot.website; webBtn.style.display = 'flex'; } 
+                else { webBtn.style.display = 'none'; }
+
+                const phoneBtn = document.getElementById('circle-phone-btn');
+                if (spot.phone) { phoneBtn.href = `tel:${spot.phone}`; phoneBtn.style.display = 'flex'; } 
+                else { phoneBtn.style.display = 'none'; }
+
+                const favBtn = document.getElementById('btn-favorite-spot');
+                const favIconContainer = document.getElementById('fav-icon-container');
+                let isFav = false; 
+                
+                favBtn.onclick = () => {
+                    isFav = !isFav;
+                    if (isFav) {
+                        favIconContainer.classList.replace('bg-gray-50', 'bg-red-50');
+                        favIconContainer.classList.replace('text-gray-400', 'text-red-500');
+                    } else {
+                        favIconContainer.classList.replace('bg-red-50', 'bg-gray-50');
+                        favIconContainer.classList.replace('text-red-500', 'text-gray-400');
+                    }
+                };
+
+                document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
             };
 
-            // 滑出面板 (移除隱藏 class)
-            document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
-        };
+            window.closeSpotDetail = function() {
+                document.getElementById('spot-detail-panel').classList.add('translate-x-full');
+            };
 
-        window.closeSpotDetail = function() {
-            document.getElementById('spot-detail-panel').classList.add('translate-x-full');
-        };
-
-    })();
-</script>
+        })();
+    </script>
+</div>
