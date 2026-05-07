@@ -1,180 +1,84 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>儀表板 - 旅圖製造所</title>
-    <!-- 使用 Tailwind CSS 加速排版 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+    // 防止直接存取 index2.html 或 home.html，確保符合 SPA 路由
+    if (!window.location.hash && (window.location.pathname.endsWith('index2.html') || window.location.pathname.endsWith('home.html'))) {
+        window.location.replace('/#home');
+    }
+</script>
+
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fade-in pb-24">
     
-    <!-- === 防破圖路由守衛 === -->
-    <script>
-        // 防止直接存取 index2.html 或 home.html
-        if (!window.location.hash && (window.location.pathname.endsWith('index2.html') || window.location.pathname.endsWith('home.html'))) {
-            window.location.replace('/#home');
-        }
-    </script>
-    
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f9fafb;
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-</head>
-<body class="text-gray-800">
-
-    <!-- ========================================== -->
-    <!-- App 儀表板首頁 (由 index.html 動態載入) -->
-    <!-- ========================================== -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fade-in pb-24">
-        
-        <!-- 頂部問候區 -->
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <!-- ID: dynamic-greeting 用於 JS 注入 -->
-                <h1 id="dynamic-greeting" class="text-2xl sm:text-3xl font-bold text-gray-900">旅人，您好！</h1>
-                <p class="text-gray-500 text-sm mt-1">今天想去哪裡探險呢？</p>
-            </div>
-            <!-- 通知鈴鐺 -->
-            <button class="p-2.5 bg-white rounded-full shadow-sm border border-gray-100 hover:bg-gray-50 text-gray-600 transition-colors relative">
-                <div class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-            </button>
-        </div>
-
-        <!-- 快速功能區 (Quick Actions) -->
-        <div class="grid grid-cols-3 gap-3 sm:gap-6 mb-10">
-            <a href="#mytrip" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all p-4 rounded-2xl group">
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </div>
-                <span class="text-sm font-medium text-gray-700 group-hover:text-blue-700">建立行程</span>
-            </a>
-            
-            <a href="#discover" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all p-4 rounded-2xl group">
-                <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <span class="text-sm font-medium text-gray-700 group-hover:text-orange-700">尋找靈感</span>
-            </a>
-
-            <a href="#account" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-purple-200 hover:shadow-md transition-all p-4 rounded-2xl group">
-                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                </div>
-                <span class="text-sm font-medium text-gray-700 group-hover:text-purple-700">我的收藏</span>
-            </a>
-        </div>
-
-        <!-- 近期行程區塊 -->
-        <div class="mb-12">
-            <div class="flex justify-between items-end mb-4 px-1">
-                <h2 class="text-xl font-bold text-gray-900">即將出發的旅程</h2>
-                <a href="#mytrip" class="text-sm text-blue-600 font-medium hover:underline flex items-center">
-                    全部行程 <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </a>
-            </div>
-            
-            <div class="flex overflow-x-auto hide-scrollbar gap-4 pb-4 snap-x">
-                <a href="#mytrip" class="block min-w-[280px] sm:min-w-[320px] bg-white border border-gray-100 hover:border-blue-300 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all snap-center shrink-0 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 opacity-70 group-hover:scale-110 transition-transform"></div>
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md">規劃中</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-blue-600 transition-colors">東京五天四夜自由行</h3>
-                    <p class="text-sm text-gray-500 mb-5 flex items-center">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        2026/10/01 - 10/05
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex -space-x-2 overflow-hidden">
-                            <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover" src="https://ui-avatars.com/api/?name=ME&background=0D8ABC&color=fff" alt="">
-                            <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-2 ring-white text-xs font-medium text-gray-500">+2</div>
-                        </div>
-                        <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md">8 個景點</span>
-                    </div>
-                </a>
-
-                <a href="#mytrip" class="block min-w-[280px] sm:min-w-[320px] bg-gray-50 border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50 rounded-3xl p-5 shadow-sm transition-all snap-center shrink-0 flex flex-col items-center justify-center text-gray-500 hover:text-blue-600 group">
-                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    </div>
-                    <span class="font-medium">規劃下一趟旅程</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- 推薦區塊 -->
+    <div class="flex items-center justify-between mb-8">
         <div>
-            <h2 class="text-xl font-bold text-gray-900 mb-4 px-1">為你推薦</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="#discover" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex h-32 hover:shadow-md hover:border-gray-200 transition-all group">
-                    <div class="w-1/3 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="">
-                    </div>
-                    <div class="p-4 flex flex-col justify-center w-2/3">
-                        <span class="text-xs text-blue-600 font-bold mb-1 tracking-wide uppercase">主題攻略</span>
-                        <h3 class="text-base font-bold text-gray-900 line-clamp-2 leading-snug">曼谷週末快閃：吃喝玩樂完全指南</h3>
-                    </div>
-                </a>
-                <a href="#discover" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex h-32 hover:shadow-md hover:border-gray-200 transition-all group">
-                    <div class="w-1/3 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=500&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="">
-                    </div>
-                    <div class="p-4 flex flex-col justify-center w-2/3">
-                        <span class="text-xs text-orange-600 font-bold mb-1 tracking-wide uppercase">秘境探險</span>
-                        <h3 class="text-base font-bold text-gray-900 line-clamp-2 leading-snug">京都私房景點，避開人潮的絕美路線</h3>
-                    </div>
-                </a>
-            </div>
+            <h1 id="dynamic-greeting" class="text-2xl sm:text-3xl font-bold text-gray-900">旅人，您好！</h1>
+            <p class="text-gray-500 text-sm mt-1">今天想去哪裡探險呢？</p>
         </div>
+        <button class="p-2.5 bg-white rounded-full shadow-sm border border-gray-100 hover:bg-gray-50 text-gray-600 transition-colors relative">
+            <div class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+        </button>
     </div>
 
-    <!-- === 問候語腳本 === -->
-    <script>
-        (function() {
-            const updateGreeting = () => {
-                const hours = new Date().getHours();
-                let greeting = "";
+    <div class="grid grid-cols-3 gap-3 sm:gap-6 mb-10">
+        <a href="#mytrip" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all p-4 rounded-2xl group">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-700">建立行程</span>
+        </a>
+        
+        <a href="#discover" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all p-4 rounded-2xl group">
+            <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-orange-700">尋找靈感</span>
+        </a>
 
-                if (hours >= 5 && hours < 11) {
-                    greeting = "早安";
-                } else if (hours >= 11 && hours < 14) {
-                    greeting = "午安";
-                } else if (hours >= 14 && hours < 18) {
-                    greeting = "下午好";
-                } else if (hours >= 18 && hours < 24) {
-                    greeting = "晚安";
-                } else {
-                    greeting = "夜深了";
-                }
+        <a href="#account" class="flex flex-col items-center justify-center bg-white border border-gray-100 hover:border-purple-200 hover:shadow-md transition-all p-4 rounded-2xl group">
+            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-purple-700">我的收藏</span>
+        </a>
+    </div>
 
-                const greetingEl = document.getElementById('dynamic-greeting');
-                if (greetingEl) {
-                    greetingEl.textContent = `${greeting}，旅人！`;
-                }
-            };
+    </div>
 
-            // 執行問候語更新
-            updateGreeting();
-        })();
-    </script>
+<script type="module">
+    // 使用立即執行函式 (IIFE) 確保變數不污染全域
+    (function() {
+        const updateGreeting = () => {
+            const hours = new Date().getHours();
+            let greeting = "";
 
-</body>
-</html>
+            if (hours >= 5 && hours < 11) greeting = "早安";
+            else if (hours >= 11 && hours < 14) greeting = "午安";
+            else if (hours >= 14 && hours < 18) greeting = "下午好";
+            else if (hours >= 18 && hours < 24) greeting = "晚安";
+            else greeting = "夜深了";
+
+            const greetingEl = document.getElementById('dynamic-greeting');
+            if (greetingEl) {
+                greetingEl.textContent = `${greeting}，旅人！`;
+            }
+        };
+
+        updateGreeting();
+    })();
+</script>
