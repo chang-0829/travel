@@ -8,7 +8,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Leaflet CSS (地圖核心) -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   
   <!-- Tailwind CSS -->
@@ -26,17 +26,10 @@
   </script>
 
   <style>
-    /* --- LINE Seed 字體整合 --- */
-    @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
     @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'LINE Seed W'; src: url('./fonts/LINESeedSans_W_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'LINE Seed W'; src: url('./fonts/LINESeedSans_W_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-
-    body { font-family: 'LINE Seed TW', 'LINE Seed W', ui-sans-serif, system-ui, sans-serif; background-color: #F8FAFC; }
-    
+    body { font-family: 'LINE Seed TW', ui-sans-serif, system-ui, sans-serif; background-color: #F8FAFC; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
     /* 覆寫 Leaflet 樣式 */
     .custom-marker { background: transparent; border: none; }
@@ -53,13 +46,10 @@
        </div>
        <h2 class="text-2xl font-extrabold text-brand-dark mb-2">系統管理後台</h2>
        <p class="text-[13px] font-bold text-brand-textSub mb-8">此區域僅限高階管理員信箱存取</p>
-       
        <p id="login-error-msg" class="hidden text-[13px] text-[#E63946] bg-[#FFE5E5] px-4 py-3 rounded-xl font-bold w-full mb-6 border border-[#E63946]/20"></p>
-       
        <button onclick="window.adminLogin()" class="w-full py-4 bg-white border border-brand-light text-brand-dark font-extrabold text-[15px] rounded-[16px] shadow-sm hover:bg-brand-bg active:scale-95 transition-all flex items-center justify-center gap-3">
           <i class="fa-brands fa-google text-[#4285F4] text-xl"></i> Google 帳號授權登入
        </button>
-       
        <a href="./discover.html" class="mt-8 text-xs font-bold text-brand-textSub hover:text-brand-primary transition-colors flex items-center gap-1.5">
           <i class="fa-solid fa-arrow-left"></i> 返回前台探索
        </a>
@@ -77,7 +67,7 @@
        <div class="w-10 h-10 rounded-xl bg-brand-dark text-white flex items-center justify-center text-xl mr-3 shadow-sm">
           <i class="fa-solid fa-plane"></i>
        </div>
-       <div>
+       <div class="overflow-hidden">
          <div class="text-lg font-extrabold text-brand-dark tracking-tight leading-tight">趣旅行</div>
          <div class="text-[10px] font-bold text-brand-textSub tracking-widest uppercase">Admin Panel</div>
        </div>
@@ -88,14 +78,11 @@
       <a href="#" class="flex items-center gap-4 px-4 py-3 rounded-xl bg-brand-primary/10 text-brand-primary font-bold transition-all">
         <i class="fa-solid fa-map-location-dot text-lg w-5 text-center"></i> <span>景點資料庫</span>
       </a>
-      <a href="#" class="flex items-center gap-4 px-4 py-3 rounded-xl text-brand-textSub hover:bg-brand-bg hover:text-brand-primary font-bold transition-all opacity-50 cursor-not-allowed">
-        <i class="fa-solid fa-users text-lg w-5 text-center"></i> <span>用戶管理</span>
-      </a>
     </div>
 
     <div class="p-4 border-t border-brand-light/50">
       <a href="./discover.html" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-brand-bg text-brand-textMain font-bold hover:bg-brand-light/50 transition-all border border-brand-light mb-2">
-        <i class="fa-solid fa-arrow-right-from-bracket rotate-180"></i> 返回前台探索
+        <i class="fa-solid fa-arrow-right-from-bracket rotate-180"></i> 返回前台
       </a>
     </div>
   </aside>
@@ -106,45 +93,42 @@
     <!-- 頂部 Header -->
     <header class="h-20 bg-white px-8 shrink-0 flex items-center justify-between border-b border-brand-light shadow-sm z-10">
       <div class="flex items-center gap-4">
-        <button class="md:hidden text-brand-dark hover:text-brand-primary text-xl"><i class="fa-solid fa-bars"></i></button>
         <h2 class="text-xl font-extrabold text-brand-dark">公共景點管理</h2>
       </div>
       <div class="flex items-center gap-4">
          <span id="admin-user-name" class="text-sm font-bold text-brand-textSub hidden sm:block">載入中...</span>
-         <button onclick="window.adminLogout()" class="w-10 h-10 rounded-full bg-brand-bg border border-brand-light flex items-center justify-center text-brand-primary hover:bg-[#FFE5E5] hover:text-[#E63946] transition-colors shadow-sm" title="登出並返回">
+         <button onclick="window.adminLogout()" class="w-10 h-10 rounded-full bg-brand-bg border border-brand-light flex items-center justify-center text-brand-primary hover:bg-[#FFE5E5] hover:text-[#E63946] transition-colors shadow-sm">
             <i class="fa-solid fa-right-from-bracket"></i>
          </button>
       </div>
     </header>
 
-    <!-- 內容區：資料表格 -->
+    <!-- 資料表格 -->
     <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
        <div class="bg-white rounded-2xl shadow-sm border border-brand-light flex flex-col h-full max-h-[800px]">
-          <!-- 表格 Header 功能區 -->
           <div class="p-6 border-b border-brand-light/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
              <div class="relative w-full sm:w-72">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-brand-textSub"></i>
-                <input type="text" id="search-input" placeholder="搜尋景點名稱..." class="w-full bg-brand-bg rounded-xl py-2.5 pl-11 pr-4 outline-none focus:ring-2 focus:ring-brand-primary/30 transition-all text-sm font-bold text-brand-dark border border-transparent focus:border-brand-primary/50">
+                <input type="text" id="search-input" placeholder="搜尋景點名稱..." class="w-full bg-brand-bg rounded-xl py-2.5 pl-11 pr-4 outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-bold text-brand-dark border border-transparent">
              </div>
-             <button onclick="window.openSpotModal()" class="w-full sm:w-auto px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md shadow-brand-primary/30 hover:bg-brand-dark active:scale-95 transition-all flex items-center justify-center gap-2">
+             <button onclick="window.openSpotModal()" class="w-full sm:w-auto px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
                 <i class="fa-solid fa-plus"></i> 新增景點
              </button>
           </div>
 
-          <!-- 表格主體 -->
           <div class="flex-1 overflow-auto hide-scrollbar">
              <table class="w-full text-left border-collapse">
-                <thead class="bg-brand-bg/50 sticky top-0 z-10">
+                <thead class="bg-brand-bg/50 sticky top-0 z-10 font-bold text-xs text-brand-textSub uppercase">
                    <tr>
-                      <th class="px-6 py-4 text-xs font-bold text-brand-textSub uppercase tracking-wider border-b border-brand-light">類別/封面</th>
-                      <th class="px-6 py-4 text-xs font-bold text-brand-textSub uppercase tracking-wider border-b border-brand-light">景點名稱</th>
-                      <th class="px-6 py-4 text-xs font-bold text-brand-textSub uppercase tracking-wider border-b border-brand-light">地址</th>
-                      <th class="px-6 py-4 text-xs font-bold text-brand-textSub uppercase tracking-wider border-b border-brand-light hidden md:table-cell">座標 (Lat, Lng)</th>
-                      <th class="px-6 py-4 text-xs font-bold text-brand-textSub uppercase tracking-wider border-b border-brand-light text-right">操作</th>
+                      <th class="px-6 py-4 border-b border-brand-light">類別</th>
+                      <th class="px-6 py-4 border-b border-brand-light">景點名稱</th>
+                      <th class="px-6 py-4 border-b border-brand-light">地址</th>
+                      <th class="px-6 py-4 border-b border-brand-light hidden md:table-cell">座標</th>
+                      <th class="px-6 py-4 border-b border-brand-light text-right">操作</th>
                    </tr>
                 </thead>
                 <tbody id="table-body" class="divide-y divide-brand-light/50">
-                   <tr><td colspan="5" class="px-6 py-12 text-center text-brand-textSub font-bold"><i class="fa-solid fa-spinner fa-spin mr-2"></i> 驗證權限中...</td></tr>
+                   <tr><td colspan="5" class="px-6 py-12 text-center text-brand-textSub font-bold">載入中...</td></tr>
                 </tbody>
              </table>
           </div>
@@ -152,573 +136,273 @@
     </div>
   </main>
 
-  <!-- ================= 滿版景點編輯/新增 Modal (Full Screen) ================= -->
+  <!-- ================= 滿版編輯 Modal ================= -->
   <div id="spot-modal" class="fixed inset-0 z-[5000] hidden bg-white flex-col transform transition-transform translate-y-full duration-300 opacity-0 overflow-hidden">
-     
-     <!-- Modal Header -->
-     <div class="px-6 h-[72px] border-b border-brand-light/80 flex justify-between items-center bg-white shrink-0 shadow-sm z-20 relative">
+     <div class="px-6 h-[72px] border-b border-brand-light/80 flex justify-between items-center bg-white shrink-0 z-20 relative">
         <div class="flex items-center gap-4">
-           <button onclick="window.closeSpotModal()" class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-textMain hover:bg-brand-light hover:text-brand-dark transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
-           <h3 id="modal-title" class="text-xl font-extrabold text-brand-dark">新增景點</h3>
+           <button onclick="window.closeSpotModal()" class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-textMain hover:bg-brand-light transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
+           <h3 id="modal-title" class="text-xl font-extrabold text-brand-dark tracking-tight">新增景點</h3>
         </div>
-        <button id="btn-save-spot" onclick="window.saveSpot()" class="px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md shadow-brand-primary/30 hover:bg-brand-dark active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center gap-2">
-           <i class="fa-solid fa-floppy-disk"></i> <span class="hidden sm:inline">儲存景點資料</span><span class="sm:hidden">儲存</span>
+        <button id="btn-save-spot" onclick="window.saveSpot()" class="px-6 py-2.5 bg-brand-primary text-white font-bold rounded-xl shadow-md hover:bg-brand-dark active:scale-95 transition-all flex items-center gap-2">
+           <i class="fa-solid fa-floppy-disk"></i> 儲存景點
         </button>
      </div>
      
-     <!-- Modal Body (左側表單與右側滿版地圖) -->
      <div class="flex-1 overflow-hidden flex flex-col md:flex-row bg-white relative">
-        
-        <!-- 左側：詳細表單 (固定寬度或佔 1/3) -->
-        <div class="w-full md:w-[450px] lg:w-[500px] flex flex-col border-b md:border-b-0 md:border-r border-brand-light shrink-0 z-10 bg-white">
+        <!-- 左側表單 -->
+        <div class="w-full md:w-[480px] flex flex-col border-b md:border-b-0 md:border-r border-brand-light shrink-0 z-10 bg-white">
            <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-5">
                <input type="hidden" id="form-id">
-
-               <!-- 新增：景點封面照上傳區 -->
-               <div>
-                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點封面照 (選填)</label>
-                  <div class="relative w-full h-44 bg-[#F8FAFC] border-2 border-dashed border-brand-light/80 rounded-2xl flex flex-col items-center justify-center text-brand-textSub hover:bg-brand-light/30 hover:border-brand-primary/50 transition-all cursor-pointer overflow-hidden group" onclick="document.getElementById('form-image-input').click()">
-                     
-                     <!-- 預覽圖 -->
-                     <img id="form-image-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden z-10" />
-                     <!-- 變更提示遮罩 (已有圖片時 Hover 顯示) -->
-                     <div id="form-image-overlay" class="absolute inset-0 bg-black/50 text-white flex-col items-center justify-center z-20 hidden opacity-0 group-hover:opacity-100 transition-opacity">
-                         <i class="fa-solid fa-camera rotate-12 text-2xl mb-1"></i>
-                         <span class="text-xs font-bold">點擊更換圖片</span>
-                     </div>
-
-                     <!-- 預設圖示 -->
-                     <div id="form-image-placeholder" class="flex flex-col items-center justify-center relative z-0">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2 text-brand-textSub group-hover:text-brand-primary transition-colors"></i>
-                        <span class="text-sm font-bold text-brand-dark group-hover:text-brand-primary transition-colors">點擊上傳圖片</span>
-                        <span class="text-[11px] font-bold mt-1 opacity-60">支援 JPG, PNG (建議橫式，最大 5MB)</span>
-                     </div>
-                     <input type="file" id="form-image-input" accept="image/*" class="hidden" onchange="window.previewImage(event)">
+               
+               <!-- 圖片上傳區 -->
+               <div class="space-y-2">
+                  <label class="block text-xs font-bold text-brand-textSub pl-1">景點封面圖片</label>
+                  <div id="image-preview" class="w-full h-40 bg-brand-bg border-2 border-dashed border-brand-light rounded-2xl overflow-hidden flex flex-col items-center justify-center relative group cursor-pointer" onclick="document.getElementById('form-image').click()">
+                      <img id="preview-img" src="" class="hidden w-full h-full object-cover">
+                      <div id="preview-placeholder" class="flex flex-col items-center text-brand-textSub gap-2 group-hover:text-brand-primary transition-colors">
+                          <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+                          <span class="text-xs font-bold">點擊上傳照片</span>
+                      </div>
+                      <input type="file" id="form-image" class="hidden" accept="image/*" onchange="window.handleImageSelect(event)">
                   </div>
-                  <!-- 隱藏欄位儲存既有的 Firebase Storage URL -->
-                  <input type="hidden" id="form-existing-image-url">
                </div>
 
                <div>
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點中文名稱 <span class="text-[#E63946]">*</span></label>
-                  <input type="text" id="form-name" placeholder="輸入景點/地標中文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                  <input type="text" id="form-name" placeholder="輸入名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:bg-white transition-all">
                </div>
 
-               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+               <div class="grid grid-cols-2 gap-3">
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 1 (選填)</label>
-                     <input type="text" id="form-foreign1" placeholder="如日文/英文" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文 1</label>
+                     <input type="text" id="form-foreign1" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none">
                   </div>
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文名稱 2 (選填)</label>
-                     <input type="text" id="form-foreign2" placeholder="其他外文名稱" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">外文 2</label>
+                     <input type="text" id="form-foreign2" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none">
                   </div>
                </div>
 
                <div>
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">分類 <span class="text-[#E63946]">*</span></label>
-                  <select id="form-mode" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all appearance-none cursor-pointer">
-                     <!-- JS 動態填入 -->
-                  </select>
+                  <select id="form-mode" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none appearance-none cursor-pointer"></select>
                </div>
 
                <div>
                   <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">地址 <span class="text-[#E63946]">*</span></label>
-                  <input type="text" id="form-address" placeholder="輸入完整地址" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                  <input type="text" id="form-address" placeholder="輸入詳細地址" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:bg-white transition-all">
                </div>
 
                <div>
-                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點介紹 (選填)</label>
-                  <textarea id="form-description" placeholder="輸入景點的詳細介紹或特色..." rows="4" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all resize-none"></textarea>
+                  <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">景點介紹</label>
+                  <textarea id="form-description" rows="4" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none resize-none focus:bg-white transition-all"></textarea>
                </div>
 
-               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+               <div class="grid grid-cols-2 gap-3">
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">網址 (選填)</label>
-                     <input type="url" id="form-website" placeholder="https://" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">網址</label>
+                     <input type="url" id="form-website" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none">
                   </div>
                   <div>
-                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">電話 (選填)</label>
-                     <input type="tel" id="form-phone" placeholder="輸入聯絡電話" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none focus:border-brand-primary/50 focus:bg-white transition-all">
+                     <label class="block text-xs font-bold text-brand-textSub mb-1.5 pl-1">電話</label>
+                     <input type="tel" id="form-phone" class="w-full bg-[#F8FAFC] border border-brand-light/80 rounded-xl px-4 py-3 text-sm font-bold text-brand-dark outline-none">
                   </div>
                </div>
            </div>
            
-           <!-- 左側底部：座標開放手動輸入 -->
-           <div class="p-6 bg-brand-bg/50 border-t border-brand-light shrink-0 z-10">
+           <div class="p-6 bg-brand-bg/50 border-t border-brand-light shrink-0">
                <div class="grid grid-cols-2 gap-3">
                   <div>
                      <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Latitude</label>
-                     <input type="number" id="form-lat" step="any" placeholder="例: 25.0339" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none focus:border-brand-primary/50 transition-all">
+                     <input type="number" id="form-lat" step="any" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none">
                   </div>
                   <div>
                      <label class="block text-[10px] font-bold text-brand-textSub mb-1 pl-1 uppercase tracking-wider">Longitude</label>
-                     <input type="number" id="form-lng" step="any" placeholder="例: 121.5644" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 shadow-sm rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none focus:border-brand-primary/50 transition-all">
+                     <input type="number" id="form-lng" step="any" onchange="window.handleManualCoordChange()" class="w-full bg-white border border-brand-light/50 rounded-lg px-3 py-2 text-xs font-mono text-brand-dark outline-none">
                   </div>
                </div>
            </div>
         </div>
 
-        <!-- 右側：滿版地圖選點器 -->
-        <div class="flex-1 h-[400px] md:h-full bg-brand-light relative flex flex-col shrink-0 z-0">
-           <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-lg text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-2 z-[400]">
-              <i class="fa-solid fa-wand-magic-sparkles text-brand-primary"></i> 在地圖上點擊或左下方手動輸入精準座標
-           </div>
-           <div id="admin-map" class="flex-1 w-full h-full relative z-0"></div>
+        <!-- 右側滿版地圖 -->
+        <div class="flex-1 h-full bg-brand-light relative z-0">
+           <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg text-brand-dark text-xs font-bold py-2 px-4 rounded-full z-[400] border border-brand-light">在地圖上點擊可精確定位</div>
+           <div id="admin-map" class="w-full h-full"></div>
         </div>
      </div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  
-  <!-- Firebase / 邏輯 -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-    import { getAuth, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
     import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js';
 
-    // Firebase Init
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
-      apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
-      authDomain: "travel-96009.firebaseapp.com", 
-      projectId: "travel-96009", 
-      storageBucket: "travel-96009.firebasestorage.app", 
-      messagingSenderId: "578860064042", 
-      appId: "1:578860064042:web:b147880df3a01dd8f75253" 
-    };
-    const app = initializeApp(firebaseConfig); 
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app); 
-    const storage = getStorage(app); // 實作 Storage 模組
+    const db = getFirestore(app);
+    const storage = getStorage(app);
     const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
-
-    // 🔒 授權信箱
     const ADMIN_EMAIL = 'a0909921988@gmail.com';
 
-    const LOCATION_MODES = [
-      { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
-      { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
-      { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
-      { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
-      { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
-      { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
-      { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
-      { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
-      { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
-    ];
+    let adminSpots = [], adminMap = null, pickerMarker = null, isAdmin = false, selectedFile = null;
 
-    // State
-    let adminSpots = [];
-    let adminMap = null;
-    let pickerMarker = null;
-    let isAdmin = false;
+    const LOCATION_MODES = [{ id:'spot', label:'景點', icon:'fa-solid fa-camera' },{ id:'food', label:'美食', icon:'fa-solid fa-utensils' },{ id:'shop', label:'購物', icon:'fa-solid fa-bag-shopping' },{ id:'hotel', label:'住宿', icon:'fa-solid fa-hotel' },{ id:'park', label:'樂園', icon:'fa-solid fa-wand-magic-sparkles' },{ id:'car_rental', label:'租車站', icon:'fa-solid fa-key' },{ id:'station', label:'車站', icon:'fa-solid fa-train' },{ id:'airport', label:'機場', icon:'fa-solid fa-plane-arrival' },{ id:'other', label:'其他', icon:'fa-solid fa-location-dot' }];
 
-    // Toast Function
-    window.showToast = function(msg) {
-      const el = document.getElementById('toast');
-      document.getElementById('toast-msg').innerText = msg;
-      el.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
-      el.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
-        el.classList.remove('opacity-100', 'translate-y-0');
-        el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
-      }, 3000);
-    }
+    window.showToast = (msg) => { const el = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; el.classList.remove('opacity-0'); el.classList.add('opacity-100'); setTimeout(() => el.classList.add('opacity-0'), 3000); };
 
-    // 初始化下拉選單
-    function initSelect() {
-        const select = document.getElementById('form-mode');
-        select.innerHTML = '';
-        LOCATION_MODES.forEach(mode => {
-            select.add(new Option(`${mode.label}`, mode.id));
-        });
-    }
-
-    // 登入驗證機制
     onAuthStateChanged(auth, user => {
-        const nameEl = document.getElementById('admin-user-name');
-        const loginOverlay = document.getElementById('admin-login-overlay');
-        const errorMsg = document.getElementById('login-error-msg');
-
         if (user && user.email === ADMIN_EMAIL) {
             isAdmin = true;
-            nameEl.innerText = user.displayName || "超級管理員";
-            loginOverlay.classList.add('hidden');
-            initSelect();
-            loadSpots();
+            document.getElementById('admin-user-name').innerText = user.displayName || user.email;
+            document.getElementById('admin-login-overlay').classList.add('hidden');
+            initSelect(); loadSpots();
         } else {
             isAdmin = false;
-            nameEl.innerText = "未授權";
-            loginOverlay.classList.remove('hidden');
-            document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-[#E63946] font-bold">拒絕存取：無權限讀取</td></tr>`;
-            
-            if (user && !user.isAnonymous && user.email !== ADMIN_EMAIL) {
-               errorMsg.innerText = `目前帳號 (${user.email}) 無權限進入後台。`;
-               errorMsg.classList.remove('hidden');
-               signOut(auth);
-            } else {
-               errorMsg.classList.add('hidden');
-            }
+            document.getElementById('admin-login-overlay').classList.remove('hidden');
+            if (user) signOut(auth);
         }
     });
 
-    window.adminLogin = function() {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider).catch(err => {
-            window.showToast("登入失敗：" + err.message);
-        });
-    };
+    function initSelect() { const s = document.getElementById('form-mode'); s.innerHTML = ''; LOCATION_MODES.forEach(m => s.add(new Option(m.label, m.id))); }
 
-    window.adminLogout = function() {
-        signOut(auth).then(() => {
-            window.location.href = './discover.html';
-        });
-    };
-
-    // 載入資料
     function loadSpots() {
-      if (!isAdmin) return;
-      const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-      onSnapshot(qSpots, (snapshot) => {
-        adminSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderTable();
-      }, err => {
-        console.error(err);
-        window.showToast("載入資料失敗，請確認權限");
-      });
+        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), s => {
+            adminSpots = s.docs.map(d => ({id:d.id, ...d.data()}));
+            renderTable();
+        });
     }
 
-    // 渲染表格
-    function renderTable(filter = '') {
-      const tbody = document.getElementById('table-body');
-      let spots = adminSpots;
-      
-      if (filter) {
-          const kw = filter.toLowerCase();
-          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw));
-      }
-
-      if (spots.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-brand-textSub font-bold"><i class="fa-solid fa-box-open text-2xl mb-2"></i><br>目前沒有資料</td></tr>`;
-          return;
-      }
-
-      const sorted = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-      tbody.innerHTML = sorted.map(spot => {
-          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
-          const hasCoords = spot.lat && spot.lng;
-          const coordsStr = hasCoords ? `${parseFloat(spot.lat).toFixed(4)}, ${parseFloat(spot.lng).toFixed(4)}` : '<span class="text-brand-accent italic">未設定</span>';
-          const displayAddress = spot.address || spot.subtitle || '-';
-          
-          // 如果有圖片網址，顯示縮圖；沒有則顯示圖示
-          const iconOrImgHtml = spot.imageUrl 
-              ? `<img src="${spot.imageUrl}" class="w-10 h-10 rounded-[10px] object-cover border border-brand-light/80 shadow-sm" alt="cover" />`
-              : `<div class="w-10 h-10 rounded-[10px] bg-brand-primary/10 text-brand-primary flex items-center justify-center border border-brand-primary/10 shadow-sm"><i class="${locObj.icon} text-sm"></i></div>`;
-
-          return `
-          <tr class="hover:bg-brand-bg/50 transition-colors group">
-             <td class="px-6 py-3 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                   ${iconOrImgHtml}
-                   <span class="text-[13px] font-bold text-brand-textSub px-2 py-0.5 rounded-md bg-brand-light/50 border border-brand-light">${locObj.label}</span>
-                </div>
-             </td>
-             <td class="px-6 py-3">
-                <div class="text-[15px] font-extrabold text-brand-dark">${spot.name}</div>
-             </td>
-             <td class="px-6 py-3">
-                <div class="text-sm font-medium text-brand-textSub max-w-[200px] truncate">${displayAddress}</div>
-             </td>
-             <td class="px-6 py-3 hidden md:table-cell">
-                <div class="text-[11px] font-mono font-bold text-brand-textSub bg-brand-light/40 inline-block px-2.5 py-1 rounded-md border border-brand-light/50">${coordsStr}</div>
-             </td>
-             <td class="px-6 py-3 text-right whitespace-nowrap">
-                <button onclick="window.openSpotModal('${spot.id}')" class="w-8 h-8 rounded-lg bg-brand-bg text-brand-primary hover:bg-brand-primary hover:text-white transition-all shadow-sm mr-1">
-                   <i class="fa-solid fa-pen text-xs"></i>
-                </button>
-                <button onclick="window.deleteSpot('${spot.id}')" class="w-8 h-8 rounded-lg bg-[#FFE5E5] text-[#E63946] hover:bg-[#E63946] hover:text-white transition-all shadow-sm">
-                   <i class="fa-solid fa-trash-can text-xs"></i>
-                </button>
-             </td>
-          </tr>
-          `;
-      }).join('');
+    function renderTable(f = '') {
+        const tbody = document.getElementById('table-body');
+        const spots = f ? adminSpots.filter(s => s.name?.includes(f)) : adminSpots;
+        tbody.innerHTML = spots.sort((a,b)=>b.createdAt-a.createdAt).map(s => `
+          <tr class="hover:bg-brand-bg/30"><td class="px-6 py-4 font-bold text-xs text-brand-primary uppercase">${(LOCATION_MODES.find(m=>m.id===s.locMode)||{}).label}</td><td class="px-6 py-4 font-extrabold">${s.name}</td><td class="px-6 py-4 text-sm text-brand-textSub truncate max-w-[200px]">${s.address||'-'}</td><td class="px-6 py-4 text-xs font-mono">${s.lat?.toFixed(4)}, ${s.lng?.toFixed(4)}</td><td class="px-6 py-4 text-right"><button onclick="window.openSpotModal('${s.id}')" class="w-8 h-8 rounded-lg bg-brand-bg text-brand-primary mr-1"><i class="fa-solid fa-pen"></i></button><button onclick="window.deleteSpot('${s.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>
+        `).join('');
     }
 
-    document.getElementById('search-input').addEventListener('input', (e) => renderTable(e.target.value));
+    document.getElementById('search-input').oninput = e => renderTable(e.target.value);
 
-    // ========== 圖片上傳預覽邏輯 ==========
-    window.previewImage = function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            if(file.size > 5 * 1024 * 1024) {
-               window.showToast("圖片大小不能超過 5MB");
-               document.getElementById('form-image-input').value = '';
-               return;
-            }
-            const preview = document.getElementById('form-image-preview');
-            const placeholder = document.getElementById('form-image-placeholder');
-            const overlay = document.getElementById('form-image-overlay');
-            
-            preview.src = URL.createObjectURL(file);
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-            overlay.classList.add('flex');
-            overlay.classList.remove('hidden');
-        }
+    // ========== 圖片處理與上傳 ==========
+    window.handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (re) => {
+            document.getElementById('preview-img').src = re.target.result;
+            document.getElementById('preview-img').classList.remove('hidden');
+            document.getElementById('preview-placeholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
     };
 
-    // ========== 地圖與 Modal 邏輯 ==========
-    function initAdminMap() {
-        if(adminMap) return;
-        const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-            attribution: '&copy; Google', maxZoom: 20
-        });
-
-        adminMap = L.map('admin-map', { 
-            zoomControl: false, layers: [streetLayer]
-        }).setView([23.5, 121], 7); 
-        L.control.zoom({ position: 'topright' }).addTo(adminMap);
-
-        adminMap.on('click', function(e) {
-            updatePickerMarker(e.latlng.lat, e.latlng.lng);
-        });
-    }
-
-    function updatePickerMarker(lat, lng) {
-        document.getElementById('form-lat').value = lat;
-        document.getElementById('form-lng').value = lng;
-        
-        if (pickerMarker) {
-            pickerMarker.setLatLng([lat, lng]);
-        } else {
-            const customIcon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div class="marker-pin"><i class="fa-solid fa-location-dot"></i></div>`,
-                iconSize: [32, 32], iconAnchor: [16, 16]
-            });
-            pickerMarker = L.marker([lat, lng], { icon: customIcon }).addTo(adminMap);
-        }
-        adminMap.panTo([lat, lng]);
-    }
-
-    // 手動輸入經緯度連動地圖
-    window.handleManualCoordChange = function() {
+    // ========== 儲存邏輯 (完整欄位) ==========
+    window.saveSpot = async () => {
+        if (!isAdmin) return;
+        const id = document.getElementById('form-id').value;
+        const name = document.getElementById('form-name').value.trim();
         const lat = parseFloat(document.getElementById('form-lat').value);
         const lng = parseFloat(document.getElementById('form-lng').value);
-        
-        if (!isNaN(lat) && !isNaN(lng)) {
-            if (pickerMarker) {
-                pickerMarker.setLatLng([lat, lng]);
-            } else {
-                const customIcon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div class="marker-pin"><i class="fa-solid fa-location-dot"></i></div>`,
-                    iconSize: [32, 32], iconAnchor: [16, 16]
-                });
-                pickerMarker = L.marker([lat, lng], { icon: customIcon }).addTo(adminMap);
+        if (!name || isNaN(lat)) { window.showToast("名稱與座標為必填"); return; }
+
+        const btn = document.getElementById('btn-save-spot');
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 處理中...';
+
+        let imageUrl = document.getElementById('preview-img').src.startsWith('http') ? document.getElementById('preview-img').src : null;
+
+        try {
+            if (selectedFile) {
+                const storageRef = ref(storage, `artifacts/${appId}/spots/${Date.now()}_${selectedFile.name}`);
+                await uploadBytes(storageRef, selectedFile);
+                imageUrl = await getDownloadURL(storageRef);
             }
-            if(adminMap) {
-                adminMap.panTo([lat, lng]);
-                adminMap.setZoom(16);
-            }
-        }
+
+            const data = {
+                name, imageUrl, lat, lng,
+                foreignName1: document.getElementById('form-foreign1').value.trim(),
+                foreignName2: document.getElementById('form-foreign2').value.trim(),
+                locMode: document.getElementById('form-mode').value,
+                address: document.getElementById('form-address').value.trim(),
+                description: document.getElementById('form-description').value.trim(),
+                website: document.getElementById('form-website').value.trim(),
+                phone: document.getElementById('form-phone').value.trim(),
+            };
+
+            if (id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id), data);
+            else { data.createdAt = Date.now(); await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), data); }
+            
+            window.closeSpotModal(); window.showToast("儲存成功");
+        } catch (e) { console.error(e); window.showToast("失敗: " + e.message); }
+        finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存景點'; }
     };
 
-    window.openSpotModal = function(id = null) {
-        // 重置表單與圖片區塊
+    // ========== 地圖與其他邏輯 ==========
+    window.openSpotModal = (id = null) => {
         document.getElementById('form-id').value = id || '';
         document.getElementById('form-name').value = '';
         document.getElementById('form-foreign1').value = '';
         document.getElementById('form-foreign2').value = '';
-        document.getElementById('form-mode').value = 'spot';
         document.getElementById('form-address').value = '';
         document.getElementById('form-description').value = '';
         document.getElementById('form-website').value = '';
         document.getElementById('form-phone').value = '';
         document.getElementById('form-lat').value = '';
         document.getElementById('form-lng').value = '';
-        
-        // 重置圖片區
-        document.getElementById('form-image-input').value = '';
-        document.getElementById('form-existing-image-url').value = '';
-        const preview = document.getElementById('form-image-preview');
-        const placeholder = document.getElementById('form-image-placeholder');
-        const overlay = document.getElementById('form-image-overlay');
-        preview.src = '';
-        preview.classList.add('hidden');
-        placeholder.classList.remove('hidden');
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-        
-        if(pickerMarker && adminMap) {
-            adminMap.removeLayer(pickerMarker);
-            pickerMarker = null;
-        }
-
-        document.getElementById('modal-title').innerText = id ? '編輯景點' : '新增景點';
+        document.getElementById('preview-img').src = '';
+        document.getElementById('preview-img').classList.add('hidden');
+        document.getElementById('preview-placeholder').classList.remove('hidden');
+        selectedFile = null;
 
         if (id) {
-            const spot = adminSpots.find(s => s.id === id);
-            if (spot) {
-                document.getElementById('form-name').value = spot.name || '';
-                document.getElementById('form-foreign1').value = spot.foreignName1 || '';
-                document.getElementById('form-foreign2').value = spot.foreignName2 || '';
-                document.getElementById('form-mode').value = spot.locMode || 'spot';
-                document.getElementById('form-address').value = spot.address || spot.subtitle || '';
-                document.getElementById('form-description').value = spot.description || '';
-                document.getElementById('form-website').value = spot.website || '';
-                document.getElementById('form-phone').value = spot.phone || '';
-
-                // 若有舊圖片，進行預覽顯示
-                if (spot.imageUrl) {
-                    document.getElementById('form-existing-image-url').value = spot.imageUrl;
-                    preview.src = spot.imageUrl;
-                    preview.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                    overlay.classList.add('flex');
-                    overlay.classList.remove('hidden');
+            const s = adminSpots.find(sp => sp.id === id);
+            if (s) {
+                document.getElementById('form-name').value = s.name;
+                document.getElementById('form-foreign1').value = s.foreignName1 || '';
+                document.getElementById('form-foreign2').value = s.foreignName2 || '';
+                document.getElementById('form-mode').value = s.locMode || 'spot';
+                document.getElementById('form-address').value = s.address || '';
+                document.getElementById('form-description').value = s.description || '';
+                document.getElementById('form-website').value = s.website || '';
+                document.getElementById('form-phone').value = s.phone || '';
+                document.getElementById('form-lat').value = s.lat || '';
+                document.getElementById('form-lng').value = s.lng || '';
+                if (s.imageUrl) {
+                    document.getElementById('preview-img').src = s.imageUrl;
+                    document.getElementById('preview-img').classList.remove('hidden');
+                    document.getElementById('preview-placeholder').classList.add('hidden');
                 }
-
-                if(spot.lat && spot.lng) {
-                    setTimeout(() => {
-                        updatePickerMarker(spot.lat, spot.lng);
-                        if(adminMap) adminMap.setZoom(15);
-                    }, 200);
-                }
+                setTimeout(() => updatePickerMarker(s.lat, s.lng), 200);
             }
-        } else {
-             setTimeout(() => { if(adminMap) adminMap.setView([23.5, 121], 7); }, 200);
         }
 
-        // 滿版進場動畫
-        const modal = document.getElementById('spot-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
-        setTimeout(() => {
-            modal.classList.remove('translate-y-full', 'opacity-0');
-            modal.classList.add('translate-y-0', 'opacity-100');
-            
-            if(!adminMap) initAdminMap();
-            adminMap.invalidateSize();
-        }, 10);
+        const m = document.getElementById('spot-modal');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        setTimeout(() => { m.classList.remove('translate-y-full', 'opacity-0'); m.classList.add('translate-y-0', 'opacity-100'); if(!adminMap) initAdminMap(); adminMap.invalidateSize(); }, 10);
     };
 
-    window.closeSpotModal = function() {
-        const modal = document.getElementById('spot-modal');
-        modal.classList.remove('translate-y-0', 'opacity-100');
-        modal.classList.add('translate-y-full', 'opacity-0');
-        
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }, 300);
-    };
+    window.closeSpotModal = () => { const m = document.getElementById('spot-modal'); m.classList.add('translate-y-full', 'opacity-0'); setTimeout(()=>m.classList.add('hidden'), 300); };
 
-    // ========== CRUD 操作 (整合圖片上傳) ==========
-    window.saveSpot = async function() {
-        if (!isAdmin) return;
-        
-        const saveBtn = document.getElementById('btn-save-spot');
-        const id = document.getElementById('form-id').value;
-        const name = document.getElementById('form-name').value.trim();
-        const foreignName1 = document.getElementById('form-foreign1').value.trim();
-        const foreignName2 = document.getElementById('form-foreign2').value.trim();
-        const mode = document.getElementById('form-mode').value;
-        const address = document.getElementById('form-address').value.trim();
-        const description = document.getElementById('form-description').value.trim();
-        const website = document.getElementById('form-website').value.trim();
-        const phone = document.getElementById('form-phone').value.trim();
-
-        const lat = parseFloat(document.getElementById('form-lat').value);
-        const lng = parseFloat(document.getElementById('form-lng').value);
-
-        if(!name) { window.showToast("景點中文名稱為必填"); return; }
-        if(!address) { window.showToast("地址為必填"); return; }
-        if(isNaN(lat) || isNaN(lng)) { window.showToast("請輸入或取得精確地圖座標"); return; }
-
-        // 準備圖片資料
-        const fileInput = document.getElementById('form-image-input');
-        const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
-        let finalImageUrl = document.getElementById('form-existing-image-url').value;
-
-        // 鎖定按鈕與呈現載入狀態
-        const originalBtnHTML = saveBtn.innerHTML;
-        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span class="hidden sm:inline">資料處理中...</span><span class="sm:hidden">處理中</span>`;
-        saveBtn.disabled = true;
-
-        try {
-            // 如果有選取新圖片，先上傳至 Firebase Storage
-            if (file) {
-                // 將圖片命名為：時間戳記_原始檔名，以防覆蓋
-                const safeFileName = encodeURIComponent(file.name);
-                const storageRef = ref(storage, `artifacts/${appId}/public/data/spots/${Date.now()}_${safeFileName}`);
-                const uploadTask = await uploadBytesResumable(storageRef, file);
-                finalImageUrl = await getDownloadURL(uploadTask.ref);
-            }
-
-            const spotData = {
-                name: name,
-                foreignName1: foreignName1,
-                foreignName2: foreignName2,
-                locMode: mode,
-                address: address,
-                description: description,
-                website: website,
-                phone: phone,
-                lat: lat,
-                lng: lng,
-                imageUrl: finalImageUrl || null // 將圖片網址寫入資料庫
-            };
-
-            if (id) {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id), spotData);
-            } else {
-                spotData.createdAt = Date.now();
-                spotData.creatorId = auth.currentUser ? auth.currentUser.uid : 'admin';
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'spots'), spotData);
-            }
-            window.closeSpotModal();
-            window.showToast("雲端儲存成功");
-        } catch(e) {
-            console.error(e);
-            window.showToast("寫入失敗，請確認 Firebase 權限規則或網路狀態");
-        } finally {
-            // 恢復按鈕狀態
-            saveBtn.innerHTML = originalBtnHTML;
-            saveBtn.disabled = false;
-        }
-    };
-
-    window.deleteSpot = async function(id) {
-        if (!isAdmin) return;
-        if(!confirm("確定要刪除此景點嗎？刪除後前台也將無法搜尋到。")) return;
-
-        // 備註：實務上可以連同 Storage 裡的圖片一起刪除，此處先單純刪除文檔避免誤刪公用圖檔。
-        try {
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id));
-            window.showToast("雲端刪除成功");
-        } catch(e) {
-            console.error(e);
-            window.showToast("刪除失敗，請確認 Firebase 權限規則");
-        }
-    };
-
-    async function startApp() {
-        try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            }
-        } catch (e) {
-            console.log('Auth Init Fallback', e);
-        }
+    function initAdminMap() {
+        adminMap = L.map('admin-map', { zoomControl: false }).setView([23.5, 121], 7);
+        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { attribution: '&copy; Google' }).addTo(adminMap);
+        adminMap.on('click', e => updatePickerMarker(e.latlng.lat, e.latlng.lng));
     }
 
-    startApp();
+    function updatePickerMarker(lat, lng) {
+        if (!lat) return;
+        document.getElementById('form-lat').value = lat; document.getElementById('form-lng').value = lng;
+        if (pickerMarker) pickerMarker.setLatLng([lat, lng]);
+        else pickerMarker = L.marker([lat, lng], { icon: L.divIcon({ className:'custom-marker', html:'<div class="marker-pin"><i class="fa-solid fa-location-dot"></i></div>', iconSize:[32,32] }) }).addTo(adminMap);
+        adminMap.panTo([lat, lng]);
+    }
+
+    window.handleManualCoordChange = () => updatePickerMarker(parseFloat(document.getElementById('form-lat').value), parseFloat(document.getElementById('form-lng').value));
+    window.adminLogin = () => signInWithPopup(auth, new GoogleAuthProvider());
+    window.adminLogout = () => signOut(auth).then(()=>window.location.reload());
+    window.deleteSpot = async (id) => { if(confirm("確刪?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spots', id)); };
   </script>
 </body>
 </html>
