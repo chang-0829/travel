@@ -6,9 +6,7 @@
 
 <!-- === 新增：防破圖路由守衛 === -->
 <script>
-    // 檢查是否為直接存取 (URL 中沒有 #，且路徑結尾是 account.html)
     if (!window.location.hash && window.location.pathname.endsWith('account.html')) {
-        // 立刻將使用者重新導向至正確的 SPA 路由
         window.location.replace('/#account');
     }
 </script>
@@ -23,9 +21,17 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 狀態 A：未登入畫面 (預設隱藏，由 Firebase 決定是否顯示) -->
+    <!-- 狀態 0：載入中畫面 (新增：填補 Firebase 驗證的時間差) -->
     <!-- ========================================== -->
-    <div id="unauth-view" class="hidden">
+    <div id="auth-loading" class="flex flex-col items-center justify-center py-16">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-4"></div>
+        <p class="text-gray-500 font-medium">正在讀取您的旅人狀態...</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 狀態 A：未登入畫面 (預設隱藏) -->
+    <!-- ========================================== -->
+    <div id="unauth-view" class="hidden animate-fade-in">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center sm:p-12">
             <div class="mx-auto w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
                 <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +42,6 @@
             <p class="text-gray-500 mb-8 max-w-md mx-auto">登入旅圖製造所，解鎖無限收藏、跨裝置同步行程，並與好友共同編輯計畫。</p>
             
             <div class="space-y-4 max-w-sm mx-auto">
-                <!-- Google 登入按鈕 -->
                 <button id="btn-login-google" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                     <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -51,20 +56,18 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 狀態 B：已登入畫面 (預設隱藏，由 Firebase 決定是否顯示) -->
+    <!-- 狀態 B：已登入畫面 (預設隱藏) -->
     <!-- ========================================== -->
-    <div id="auth-view" class="hidden space-y-6">
+    <div id="auth-view" class="hidden space-y-6 animate-fade-in">
         
         <!-- 個人資訊卡片 -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <!-- 頭像 -->
             <div class="relative">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center shrink-0">
                     <img id="user-avatar" src="" alt="頭像" class="w-full h-full object-cover">
                 </div>
             </div>
             
-            <!-- 資訊與數據 -->
             <div class="flex-1 text-center sm:text-left">
                 <h2 id="user-name" class="text-2xl font-bold text-gray-900">載入中...</h2>
                 <p id="user-email" class="text-sm text-gray-500 mt-1">讀取中...</p>
@@ -124,23 +127,18 @@
 </div>
 
 <!-- ========================================== -->
-<!-- Firebase 整合程式碼 (正式版) -->
+<!-- Firebase 整合程式碼 -->
 <!-- ========================================== -->
 <script type="module">
-    // ⚠️ 修正重點：import 語法必須放在 module 腳本的最頂層，不能被 if 區塊包圍
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    // 引入 getApps 與 getApp 來安全地檢查 Firebase 是否已初始化
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // 只有在非直接存取的情況下，才執行 Firebase 初始化和渲染 UI
     if (window.location.hash || !window.location.pathname.endsWith('account.html')) {
         
-        // 顯示內容區塊
         const contentDiv = document.getElementById('account-page-content');
-        if (contentDiv) {
-            contentDiv.style.display = 'block';
-        }
+        if (contentDiv) contentDiv.style.display = 'block';
 
-        // 使用您專案真實的 Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
             authDomain: "travel-96009.firebaseapp.com",
@@ -150,18 +148,13 @@
             appId: "1:578860064042:web:b147880df3a01dd8f75253"
         };
 
-        // 初始化 Firebase
-        let app;
-        try {
-            app = initializeApp(firebaseConfig);
-        } catch (e) {
-            console.warn("Firebase 已初始化過，沿用現有實例。");
-        }
-        
-        const auth = getAuth();
+        // 💡 優化：檢查 Firebase 是否已經被初始化過，避免切換頁面時重複報錯
+        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
         // 綁定 DOM
+        const loadingView = document.getElementById('auth-loading');
         const unauthView = document.getElementById('unauth-view');
         const authView = document.getElementById('auth-view');
         const btnLoginGoogle = document.getElementById('btn-login-google');
@@ -173,6 +166,9 @@
 
         // 登入狀態監聽
         onAuthStateChanged(auth, (user) => {
+            // 💡 關鍵：Firebase 檢查完畢後，立刻隱藏「載入中」畫面
+            if (loadingView) loadingView.classList.add('hidden');
+
             if (user) {
                 unauthView.classList.add('hidden');
                 authView.classList.remove('hidden');
@@ -208,6 +204,10 @@
         if (btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 if(confirm('確定要登出嗎？')) {
+                    // 登出時重新顯示載入畫面，優化體驗
+                    authView.classList.add('hidden');
+                    if (loadingView) loadingView.classList.remove('hidden');
+                    
                     try {
                         await signOut(auth);
                     } catch (error) {
