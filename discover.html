@@ -226,6 +226,7 @@
         let allSpots = [];
         let userFavorites = new Set();
         let markersLayer = null;
+        let publicSpotsLoaded = false;
 
         // --- 1. Firebase 驗證與資料拉取 ---
         const initAuth = async () => {
@@ -233,16 +234,27 @@
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    await signInAnonymously(auth);
+                    // 修正：補捉匿名登入失敗錯誤 (避免專案後台未開啟匿名登入時報 400 錯誤)
+                    await signInAnonymously(auth).catch(err => {
+                        console.warn("提示：匿名登入未啟用，目前以訪客身分瀏覽地圖。若需使用收藏，請先至旅人檔案登入。");
+                    });
                 }
-            } catch (error) { console.error("Firebase Auth Error:", error); }
+            } catch (error) { 
+                console.warn("Firebase Auth Init Warning:", error.message); 
+            }
         };
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            if (user) {
+            
+            // 修正：不論是否登入，都預設載入公開景點，確保訪客能看到地圖
+            if (!publicSpotsLoaded) {
                 loadPublicSpots();
+                publicSpotsLoaded = true;
+            }
+
+            if (user) {
                 loadUserFavorites();
             }
         });
@@ -256,7 +268,7 @@
                     allSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderMapMarkers();
                 }
-            }, (error) => console.error("Error loading spots:", error));
+            }, (error) => console.warn("載入景點資料受限 (通常為訪客無權限):", error.message));
         }
 
         function loadUserFavorites() {
@@ -275,8 +287,14 @@
                 { name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
             ];
             const spotsRef = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-            for (const spot of defaultSpots) {
-                await setDoc(doc(spotsRef), spot);
+            try {
+                for (const spot of defaultSpots) {
+                    await setDoc(doc(spotsRef), spot);
+                }
+            } catch (e) {
+                // 訪客可能沒有權限寫入，只用本地變數顯示
+                allSpots = defaultSpots.map((spot, index) => ({ id: 'default_' + index, ...spot }));
+                renderMapMarkers();
             }
         }
 
@@ -353,7 +371,7 @@
             });
         }
 
-        // --- 4. 面板互動與收藏邏輯 (還原舊版行為) ---
+        // --- 4. 面板互動與收藏邏輯 ---
         window.openSpotDetail = function(spot) {
             window.currentOpenSpotId = spot.id;
 
@@ -363,7 +381,7 @@
             document.getElementById('spot-detail-rating').textContent = spot.rating || '4.0';
             document.getElementById('spot-detail-img').src = spot.img || 'https://via.placeholder.com/800x600';
 
-            // 舊版導航邏輯：有座標用座標，沒有則用地址
+            // 導航邏輯
             const navBtn = document.getElementById('circle-nav-btn');
             if (spot.lat && spot.lng) {
                 navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
@@ -384,7 +402,7 @@
             const favBtn = document.getElementById('btn-favorite-spot');
             favBtn.onclick = () => window.toggleFavorite(spot.id);
 
-            // 展開面板 (移除舊版的隱藏 class，加上強制顯示的 class)
+            // 展開面板
             const panel = document.getElementById('spot-detail-panel');
             panel.classList.remove('translate-y-full', 'md:translate-x-full');
             panel.classList.add('!translate-y-0', '!translate-x-0');
@@ -398,7 +416,11 @@
         };
 
         window.toggleFavorite = async function(spotId) {
-            if (!currentUser) return;
+            // 新增：如果未登入，給予友善提示，避免無法寫入資料庫
+            if (!currentUser) {
+                alert("請先前往「旅人檔案」登入帳號，即可使用收藏功能！");
+                return;
+            }
             
             const favDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
             try {
