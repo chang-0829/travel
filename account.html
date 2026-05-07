@@ -1,4 +1,20 @@
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+<!-- ========================================== -->
+<!-- 旅人檔案 (account.html) - 動態載入內容 -->
+<!-- ⚠️ 注意：這份檔案不需要 html, head, body 標籤 -->
+<!-- ⚠️ Tailwind CSS 由 index.html 統一載入 -->
+<!-- ========================================== -->
+
+<!-- === 新增：防破圖路由守衛 === -->
+<script>
+    // 檢查是否為直接存取 (URL 中沒有 #，且路徑結尾是 account.html)
+    if (!window.location.hash && window.location.pathname.endsWith('account.html')) {
+        // 立刻將使用者重新導向至正確的 SPA 路由
+        window.location.replace('/#account');
+    }
+</script>
+<!-- ======================= -->
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in" style="display: none;" id="account-page-content">
     
     <!-- 頁面標題 -->
     <div class="mb-8">
@@ -111,85 +127,91 @@
 <!-- Firebase 整合程式碼 (正式版) -->
 <!-- ========================================== -->
 <script type="module">
-    // 載入 Firebase 核心與 Auth 模組
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    // 只有在非直接存取的情況下，才執行 Firebase 初始化和渲染 UI
+    if (window.location.hash || !window.location.pathname.endsWith('account.html')) {
+        // 顯示內容區塊
+        document.getElementById('account-page-content').style.display = 'block';
 
-    // 使用您專案真實的 Firebase 設定
-    const firebaseConfig = {
-        apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
-        authDomain: "travel-96009.firebaseapp.com",
-        projectId: "travel-96009",
-        storageBucket: "travel-96009.firebasestorage.app",
-        messagingSenderId: "578860064042",
-        appId: "1:578860064042:web:b147880df3a01dd8f75253"
-    };
+        // 載入 Firebase 核心與 Auth 模組
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // 初始化 Firebase
-    let app;
-    try {
-        app = initializeApp(firebaseConfig);
-    } catch (e) {
-        console.warn("Firebase 已初始化過，沿用現有實例。");
-    }
-    
-    const auth = getAuth();
-    const provider = new GoogleAuthProvider();
+        // 使用您專案真實的 Firebase 設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
+            authDomain: "travel-96009.firebaseapp.com",
+            projectId: "travel-96009",
+            storageBucket: "travel-96009.firebasestorage.app",
+            messagingSenderId: "578860064042",
+            appId: "1:578860064042:web:b147880df3a01dd8f75253"
+        };
 
-    // 綁定 DOM
-    const unauthView = document.getElementById('unauth-view');
-    const authView = document.getElementById('auth-view');
-    const btnLoginGoogle = document.getElementById('btn-login-google');
-    const btnLogout = document.getElementById('btn-logout');
-    
-    const userNameEl = document.getElementById('user-name');
-    const userEmailEl = document.getElementById('user-email');
-    const userAvatarEl = document.getElementById('user-avatar');
-
-    // 登入狀態監聽
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            unauthView.classList.add('hidden');
-            authView.classList.remove('hidden');
-            
-            userNameEl.textContent = user.displayName || '旅人';
-            userEmailEl.textContent = user.email || '無提供 Email';
-            userAvatarEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=0D8ABC&color=fff&size=128`;
-        } else {
-            unauthView.classList.remove('hidden');
-            authView.classList.add('hidden');
+        // 初始化 Firebase
+        let app;
+        try {
+            app = initializeApp(firebaseConfig);
+        } catch (e) {
+            console.warn("Firebase 已初始化過，沿用現有實例。");
         }
-    });
+        
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
 
-    // 點擊：Google 登入
-    if (btnLoginGoogle) {
-        btnLoginGoogle.addEventListener('click', async () => {
-            const originalText = btnLoginGoogle.innerHTML;
-            btnLoginGoogle.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 登入中...';
-            btnLoginGoogle.disabled = true;
+        // 綁定 DOM
+        const unauthView = document.getElementById('unauth-view');
+        const authView = document.getElementById('auth-view');
+        const btnLoginGoogle = document.getElementById('btn-login-google');
+        const btnLogout = document.getElementById('btn-logout');
+        
+        const userNameEl = document.getElementById('user-name');
+        const userEmailEl = document.getElementById('user-email');
+        const userAvatarEl = document.getElementById('user-avatar');
 
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Firebase 登入失敗:", error);
-                alert("登入失敗: " + error.message);
-                btnLoginGoogle.innerHTML = originalText;
-                btnLoginGoogle.disabled = false;
+        // 登入狀態監聽
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                unauthView.classList.add('hidden');
+                authView.classList.remove('hidden');
+                
+                userNameEl.textContent = user.displayName || '旅人';
+                userEmailEl.textContent = user.email || '無提供 Email';
+                userAvatarEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=0D8ABC&color=fff&size=128`;
+            } else {
+                unauthView.classList.remove('hidden');
+                authView.classList.add('hidden');
             }
         });
-    }
 
-    // 點擊：登出
-    if (btnLogout) {
-        btnLogout.addEventListener('click', async () => {
-            if(confirm('確定要登出嗎？')) {
+        // 點擊：Google 登入
+        if (btnLoginGoogle) {
+            btnLoginGoogle.addEventListener('click', async () => {
+                const originalText = btnLoginGoogle.innerHTML;
+                btnLoginGoogle.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 登入中...';
+                btnLoginGoogle.disabled = true;
+
                 try {
-                    await signOut(auth);
+                    await signInWithPopup(auth, provider);
                 } catch (error) {
-                    console.error("Firebase 登出失敗:", error);
-                    alert("登出失敗: " + error.message);
+                    console.error("Firebase 登入失敗:", error);
+                    alert("登入失敗: " + error.message);
+                    btnLoginGoogle.innerHTML = originalText;
+                    btnLoginGoogle.disabled = false;
                 }
-            }
-        });
+            });
+        }
+
+        // 點擊：登出
+        if (btnLogout) {
+            btnLogout.addEventListener('click', async () => {
+                if(confirm('確定要登出嗎？')) {
+                    try {
+                        await signOut(auth);
+                    } catch (error) {
+                        console.error("Firebase 登出失敗:", error);
+                        alert("登出失敗: " + error.message);
+                    }
+                }
+            });
+        }
     }
 </script>
