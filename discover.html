@@ -1,72 +1,62 @@
 <!-- ========================================== -->
-<!-- 尋覓世界 (discover.html) - 動態載入內容 -->
-<!-- ⚠️ 注意：這份檔案不需要 html, head, body 標籤 -->
+<!-- 尋覓世界 (discover.html) - 動態載入純地圖元件 -->
+<!-- ⚠️ 完美還原舊版介面、支援 Firebase 與離線備用資料 -->
 <!-- ========================================== -->
 
-<div id="discover-page-root" class="h-full relative w-full overflow-hidden bg-brand-bg animate-fade-in">
+<!-- 載入外部資源 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<style>
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    <!-- === 防破圖路由守衛 === -->
-    <script>
-        if (!window.location.hash && window.location.pathname.endsWith('discover.html')) {
-            window.location.replace('/#discover');
-        }
-    </script>
+    /* 修正 Leaflet 層級 */
+    .leaflet-container { z-index: 10; font-family: inherit; }
+    .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    
+    /* 舊版：自訂地圖圖示 */
+    .custom-marker-wrapper {
+        display: flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; background-color: white; border-radius: 50%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+        border: 2px solid #748CAB; 
+        color: #748CAB;
+        transition: transform 0.2s, background-color 0.2s, color 0.2s;
+    }
+    .custom-marker-wrapper:hover { 
+        transform: scale(1.1); 
+        background-color: #748CAB; 
+        color: white; 
+    }
 
-    <!-- === 載入外部資源 === -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+</style>
 
-    <style>
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* 修正 Leaflet 層級 */
-        .leaflet-container { z-index: 10; font-family: inherit; }
-        .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        
-        /* 舊版：自訂地圖圖示 */
-        .custom-marker-wrapper {
-            display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; background-color: white; border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-            border: 2px solid #748CAB; 
-            color: #748CAB;
-            transition: transform 0.2s, background-color 0.2s, color 0.2s;
-        }
-        .custom-marker-wrapper:hover { 
-            transform: scale(1.1); 
-            background-color: #748CAB; 
-            color: white; 
-        }
-
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
-
-    <!-- ========================================== -->
-    <!-- 探索地圖 (Google圖磚 + Firebase) -->
-    <!-- ========================================== -->
+<!-- 💡 使用 absolute inset-0 確保完美填滿 index.html 的 main 區塊 -->
+<div id="discover-page-root" class="absolute inset-0 w-full h-full overflow-hidden bg-[#F2F5F8] animate-fade-in">
     
     <!-- 地圖容器 -->
-    <div id="full-screen-map" class="w-full h-[calc(100vh-80px)] md:h-full z-0 absolute inset-0"></div>
+    <div id="discover-map" class="absolute inset-0 w-full h-full z-0"></div>
 
-    <!-- 舊版：懸浮搜尋與篩選 -->
+    <!-- 舊版：懸浮搜尋與篩選 (覆蓋於地圖上方) -->
     <div class="absolute top-4 left-4 right-4 z-[999] md:w-96 md:left-6 md:top-6 pointer-events-none">
         <div class="bg-white rounded-2xl shadow-lg flex items-center p-2 mb-3 pointer-events-auto">
-            <div class="pl-3 pr-2 text-gray-400"><i class="fas fa-search"></i></div>
-            <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-gray-700 w-full placeholder-gray-400">
-            <button class="w-10 h-10 rounded-xl bg-gray-100 text-[#748CAB] flex items-center justify-center ml-2 hover:bg-gray-200 transition-colors"><i class="fas fa-sliders-h"></i></button>
+            <div class="pl-3 pr-2 text-[#8796A5]"><i class="fas fa-search"></i></div>
+            <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-[#2C3E50] w-full placeholder-[#8796A5]">
+            <button class="w-10 h-10 rounded-xl bg-[#F2F5F8] text-[#748CAB] flex items-center justify-center ml-2 hover:bg-[#E6EBEF] transition-colors"><i class="fas fa-sliders-h"></i></button>
         </div>
-        <!-- 快速篩選 (舊版配色) -->
+        <!-- 快速篩選 -->
         <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 px-1 pointer-events-auto">
             <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-[#748CAB] text-white shadow-md transition-colors"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"><i class="fas fa-utensils mr-1"></i> 美食</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"><i class="fas fa-mountain mr-1"></i> 自然</button>
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] transition-colors"><i class="fas fa-utensils mr-1"></i> 美食</button>
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] transition-colors"><i class="fas fa-mountain mr-1"></i> 自然</button>
         </div>
     </div>
 
@@ -89,37 +79,37 @@
         <!-- 內容區與操作 -->
         <div class="flex-1 overflow-y-auto relative bg-white pb-20 md:pb-0">
             
-            <!-- 舊版精髓：懸浮圓形收藏按鈕 (FAB) -->
+            <!-- 懸浮圓形收藏按鈕 (FAB) -->
             <button id="btn-favorite-spot" class="absolute right-5 -top-6 w-12 h-12 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-300 text-xl z-10 hover:scale-110 transition-transform">
                 <i id="fav-icon-inner" class="fas fa-heart"></i>
             </button>
 
             <div class="p-5 md:p-6 pb-2">
-                <h2 id="spot-detail-title" class="text-2xl font-bold text-gray-800 mb-1">載入中...</h2>
-                <div class="flex items-center text-sm text-gray-500 mb-4">
+                <h2 id="spot-detail-title" class="text-2xl font-bold text-[#2C3E50] mb-1">載入中...</h2>
+                <div class="flex items-center text-sm text-[#8796A5] mb-4">
                     <span class="text-yellow-400 mr-1"><i class="fas fa-star"></i></span>
                     <span id="spot-detail-rating" class="font-medium mr-2">4.5</span>
                 </div>
 
-                <!-- 舊版精髓：行動按鈕 -->
-                <div class="flex justify-around py-4 border-y border-gray-100 mb-5">
+                <!-- 行動按鈕 -->
+                <div class="flex justify-around py-4 border-y border-[#E6EBEF] mb-5">
                     <a id="circle-nav-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
+                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
                             <i class="fas fa-location-arrow"></i>
                         </div>
-                        <span class="text-[11px] font-medium text-gray-500">導航</span>
+                        <span class="text-[11px] font-medium text-[#8796A5]">導航</span>
                     </a>
                     <a id="circle-web-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
+                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
                             <i class="fas fa-globe"></i>
                         </div>
-                        <span class="text-[11px] font-medium text-gray-500">網站</span>
+                        <span class="text-[11px] font-medium text-[#8796A5]">網站</span>
                     </a>
                     <a id="circle-phone-btn" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
+                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <span class="text-[11px] font-medium text-gray-500">電話</span>
+                        <span class="text-[11px] font-medium text-[#8796A5]">電話</span>
                     </a>
                 </div>
 
@@ -127,18 +117,18 @@
                 <div class="space-y-4 pb-12">
                     <div class="flex items-start">
                         <i class="fas fa-map-marker-alt w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <p id="spot-detail-address" class="ml-3 text-sm text-gray-700 leading-relaxed"></p>
+                        <p id="spot-detail-address" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
                     </div>
                     <div class="flex items-start">
                         <i class="fas fa-info-circle w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <p id="spot-detail-desc" class="ml-3 text-sm text-gray-700 leading-relaxed"></p>
+                        <p id="spot-detail-desc" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- === Firebase & 頁面邏輯模組 === -->
+    <!-- === 核心邏輯與 Firebase === -->
     <script type="module">
         import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -163,40 +153,72 @@
         let allSpots = [];
         let userFavorites = new Set();
         let markersLayer = null;
-        let mapInitialized = false;
+        let mapInstance = null;
 
-        // --- 1. Firebase 驗證與資料拉取 ---
+        // ----------------------------------------------------
+        // 1. 初始化 Leaflet 地圖 (取消高度限制，強制渲染)
+        // ----------------------------------------------------
+        function initLeafletMap() {
+            const checkL = setInterval(() => {
+                if (typeof L !== 'undefined') {
+                    const mapEl = document.getElementById('discover-map');
+                    if (!mapEl || mapEl._leaflet_id) return;
+                    clearInterval(checkL);
+
+                    mapInstance = L.map('discover-map', { zoomControl: false }).setView([23.5, 121], 6);
+
+                    // Google Maps 圖磚
+                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                        attribution: '&copy; Google Maps'
+                    }).addTo(mapInstance);
+
+                    L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+                    markersLayer = L.layerGroup().addTo(mapInstance);
+
+                    if (allSpots.length > 0) renderMapMarkers();
+                    
+                    // 確保在 SPA 切換後，地圖能重新計算尺寸，解決灰屏問題
+                    setTimeout(() => mapInstance.invalidateSize(), 100);
+                    setTimeout(() => mapInstance.invalidateSize(), 500);
+                }
+            }, 100);
+        }
+        initLeafletMap();
+
+        // ----------------------------------------------------
+        // 2. Firebase 驗證與錯誤攔截
+        // ----------------------------------------------------
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth).catch(err => {
-                        console.warn("提示：匿名登入受限，切換為訪客模式。");
+                        console.warn("匿名登入失敗，切換為離線訪客模式。");
                     });
                 }
             } catch (error) { 
-                console.warn("Firebase Auth Init Warning:", error.message); 
+                console.warn("Auth Init Error:", error.message); 
             }
         };
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            
-            // 每次狀態改變都確保嘗試讀取資料
-            loadPublicSpots();
-
-            if (user) {
-                loadUserFavorites();
-            }
+            loadPublicSpots(); // 不論是否登入都載入資料
+            if (user) loadUserFavorites();
         });
 
+        // ----------------------------------------------------
+        // 3. 讀取地圖資料 (支援備用離線資料)
+        // ----------------------------------------------------
         function useLocalDefaultSpots() {
             allSpots = [
-                { id: 'default_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
-                { id: 'default_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
-                { id: 'default_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
+                { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
+                { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
+                { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
             ];
             renderMapMarkers();
         }
@@ -205,9 +227,10 @@
             const isLocalEnv = typeof __firebase_config === 'undefined';
             const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
 
+            // 💡 加上 error callback，避免 Firebase 權限阻擋時整個網頁壞掉
             onSnapshot(spotsCollection, (snapshot) => {
                 if (snapshot.empty && allSpots.length === 0) {
-                    seedDefaultSpots();
+                    useLocalDefaultSpots();
                 } else {
                     allSpots = snapshot.docs.map(doc => {
                         const data = doc.data();
@@ -224,12 +247,11 @@
                             website: data.website || ''
                         };
                     });
-                    
                     allSpots = allSpots.filter(s => s.lat && s.lng);
                     renderMapMarkers();
                 }
             }, (error) => {
-                console.warn("載入雲端資料受限，改用預設離線資料:", error.message);
+                console.warn("Firebase 讀取受阻，啟用本地備用景點資料：", error.message);
                 useLocalDefaultSpots();
             });
         }
@@ -244,75 +266,11 @@
             onSnapshot(favRef, (snapshot) => {
                 userFavorites = new Set(snapshot.docs.map(doc => doc.id));
                 if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
-            }, (error) => console.warn("讀取收藏資料受限:", error.message));
+            }, (error) => console.warn("收藏讀取受阻：", error.message));
         }
-
-        async function seedDefaultSpots() {
-            const defaultSpots = [
-                { name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
-                { name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
-                { name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
-            ];
-            
-            const isLocalEnv = typeof __firebase_config === 'undefined';
-            const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-            
-            try {
-                for (const spot of defaultSpots) {
-                    await setDoc(doc(spotsCollection), spot);
-                }
-            } catch (e) {
-                console.warn("寫入預設資料失敗，直接顯示離線資料");
-                useLocalDefaultSpots();
-            }
-        }
-
-        // --- 2. Leaflet 地圖初始化 (Google Maps 圖磚) ---
-        function initLeafletMap() {
-            if (mapInitialized) return;
-            
-            const checkL = setInterval(() => {
-                if (typeof L !== 'undefined') {
-                    const mapEl = document.getElementById('full-screen-map');
-                    // 確保元素存在，即使高度為0 (例如剛載入SPA時) 也先綁定
-                    if (!mapEl) return; 
-
-                    clearInterval(checkL);
-                    if (mapEl._leaflet_id) return;
-
-                    const map = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
-                    window.fullMapInstance = map;
-                    mapInitialized = true;
-
-                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-                        maxZoom: 20,
-                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                        attribution: '&copy; Google Maps'
-                    }).addTo(map);
-
-                    L.control.zoom({ position: 'bottomright' }).addTo(map);
-                    markersLayer = L.layerGroup().addTo(map);
-
-                    if (allSpots.length > 0) renderMapMarkers();
-                    
-                    // 利用 MutationObserver 監聽容器顯示狀態，顯示時強制重繪
-                    const observer = new MutationObserver(() => {
-                        if (mapEl.clientHeight > 0) {
-                            map.invalidateSize();
-                        }
-                    });
-                    observer.observe(document.body, { childList: true, subtree: true });
-                    
-                    setTimeout(() => map.invalidateSize(), 500);
-                }
-            }, 100);
-        }
-
-        // 頁面載入就立即初始化地圖
-        initLeafletMap();
 
         function renderMapMarkers() {
-            if (!window.fullMapInstance || !markersLayer) return;
+            if (!mapInstance || !markersLayer) return;
             markersLayer.clearLayers();
 
             allSpots.forEach(spot => {
@@ -324,7 +282,9 @@
             });
         }
 
-        // --- 3. 面板互動與收藏邏輯 ---
+        // ----------------------------------------------------
+        // 4. 面板互動與 UI 邏輯
+        // ----------------------------------------------------
         window.openSpotDetail = function(spot) {
             window.currentOpenSpotId = spot.id;
 
@@ -368,7 +328,7 @@
 
         window.toggleFavorite = async function(spotId) {
             if (!currentUser) {
-                alert("請先登入帳號，即可使用收藏功能！");
+                alert("請先前往「旅人檔案」登入帳號，即可使用收藏功能！");
                 return;
             }
             
