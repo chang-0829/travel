@@ -1,263 +1,237 @@
-<!-- ========================================== -->
-<!-- 旅人檔案 (account.html) - 動態載入內容 -->
-<!-- 注意：此檔案由 index.html 動態載入，不需 html/body/head 等標籤 -->
-<!-- ========================================== -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>旅人檔案 - 旅圖製造所</title>
+    <!-- 使用 Tailwind CSS 加速排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f9fafb;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-    
-    <!-- 頁面標題 -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">旅人檔案</h1>
-        <p class="mt-2 text-sm text-gray-500">管理您的個人資訊、行程紀錄與偏好設定。</p>
-    </div>
-
-    <!-- 
-        以下區分「未登入」與「已登入」兩種狀態的 UI 區塊。
-        實際串接 Firebase 時，可透過 JavaScript 控制這兩個區塊的顯示 (hidden class) 
-    -->
-
-    <!-- ========================================== -->
-    <!-- 狀態 A：未登入畫面 (預設顯示) -->
-    <!-- ========================================== -->
-    <div id="unauth-view" class="block">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center sm:p-12">
-            <div class="mx-auto w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-                <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-3">開啟您的專屬旅程</h2>
-            <p class="text-gray-500 mb-8 max-w-md mx-auto">登入旅圖製造所，解鎖無限收藏、跨裝置同步行程，並與好友共同編輯計畫。</p>
-            
-            <div class="space-y-4 max-w-sm mx-auto">
-                <!-- Google 登入按鈕 -->
-                <button id="btn-login-google" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    使用 Google 帳號登入
-                </button>
-                
-                <!-- Email 登入按鈕 (示意) -->
-                <button id="btn-login-email" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    使用 Email 登入
-                </button>
-            </div>
-            <p class="mt-6 text-xs text-gray-400">登入即表示您同意我們的<a href="#" class="text-blue-500 hover:underline">服務條款</a>與<a href="#" class="text-blue-500 hover:underline">隱私權政策</a>。</p>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 狀態 B：已登入畫面 (預設隱藏) -->
-    <!-- ========================================== -->
-    <div id="auth-view" class="hidden space-y-6">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
         
-        <!-- 個人資訊卡片 -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <!-- 頭像 -->
-            <div class="relative">
-                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center shrink-0">
-                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=128" alt="頭像" class="w-full h-full object-cover">
+        <!-- 頁面標題 -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">旅人檔案</h1>
+            <p class="mt-2 text-sm text-gray-500">管理您的個人資訊、行程紀錄與偏好設定。</p>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 狀態 A：未登入畫面 (預設隱藏，由 Firebase 決定是否顯示) -->
+        <!-- ========================================== -->
+        <div id="unauth-view" class="hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center sm:p-12">
+                <div class="mx-auto w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
                 </div>
-                <button class="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-gray-100 text-gray-500 hover:text-blue-600 transition-colors" title="更換頭像">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">開啟您的專屬旅程</h2>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">登入旅圖製造所，解鎖無限收藏、跨裝置同步行程，並與好友共同編輯計畫。</p>
+                
+                <div class="space-y-4 max-w-sm mx-auto">
+                    <!-- Google 登入按鈕 -->
+                    <button id="btn-login-google" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        使用 Google 帳號登入
+                    </button>
+                    
+                    <!-- Email 登入按鈕 -->
+                    <button id="btn-login-email" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        使用 Email 登入
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 狀態 B：已登入畫面 (預設隱藏，由 Firebase 決定是否顯示) -->
+        <!-- ========================================== -->
+        <div id="auth-view" class="hidden space-y-6">
             
-            <!-- 資訊與數據 -->
-            <div class="flex-1 text-center sm:text-left">
-                <h2 id="user-name" class="text-2xl font-bold text-gray-900">載入中...</h2>
-                <p id="user-email" class="text-sm text-gray-500 mt-1">loading@example.com</p>
+            <!-- 個人資訊卡片 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <!-- 頭像 -->
+                <div class="relative">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center shrink-0">
+                        <img id="user-avatar" src="" alt="頭像" class="w-full h-full object-cover">
+                    </div>
+                </div>
                 
-                <div class="mt-4 flex items-center justify-center sm:justify-start gap-6">
-                    <div class="text-center">
-                        <span class="block text-2xl font-bold text-blue-600">3</span>
-                        <span class="text-xs text-gray-500 font-medium tracking-wide uppercase">我的行程</span>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div class="text-center">
-                        <span class="block text-2xl font-bold text-blue-600">12</span>
-                        <span class="text-xs text-gray-500 font-medium tracking-wide uppercase">收藏景點</span>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div class="text-center">
-                        <span class="block text-2xl font-bold text-blue-600">1</span>
-                        <span class="text-xs text-gray-500 font-medium tracking-wide uppercase">旅程徽章</span>
+                <!-- 資訊與數據 -->
+                <div class="flex-1 text-center sm:text-left">
+                    <h2 id="user-name" class="text-2xl font-bold text-gray-900">載入中...</h2>
+                    <p id="user-email" class="text-sm text-gray-500 mt-1">讀取中...</p>
+                    
+                    <div class="mt-4 flex items-center justify-center sm:justify-start gap-6">
+                        <div class="text-center">
+                            <span class="block text-2xl font-bold text-blue-600">0</span>
+                            <span class="text-xs text-gray-500 font-medium tracking-wide uppercase">我的行程</span>
+                        </div>
+                        <div class="w-px h-8 bg-gray-200"></div>
+                        <div class="text-center">
+                            <span class="block text-2xl font-bold text-blue-600">0</span>
+                            <span class="text-xs text-gray-500 font-medium tracking-wide uppercase">收藏景點</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 編輯按鈕 -->
-            <div class="sm:self-start">
-                <button class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    編輯檔案
+            <!-- 下方選單列表 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <ul class="divide-y divide-gray-100">
+                    <li>
+                        <a href="#mytrip" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <p class="text-sm font-medium text-gray-900">行程工坊</p>
+                                <p class="text-xs text-gray-500">查看與編輯您規劃中的旅程</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
+                            <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-100 transition-colors shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <p class="text-sm font-medium text-gray-900">帳號設定</p>
+                                <p class="text-xs text-gray-500">密碼、通知偏好與隱私設定</p>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 登出按鈕 -->
+            <div class="pt-4">
+                <button id="btn-logout" class="w-full flex items-center justify-center px-4 py-3 border border-red-200 text-base font-medium rounded-xl text-red-600 bg-white hover:bg-red-50 focus:outline-none transition-colors shadow-sm">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    登出帳號
                 </button>
             </div>
-        </div>
 
-        <!-- 下方選單列表 -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <ul class="divide-y divide-gray-100">
-                <!-- 選單項目 1 -->
-                <li>
-                    <a href="#mytrip" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <p class="text-sm font-medium text-gray-900">行程工坊</p>
-                            <p class="text-xs text-gray-500">查看與編輯您規劃中的旅程</p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                </li>
-                
-                <!-- 選單項目 2 -->
-                <li>
-                    <a href="#" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-100 transition-colors shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <p class="text-sm font-medium text-gray-900">我的收藏</p>
-                            <p class="text-xs text-gray-500">已儲存的景點、餐廳與住宿</p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                </li>
-
-                <!-- 選單項目 3 -->
-                <li>
-                    <a href="#" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
-                        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-100 transition-colors shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <p class="text-sm font-medium text-gray-900">帳號設定</p>
-                            <p class="text-xs text-gray-500">密碼、通知偏好與隱私設定</p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- 登出按鈕 -->
-        <div class="pt-4">
-            <button id="btn-logout" class="w-full flex items-center justify-center px-4 py-3 border border-red-200 text-base font-medium rounded-xl text-red-600 bg-white hover:bg-red-50 focus:outline-none transition-colors shadow-sm">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                登出帳號
-            </button>
         </div>
 
     </div>
 
-</div>
+    <!-- ========================================== -->
+    <!-- 真正的 Firebase 整合程式碼 (正式版) -->
+    <!-- ========================================== -->
+    <script type="module">
+        // 載入 Firebase 核心與 Auth 模組 (CDN 版本)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-<!-- 
-    頁面專屬的腳本 
-    注意：因為是由 index.html 動態載入，這些腳本會在載入時被執行。
-    為了避免重複綁定事件或污染全域變數，建議使用 IIFE (立即執行函式) 包覆。
--->
-<script>
-    (function() {
-        // --- UI 元素 ---
+        // 🚨 這裡請務必替換為您專案的真實 Firebase 設定 🚨
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 初始化 Firebase (加入 try-catch 避免在 SPA 架構中切換頁面時重複初始化報錯)
+        let app;
+        try {
+            app = initializeApp(firebaseConfig);
+        } catch (e) {
+            console.warn("Firebase 已初始化過，沿用現有實例。");
+        }
+        
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+
+        // --- DOM 元素綁定 ---
         const unauthView = document.getElementById('unauth-view');
         const authView = document.getElementById('auth-view');
         const btnLoginGoogle = document.getElementById('btn-login-google');
-        const btnLoginEmail = document.getElementById('btn-login-email');
         const btnLogout = document.getElementById('btn-logout');
         
         const userNameEl = document.getElementById('user-name');
         const userEmailEl = document.getElementById('user-email');
         const userAvatarEl = document.getElementById('user-avatar');
 
-        // --- 狀態切換函數 (UI 展示用) ---
-        function showAuthView(user) {
-            unauthView.classList.add('hidden');
-            authView.classList.remove('hidden');
-            
-            // 填入假資料 (未來替換為 Firebase User 資料)
-            userNameEl.textContent = user.name || '旅人';
-            userEmailEl.textContent = user.email || '';
-            if (user.photoURL) {
-                userAvatarEl.src = user.photoURL;
-            }
-        }
-
-        function showUnauthView() {
-            unauthView.classList.remove('hidden');
-            authView.classList.add('hidden');
-        }
-
-        // --- 模擬登入流程 (供您檢視 UI 效果) ---
-        // 🚨 之後這裡要換成呼叫 Firebase 的 signInWithPopup 🚨
-        btnLoginGoogle.addEventListener('click', () => {
-            // 模擬載入狀態
-            const originalText = btnLoginGoogle.innerHTML;
-            btnLoginGoogle.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 登入中...';
-            btnLoginGoogle.disabled = true;
-
-            setTimeout(() => {
-                // 模擬登入成功，取得使用者資料
-                const mockUser = {
-                    name: '探險家小明',
-                    email: 'explorer@example.com',
-                    photoURL: 'https://ui-avatars.com/api/?name=明&background=0D8ABC&color=fff&size=128'
-                };
-                showAuthView(mockUser);
-                
-                // 恢復按鈕狀態
-                btnLoginGoogle.innerHTML = originalText;
-                btnLoginGoogle.disabled = false;
-            }, 800); // 假裝等了 0.8 秒
-        });
-
-        btnLoginEmail.addEventListener('click', () => {
-            alert('未來可在此處實作 Email 註冊/登入表單的彈出視窗。');
-        });
-
-        // 模擬登出流程
-        btnLogout.addEventListener('click', () => {
-            if(confirm('確定要登出嗎？')) {
-                showUnauthView();
-            }
-        });
-
-        /*
-        // 💡 未來串接 Firebase 的真實寫法範例：
-        // 假設您的 index.html 或全域腳本已經初始化了 firebase auth
-        
-        firebase.auth().onAuthStateChanged((user) => {
+        // --- Firebase 登入狀態監聽 ---
+        // 這是 Firebase 的核心，它會自動偵測使用者是否已經登入過
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                // 使用者已登入
-                showAuthView({
-                    name: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL
-                });
+                // [已經登入] -> 顯示會員資料
+                unauthView.classList.add('hidden');
+                authView.classList.remove('hidden');
+                
+                userNameEl.textContent = user.displayName || '旅人';
+                userEmailEl.textContent = user.email || '無提供 Email';
+                // 若使用者沒有設定大頭貼，給予預設圖
+                userAvatarEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=0D8ABC&color=fff&size=128`;
             } else {
-                // 使用者未登入
-                showUnauthView();
+                // [尚未登入 或 已登出] -> 顯示登入按鈕
+                unauthView.classList.remove('hidden');
+                authView.classList.add('hidden');
             }
         });
-        */
 
-    })();
-</script>
+        // --- 點擊：Google 登入 ---
+        if (btnLoginGoogle) {
+            btnLoginGoogle.addEventListener('click', async () => {
+                const originalText = btnLoginGoogle.innerHTML;
+                // 按下後顯示轉圈圈，防止重複點擊
+                btnLoginGoogle.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 登入中...';
+                btnLoginGoogle.disabled = true;
 
-<style>
-    /* 簡易的淡入動畫，讓切換頁面時更順暢 */
-    .animate-fade-in {
-        animation: fadeIn 0.4s ease-out forwards;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
+                try {
+                    // 呼叫 Firebase 原生彈出視窗登入
+                    await signInWithPopup(auth, provider);
+                    // 登入成功後，onAuthStateChanged 會自動接手處理畫面切換
+                } catch (error) {
+                    console.error("Firebase 登入失敗:", error);
+                    alert("登入失敗: " + error.message);
+                    // 若失敗，恢復原本的按鈕狀態
+                    btnLoginGoogle.innerHTML = originalText;
+                    btnLoginGoogle.disabled = false;
+                }
+            });
+        }
+
+        // --- 點擊：登出 ---
+        if (btnLogout) {
+            btnLogout.addEventListener('click', async () => {
+                if(confirm('確定要登出嗎？')) {
+                    try {
+                        await signOut(auth);
+                        // 登出成功後，onAuthStateChanged 會自動接手處理畫面切換
+                    } catch (error) {
+                        console.error("Firebase 登出失敗:", error);
+                        alert("登出失敗: " + error.message);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
