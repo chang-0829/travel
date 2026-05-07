@@ -172,7 +172,7 @@
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth).catch(err => {
-                        console.warn("提示：匿名登入未啟用，目前以訪客身分瀏覽地圖。");
+                        console.warn("提示：匿名登入受限，切換為訪客模式。");
                     });
                 }
             } catch (error) { 
@@ -184,12 +184,22 @@
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             
+            // 每次狀態改變都確保嘗試讀取資料
             loadPublicSpots();
 
             if (user) {
                 loadUserFavorites();
             }
         });
+
+        function useLocalDefaultSpots() {
+            allSpots = [
+                { id: 'default_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
+                { id: 'default_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
+                { id: 'default_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
+            ];
+            renderMapMarkers();
+        }
 
         function loadPublicSpots() {
             const isLocalEnv = typeof __firebase_config === 'undefined';
@@ -218,7 +228,10 @@
                     allSpots = allSpots.filter(s => s.lat && s.lng);
                     renderMapMarkers();
                 }
-            }, (error) => console.warn("載入景點資料失敗:", error.message));
+            }, (error) => {
+                console.warn("載入雲端資料受限，改用預設離線資料:", error.message);
+                useLocalDefaultSpots();
+            });
         }
 
         function loadUserFavorites() {
@@ -231,7 +244,7 @@
             onSnapshot(favRef, (snapshot) => {
                 userFavorites = new Set(snapshot.docs.map(doc => doc.id));
                 if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
-            }, (error) => console.error("Error loading favorites:", error));
+            }, (error) => console.warn("讀取收藏資料受限:", error.message));
         }
 
         async function seedDefaultSpots() {
@@ -249,8 +262,8 @@
                     await setDoc(doc(spotsCollection), spot);
                 }
             } catch (e) {
-                allSpots = defaultSpots.map((spot, index) => ({ id: 'default_' + index, ...spot }));
-                renderMapMarkers();
+                console.warn("寫入預設資料失敗，直接顯示離線資料");
+                useLocalDefaultSpots();
             }
         }
 
