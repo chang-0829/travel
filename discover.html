@@ -1,400 +1,449 @@
 <!-- ========================================== -->
-<!-- 尋覓世界 (discover.html) - 動態載入純地圖元件 -->
-<!-- ⚠️ 完美還原舊版介面、移除放大特效、徹底拔除定位 -->
+<!-- 尋覓世界 (discover.html) - 動態載入內容 -->
+<!-- ⚠️ 注意：這份檔案不需要 html, head, body 標籤 -->
+<!-- ⚠️ 完全還原舊版介面，並串接 Firebase 資料庫 -->
 <!-- ========================================== -->
 
-<!-- 載入外部資源 -->
+<!-- === 載入外部資源 === -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style>
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+    /* 舊版自訂字體 */
+    @font-face {
+        font-family: 'GenJyuuGothic';
+        src: url('https://cdn.jsdelivr.net/gh/tsengpenghsiang/genjyuugothic/GenJyuuGothic-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
     }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    /* 修正 Leaflet 層級 */
-    .leaflet-container { z-index: 10; font-family: inherit; }
-    .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    
-    /* 💡 修正：強制 Flex 置中，並移除醜陋的放大特效，改用優雅變色 */
-    .custom-marker-wrapper {
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important;
-        width: 36px !important; 
-        height: 36px !important; 
-        background-color: white !important; 
-        border-radius: 50% !important;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important; 
-        border: 2px solid #748CAB !important; 
-        color: #748CAB !important;
-        transition: background-color 0.2s, color 0.2s, box-shadow 0.2s !important;
-        cursor: pointer !important;
-    }
-    .custom-marker-wrapper:hover { 
-        background-color: #748CAB !important; 
-        color: white !important; 
-        box-shadow: 0 5px 12px rgba(0,0,0,0.3) !important;
-        /* 徹底移除了 transform: scale(1.1) */
+    @font-face {
+        font-family: 'GenJyuuGothic';
+        src: url('https://cdn.jsdelivr.net/gh/tsengpenghsiang/genjyuugothic/GenJyuuGothic-Bold.woff2') format('woff2');
+        font-weight: bold;
+        font-style: normal;
     }
 
+    #discover-page-root {
+        font-family: 'GenJyuuGothic', 'Microsoft JhengHei', sans-serif;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* 舊版：修正 Leaflet 預設樣式 */
+    .leaflet-container {
+        font-family: 'GenJyuuGothic', 'Microsoft JhengHei', sans-serif;
+    }
+    .leaflet-popup-content-wrapper {
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .leaflet-popup-content {
+        margin: 16px;
+    }
+
+    /* 舊版：自訂地圖圖示 */
+    .custom-marker-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background-color: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        border: 2px solid #748CAB; /* brand-primary */
+        color: #748CAB; /* brand-primary */
+        transition: transform 0.2s, background-color 0.2s, color 0.2s;
+    }
+    .custom-marker-wrapper:hover {
+        transform: scale(1.1);
+        background-color: #748CAB; /* brand-primary */
+        color: white;
+    }
+    
+    .custom-marker-wrapper.user-location {
+        border-color: #3E5C76; /* brand-dark */
+        color: #3E5C76;
+    }
+    .custom-marker-wrapper.user-location:hover {
+        background-color: #3E5C76;
+    }
+
+    /* 動畫 */
+    .animate-pulse-slow {
+        animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .7; transform: scale(1.05); }
+    }
+    
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 </style>
 
-<!-- 💡 使用 absolute inset-0 確保完美填滿 index.html 的 main 區塊 -->
-<div id="discover-page-root" class="absolute inset-0 w-full h-full overflow-hidden bg-[#F2F5F8] animate-fade-in">
+<div id="discover-page-root" class="h-full relative overflow-hidden bg-[#F2F5F8]"> <!-- bg-brand-bg -->
+
+    <!-- ========================================== -->
+    <!-- 探索地圖 -->
+    <!-- ========================================== -->
     
-    <!-- 完美的置中載入畫面 -->
-    <div id="map-loading-overlay" class="absolute inset-0 z-[2000] bg-[#F2F5F8] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#748CAB] mb-4"></div>
-        <p class="text-[#748CAB] font-medium tracking-wide">尋找世界秘境中...</p>
-    </div>
+    <!-- 滿版地圖容器 -->
+    <div id="full-screen-map" class="w-full h-full z-0"></div>
 
-    <!-- 優雅的浮動提示框 -->
-    <div id="custom-toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800/90 backdrop-blur-sm text-white px-6 py-3 rounded-full shadow-lg z-[3000] opacity-0 pointer-events-none transition-opacity duration-300 text-sm font-medium whitespace-nowrap">
-        提示訊息
+    <!-- 舊版：載入中遮罩 -->
+    <div id="loading-overlay" class="absolute inset-0 bg-[#F2F5F8] z-[2000] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-[#E6EBEF] border-t-[#748CAB] rounded-full animate-spin mb-4"></div>
+        <p class="text-[#748CAB] font-bold tracking-wider animate-pulse">正在載入地圖資料...</p>
     </div>
-
-    <!-- 地圖容器 -->
-    <div id="discover-map" class="absolute inset-0 w-full h-full z-0"></div>
 
     <!-- 舊版：懸浮搜尋與篩選 (覆蓋於地圖上方) -->
     <div class="absolute top-4 left-4 right-4 z-[999] md:w-96 md:left-6 md:top-6 pointer-events-none">
+        
+        <!-- 搜尋列 -->
         <div class="bg-white rounded-2xl shadow-lg flex items-center p-2 mb-3 pointer-events-auto">
-            <div class="pl-3 pr-2 text-[#8796A5]"><i class="fas fa-search"></i></div>
-            <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-[#2C3E50] w-full placeholder-[#8796A5]">
-            <button class="w-10 h-10 rounded-xl bg-[#F2F5F8] text-[#748CAB] flex items-center justify-center ml-2 hover:bg-[#E6EBEF] transition-colors"><i class="fas fa-sliders-h"></i></button>
+            <div class="pl-3 pr-2 text-[#8796A5]"> <!-- text-brand-textSub -->
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-[#2C3E50] w-full placeholder-[#8796A5]"> <!-- text-brand-textMain, placeholder-brand-textSub -->
+            <button class="w-10 h-10 rounded-xl bg-[#F2F5F8] text-[#748CAB] flex items-center justify-center ml-2 hover:bg-[#E6EBEF] transition-colors focus:outline-none"> <!-- bg-brand-bg, text-brand-primary, hover:bg-brand-light -->
+                <i class="fas fa-sliders-h"></i>
+            </button>
         </div>
+
         <!-- 快速篩選 -->
         <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 px-1 pointer-events-auto">
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-[#748CAB] text-white shadow-md transition-colors"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] transition-colors"><i class="fas fa-utensils mr-1"></i> 美食</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] transition-colors"><i class="fas fa-mountain mr-1"></i> 自然</button>
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-[#748CAB] text-white shadow-md focus:outline-none transition-colors"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button> <!-- bg-brand-primary -->
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-utensils mr-1"></i> 美食</button> <!-- text-brand-textMain, hover:bg-brand-bg -->
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-mountain mr-1"></i> 自然</button>
+            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-camera mr-1"></i> 景點</button>
         </div>
     </div>
 
     <!-- 舊版：側邊/底部景點詳細資訊面板 -->
+    <!-- 手機版 Bottom Sheet，電腦版 Right Panel -->
     <div id="spot-detail-panel" class="absolute inset-x-0 bottom-0 md:inset-y-0 md:right-0 md:left-auto md:w-[400px] bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl z-[1000] transform translate-y-full md:translate-y-0 md:translate-x-full transition-transform duration-300 flex flex-col rounded-t-3xl md:rounded-none h-[80%] md:h-full pb-safe">
         
         <!-- 手機版拖曳條 -->
         <div class="w-full flex justify-center py-3 md:hidden shrink-0 cursor-pointer" onclick="window.closeSpotDetail()">
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+            <div class="w-12 h-1.5 bg-[#E6EBEF] rounded-full"></div> <!-- bg-brand-light -->
         </div>
 
         <!-- 景點圖片 -->
-        <div class="relative h-48 md:h-64 shrink-0 w-full bg-gray-200">
+        <div class="relative h-48 md:h-64 shrink-0 w-full bg-[#E6EBEF]"> <!-- bg-brand-light -->
             <img id="spot-detail-img" src="" alt="景點預覽" class="w-full h-full object-cover">
-            <button onclick="window.closeSpotDetail()" class="hidden md:flex absolute top-4 right-4 w-8 h-8 bg-black/40 text-white rounded-full items-center justify-center hover:bg-black/60 transition-colors z-10">
+            
+            <!-- 電腦版關閉按鈕 -->
+            <button onclick="window.closeSpotDetail()" class="hidden md:flex absolute top-4 right-4 w-8 h-8 bg-black/40 text-white rounded-full items-center justify-center hover:bg-black/60 transition-colors z-10 focus:outline-none">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
         <!-- 內容區與操作 -->
-        <div class="flex-1 overflow-y-auto relative bg-white pb-20 md:pb-0">
+        <div class="flex-1 overflow-y-auto relative bg-white">
             
             <!-- 懸浮圓形收藏按鈕 (FAB) -->
-            <button id="btn-favorite-spot" class="absolute right-5 -top-6 w-12 h-12 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-300 text-xl z-10 hover:scale-110 transition-transform">
+            <button id="btn-favorite-spot" class="absolute right-5 -top-6 w-12 h-12 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-300 text-xl z-10 hover:scale-110 transition-transform focus:outline-none">
                 <i id="fav-icon-inner" class="fas fa-heart"></i>
             </button>
 
             <div class="p-5 md:p-6 pb-2">
-                <h2 id="spot-detail-title" class="text-2xl font-bold text-[#2C3E50] mb-1">載入中...</h2>
-                <div class="flex items-center text-sm text-[#8796A5] mb-4">
+                <!-- 標題與評價 -->
+                <h2 id="spot-detail-title" class="text-2xl font-bold text-[#2C3E50] mb-1">載入中...</h2> <!-- text-brand-textMain -->
+                <div class="flex items-center text-sm text-[#8796A5] mb-4"> <!-- text-brand-textSub -->
                     <span class="text-yellow-400 mr-1"><i class="fas fa-star"></i></span>
-                    <span id="spot-detail-rating" class="font-medium mr-2">4.5</span>
+                    <span id="spot-detail-rating" class="font-medium mr-2">4.0</span>
+                    <span class="text-xs">(128 則評論)</span>
                 </div>
 
                 <!-- 行動按鈕 -->
-                <div class="flex justify-around py-4 border-y border-[#E6EBEF] mb-5">
+                <div class="flex justify-around py-4 border-y border-[#E6EBEF] mb-5"> <!-- border-brand-light -->
+                    
                     <a id="circle-nav-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
+                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg"> <!-- bg-brand-light, text-brand-primary -->
                             <i class="fas fa-location-arrow"></i>
                         </div>
-                        <span class="text-[11px] font-medium text-[#8796A5]">導航</span>
+                        <span class="text-[11px] font-medium text-[#8796A5]">導航</span> <!-- text-brand-textSub -->
                     </a>
+                    
                     <a id="circle-web-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
                         <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
                             <i class="fas fa-globe"></i>
                         </div>
                         <span class="text-[11px] font-medium text-[#8796A5]">網站</span>
                     </a>
+
                     <a id="circle-phone-btn" class="flex flex-col items-center group cursor-pointer">
                         <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
                             <i class="fas fa-phone"></i>
                         </div>
                         <span class="text-[11px] font-medium text-[#8796A5]">電話</span>
                     </a>
+                    
+                    <div class="flex flex-col items-center group cursor-pointer">
+                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <span class="text-[11px] font-medium text-[#8796A5]">分享</span>
+                    </div>
+
                 </div>
 
                 <!-- 資訊列表 -->
                 <div class="space-y-4 pb-12">
                     <div class="flex items-start">
-                        <i class="fas fa-map-marker-alt w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <p id="spot-detail-address" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
+                        <i class="fas fa-map-marker-alt w-5 text-center text-[#748CAB] mt-1 shrink-0"></i> <!-- text-brand-primary -->
+                        <p id="spot-detail-address" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p> <!-- text-brand-textMain -->
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-clock w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
+                        <div class="ml-3 text-sm text-[#2C3E50]">
+                            <p class="text-green-600 font-medium mb-0.5">營業中</p>
+                            <p class="text-[#8796A5] text-xs">09:00 - 22:00</p>
+                        </div>
                     </div>
                     <div class="flex items-start">
                         <i class="fas fa-info-circle w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
                         <p id="spot-detail-desc" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
-
-    <!-- === 核心邏輯與 Firebase === -->
-    <script type="module">
-        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const fallbackConfig = {
-            apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
-            authDomain: "travel-96009.firebaseapp.com",
-            projectId: "travel-96009",
-            storageBucket: "travel-96009.firebasestorage.app",
-            messagingSenderId: "578860064042",
-            appId: "1:578860064042:web:b147880df3a01dd8f75253"
-        };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'travel-app';
-
-        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let allSpots = [];
-        let userFavorites = new Set();
-        let markersLayer = null;
-        let mapInstance = null;
-
-        // --- 全域 Toast 提示功能 ---
-        function showToast(message) {
-            const toast = document.getElementById('custom-toast');
-            if (toast) {
-                toast.textContent = message;
-                toast.classList.remove('opacity-0');
-                setTimeout(() => toast.classList.add('opacity-0'), 3000);
-            }
-        }
-
-        // --- 1. 初始化 Leaflet 地圖 (純展示，無定位提示) ---
-        function initLeafletMap() {
-            const checkL = setInterval(() => {
-                if (typeof L !== 'undefined') {
-                    const mapEl = document.getElementById('discover-map');
-                    if (!mapEl || mapEl._leaflet_id) return;
-                    clearInterval(checkL);
-
-                    // 💡 zoomControl 設為 false 隱藏預設按鈕，且純粹設定初始視角 (setView)，沒有任何定位邏輯
-                    mapInstance = L.map('discover-map', { zoomControl: false }).setView([23.5, 121], 6);
-
-                    // Google Maps 圖磚
-                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-                        maxZoom: 20,
-                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                        attribution: '&copy; Google Maps'
-                    }).addTo(mapInstance);
-
-                    L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
-                    markersLayer = L.layerGroup().addTo(mapInstance);
-
-                    if (allSpots.length > 0) renderMapMarkers();
-                    
-                    // 確保在 SPA 切換後，地圖能重新計算尺寸，解決灰屏問題
-                    setTimeout(() => mapInstance.invalidateSize(), 100);
-                    setTimeout(() => mapInstance.invalidateSize(), 500);
-                }
-            }, 100);
-        }
-        initLeafletMap();
-
-        // --- 2. Firebase 驗證與錯誤攔截 ---
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth).catch(err => {
-                        console.warn("匿名登入未開啟，切換為訪客模式。");
-                    });
-                }
-            } catch (error) { 
-                console.warn("Auth Init Error:", error.message); 
-            }
-        };
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            loadPublicSpots(); // 不論是否登入都載入資料
-            if (user) loadUserFavorites();
-        });
-
-        // --- 3. 讀取地圖資料 (支援備用離線資料) ---
-        function useLocalDefaultSpots() {
-            allSpots = [
-                { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
-                { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
-                { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
-            ];
-            renderMapMarkers();
-        }
-
-        function loadPublicSpots() {
-            const isLocalEnv = typeof __firebase_config === 'undefined';
-            const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-
-            onSnapshot(spotsCollection, (snapshot) => {
-                if (snapshot.empty && allSpots.length === 0) {
-                    useLocalDefaultSpots();
-                } else {
-                    allSpots = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        return {
-                            id: doc.id,
-                            name: data.name || '未知景點',
-                            lat: data.lat || data.latitude,
-                            lng: data.lng || data.longitude,
-                            rating: data.rating || 4.5,
-                            address: data.address || '',
-                            desc: data.desc || data.description || '',
-                            img: data.img || data.image || data.imageUrl || 'https://via.placeholder.com/800x600',
-                            phone: data.phone || '',
-                            website: data.website || ''
-                        };
-                    });
-                    allSpots = allSpots.filter(s => s.lat && s.lng);
-                    renderMapMarkers();
-                }
-            }, (error) => {
-                console.warn("Firebase 讀取受阻，啟用本地備用景點資料：", error.message);
-                useLocalDefaultSpots();
-            });
-        }
-
-        function loadUserFavorites() {
-            if (!currentUser) return;
-            const isLocalEnv = typeof __firebase_config === 'undefined';
-            const favRef = isLocalEnv 
-                ? collection(db, 'users', currentUser.uid, 'favorites') 
-                : collection(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites');
-
-            onSnapshot(favRef, (snapshot) => {
-                userFavorites = new Set(snapshot.docs.map(doc => doc.id));
-                if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
-            }, (error) => console.warn("收藏讀取受阻：", error.message));
-        }
-
-        function renderMapMarkers() {
-            if (!mapInstance || !markersLayer) return;
-            markersLayer.clearLayers();
-
-            allSpots.forEach(spot => {
-                // 💡 修正：確保自訂 class 生效，Icon 絕對置中
-                const customIcon = L.divIcon({ 
-                    className: 'custom-marker-wrapper', 
-                    html: `<i class="${(spot.name||'').includes('山') ? 'fas fa-mountain' : 'fas fa-camera'} text-[16px]"></i>`, 
-                    iconSize: [36, 36], 
-                    iconAnchor: [18, 18] // 錨點設於正中心
-                });
-                
-                const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(markersLayer);
-                
-                // 💡 修正：點擊只會開啟側邊面板，不會跳出任何預設的 popup 或提示文字框
-                marker.on('click', () => window.openSpotDetail(spot));
-            });
-
-            // 資料繪製完成後，優雅地隱藏載入動畫
-            const loader = document.getElementById('map-loading-overlay');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        }
-
-        // ----------------------------------------------------
-        // 4. 面板互動與 UI 邏輯
-        // ----------------------------------------------------
-        window.openSpotDetail = function(spot) {
-            window.currentOpenSpotId = spot.id;
-
-            document.getElementById('spot-detail-title').textContent = spot.name;
-            document.getElementById('spot-detail-address').textContent = spot.address;
-            document.getElementById('spot-detail-desc').textContent = spot.desc;
-            document.getElementById('spot-detail-rating').textContent = spot.rating || '4.0';
-            document.getElementById('spot-detail-img').src = spot.img || 'https://via.placeholder.com/800x600';
-
-            const navBtn = document.getElementById('circle-nav-btn');
-            if (spot.lat && spot.lng) {
-                navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
-            } else {
-                navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.address || spot.name)}`;
-            }
-
-            const webBtn = document.getElementById('circle-web-btn');
-            if (spot.website) { webBtn.href = spot.website; webBtn.style.display = 'flex'; } 
-            else { webBtn.style.display = 'none'; }
-
-            const phoneBtn = document.getElementById('circle-phone-btn');
-            if (spot.phone) { phoneBtn.href = `tel:${spot.phone}`; phoneBtn.style.display = 'flex'; } 
-            else { phoneBtn.style.display = 'none'; }
-
-            updateFavoriteUI(spot.id);
-
-            const favBtn = document.getElementById('btn-favorite-spot');
-            favBtn.onclick = () => window.toggleFavorite(spot.id);
-
-            const panel = document.getElementById('spot-detail-panel');
-            panel.classList.remove('translate-y-full', 'md:translate-x-full');
-            panel.classList.add('translate-y-0', 'md:translate-x-0');
-        };
-
-        window.closeSpotDetail = function() {
-            window.currentOpenSpotId = null;
-            const panel = document.getElementById('spot-detail-panel');
-            panel.classList.add('translate-y-full', 'md:translate-x-full');
-            panel.classList.remove('translate-y-0', 'md:translate-x-0');
-        };
-
-        window.toggleFavorite = async function(spotId) {
-            if (!currentUser) {
-                showToast("請先前往「旅人檔案」登入，即可使用收藏！");
-                return;
-            }
-            
-            const isLocalEnv = typeof __firebase_config === 'undefined';
-            const favDocRef = isLocalEnv 
-                ? doc(db, 'users', currentUser.uid, 'favorites', spotId)
-                : doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
-
-            try {
-                if (userFavorites.has(spotId)) {
-                    await deleteDoc(favDocRef);
-                } else {
-                    await setDoc(favDocRef, { savedAt: new Date().toISOString() });
-                }
-            } catch (error) {
-                console.error("更新收藏失敗:", error);
-            }
-        };
-
-        function updateFavoriteUI(spotId) {
-            const favIcon = document.getElementById('fav-icon-inner');
-            if (!favIcon) return;
-
-            if (userFavorites.has(spotId)) {
-                favIcon.classList.remove('text-gray-300');
-                favIcon.classList.add('text-red-500');
-            } else {
-                favIcon.classList.remove('text-red-500');
-                favIcon.classList.add('text-gray-300');
-            }
-        }
-    </script>
 </div>
+
+<!-- === 核心邏輯腳本 === -->
+<script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const fallbackConfig = {
+        apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
+        authDomain: "travel-96009.firebaseapp.com",
+        projectId: "travel-96009",
+        storageBucket: "travel-96009.firebasestorage.app",
+        messagingSenderId: "578860064042",
+        appId: "1:578860064042:web:b147880df3a01dd8f75253"
+    };
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'travel-app';
+
+    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let allSpots = [];
+    let userFavorites = new Set();
+    let mapInstance = null;
+    let markersLayer = null;
+
+    // --- 1. 初始化 Leaflet 地圖 (純粹還原舊版) ---
+    function initMap() {
+        const checkL = setInterval(() => {
+            if (typeof L !== 'undefined') {
+                const mapEl = document.getElementById('full-screen-map');
+                if (!mapEl || mapEl._leaflet_id) return;
+                clearInterval(checkL);
+
+                // 舊版設定：CartoDB Voyager 圖磚、有關閉預設縮放的設定
+                mapInstance = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19
+                }).addTo(mapInstance);
+
+                L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+                markersLayer = L.layerGroup().addTo(mapInstance);
+
+                if (allSpots.length > 0) renderMapMarkers();
+
+                // 隱藏載入遮罩
+                const loader = document.getElementById('loading-overlay');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }
+        }, 100);
+    }
+
+    // --- 2. Firebase 資料載入 ---
+    const initAuth = async () => {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth).catch(() => console.warn("以訪客模式瀏覽。"));
+            }
+        } catch (error) { 
+            console.warn("Auth Error:", error.message); 
+        }
+    };
+    initAuth();
+
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        loadPublicSpots();
+        if (user) loadUserFavorites();
+    });
+
+    function useLocalDefaultSpots() {
+        // 完全使用您舊版的假資料
+        allSpots = [
+            { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
+            { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
+            { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
+        ];
+        renderMapMarkers();
+        initMap(); // 確保地圖有被初始化
+    }
+
+    function loadPublicSpots() {
+        const isLocalEnv = typeof __firebase_config === 'undefined';
+        const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+
+        onSnapshot(spotsCollection, (snapshot) => {
+            if (snapshot.empty && allSpots.length === 0) {
+                useLocalDefaultSpots();
+            } else {
+                allSpots = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.name || '未知景點',
+                        lat: data.lat || data.latitude,
+                        lng: data.lng || data.longitude,
+                        rating: data.rating || 4.5,
+                        address: data.address || '',
+                        desc: data.desc || data.description || '',
+                        img: data.img || data.image || data.imageUrl || 'https://via.placeholder.com/800x600',
+                        phone: data.phone || '',
+                        website: data.website || ''
+                    };
+                });
+                allSpots = allSpots.filter(s => s.lat && s.lng);
+                renderMapMarkers();
+                initMap();
+            }
+        }, () => {
+            useLocalDefaultSpots();
+        });
+    }
+
+    function loadUserFavorites() {
+        if (!currentUser) return;
+        const isLocalEnv = typeof __firebase_config === 'undefined';
+        const favRef = isLocalEnv 
+            ? collection(db, 'users', currentUser.uid, 'favorites') 
+            : collection(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites');
+
+        onSnapshot(favRef, (snapshot) => {
+            userFavorites = new Set(snapshot.docs.map(doc => doc.id));
+            if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
+        }, () => {});
+    }
+
+    function renderMapMarkers() {
+        if (!mapInstance || !markersLayer) return;
+        markersLayer.clearLayers();
+
+        allSpots.forEach(spot => {
+            // 舊版圖標邏輯
+            const iconHtml = `<div class="custom-marker-wrapper"><i class="${(spot.name||'').includes('山') ? 'fas fa-mountain' : 'fas fa-camera'}"></i></div>`;
+            const customIcon = L.divIcon({ 
+                className: '', 
+                html: iconHtml, 
+                iconSize: [36, 36], 
+                iconAnchor: [18, 36] // 舊版的錨點設定
+            });
+            
+            const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(markersLayer);
+            marker.on('click', () => window.openSpotDetail(spot));
+        });
+    }
+
+    // --- 3. UI 互動邏輯 (完全還原舊版) ---
+    window.openSpotDetail = function(spot) {
+        window.currentOpenSpotId = spot.id;
+
+        document.getElementById('spot-detail-title').textContent = spot.name;
+        document.getElementById('spot-detail-address').textContent = spot.address;
+        document.getElementById('spot-detail-desc').textContent = spot.desc;
+        document.getElementById('spot-detail-rating').textContent = spot.rating || '4.0';
+        document.getElementById('spot-detail-img').src = spot.img || 'https://via.placeholder.com/800x600';
+
+        const navBtn = document.getElementById('circle-nav-btn');
+        if (spot.lat && spot.lng) {
+            navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
+        } else {
+            navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.address || spot.name)}`;
+        }
+
+        const webBtn = document.getElementById('circle-web-btn');
+        if (spot.website) { webBtn.href = spot.website; webBtn.style.display = 'flex'; } 
+        else { webBtn.style.display = 'none'; }
+
+        const phoneBtn = document.getElementById('circle-phone-btn');
+        if (spot.phone) { phoneBtn.href = `tel:${spot.phone}`; phoneBtn.style.display = 'flex'; } 
+        else { phoneBtn.style.display = 'none'; }
+
+        updateFavoriteUI(spot.id);
+
+        const favBtn = document.getElementById('btn-favorite-spot');
+        favBtn.onclick = () => window.toggleFavorite(spot.id);
+
+        // 舊版的展開邏輯
+        document.getElementById('spot-detail-panel').classList.remove('translate-y-full', 'md:translate-x-full');
+        document.getElementById('spot-detail-panel').classList.add('translate-y-0', 'md:translate-x-0');
+    };
+
+    window.closeSpotDetail = function() {
+        window.currentOpenSpotId = null;
+        document.getElementById('spot-detail-panel').classList.add('translate-y-full', 'md:translate-x-full');
+        document.getElementById('spot-detail-panel').classList.remove('translate-y-0', 'md:translate-x-0');
+    };
+
+    window.toggleFavorite = async function(spotId) {
+        if (!currentUser) {
+            alert("請先登入，即可使用收藏！");
+            return;
+        }
+        
+        const isLocalEnv = typeof __firebase_config === 'undefined';
+        const favDocRef = isLocalEnv 
+            ? doc(db, 'users', currentUser.uid, 'favorites', spotId)
+            : doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
+
+        try {
+            if (userFavorites.has(spotId)) {
+                await deleteDoc(favDocRef);
+            } else {
+                await setDoc(favDocRef, { savedAt: new Date().toISOString() });
+            }
+        } catch (error) {
+            console.error("更新收藏失敗:", error);
+        }
+    };
+
+    function updateFavoriteUI(spotId) {
+        const favIcon = document.getElementById('fav-icon-inner');
+        if (!favIcon) return;
+
+        if (userFavorites.has(spotId)) {
+            favIcon.classList.remove('text-gray-300');
+            favIcon.classList.add('text-red-500');
+        } else {
+            favIcon.classList.remove('text-red-500');
+            favIcon.classList.add('text-gray-300');
+        }
+    }
+</script>
