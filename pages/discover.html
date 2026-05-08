@@ -1,10 +1,9 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 已徹底解決 CSS 污染與元件重疊問題 -->
+<!-- ⚠️ 已修正所有重疊、防觸控穿透、按鈕移至左下角 -->
 <!-- ========================================== -->
 
 <style>
-  /* 保留您的自訂字體與地圖核心設定，移除會污染全域的 safe-area 類別 */
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
@@ -12,11 +11,11 @@
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* 💡 修正重疊：縮小 margin-top 到 85px，確保與底部按鈕不衝突 */
+  /* 💡 修正 1：加大 margin-top，確保 +/- 縮放按鈕不會被頂部分類標籤擋住 */
   .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
   .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
-  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 85px !important; }
   
+  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 140px !important; }
   @media (min-width: 768px) {
       .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
   }
@@ -55,20 +54,20 @@
   <i class="fa-solid fa-circle-info text-[#748CAB]"></i> <span id="toast-msg">提示訊息</span>
 </div>
 
-<!-- 💡 核心外框：精準扣除手機版底部 Navbar 高度 (4rem)，保證地圖不被蓋住且不會覆寫全域 CSS -->
-<div class="absolute top-0 left-0 w-full bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 overflow-hidden flex flex-col bg-[#EAEAEA] z-0 fade-in" style="font-family: 'LINE Seed TW', sans-serif;">
+<!-- 💡 修正 4：利用精準的 calc 計算，強制容器鎖定在導覽列上方，徹底避免重疊與白邊 -->
+<div class="w-full h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] md:h-[100dvh] relative overflow-hidden flex flex-col bg-[#EAEAEA] z-0 fade-in" style="font-family: 'LINE Seed TW', sans-serif;">
 
   <!-- 地圖容器 -->
   <div id="map" class="absolute inset-0 z-0"></div>
 
   <!-- 疊加 UI 區塊 -->
-  <!-- 💡 使用 inline style 處理安全區，徹底消除對 index.html 的 CSS 污染 -->
-  <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-2 md:pb-6">
+  <!-- 加入 id="ui-overlay" 方便 JS 鎖定觸控 -->
+  <div id="ui-overlay" class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-2 md:pb-6">
      
      <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
         
         <!-- ====== 頂部搜尋與篩選 ====== -->
-        <div class="px-4 md:px-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3" style="padding-top: max(16px, env(safe-area-inset-top));">
+        <div id="top-bar-ui" class="px-4 md:px-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3" style="padding-top: max(16px, env(safe-area-inset-top));">
            <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
               <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
                   選地區 <i class="fa-solid fa-caret-down text-[11px] mt-0.5"></i>
@@ -116,7 +115,8 @@
               </div>
            </div>
 
-           <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white">
+           <!-- 💡 修正 3：overscroll-contain 防止清單滑到底時，瀏覽器回彈帶動背景地圖 -->
+           <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white">
               <div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] opacity-60 m-auto">
                  <div class="w-16 h-16 bg-[#F2F5F8] rounded-full flex items-center justify-center mb-4">
                     <i class="fa-solid fa-spinner fa-spin text-2xl text-[#748CAB]"></i>
@@ -129,17 +129,18 @@
      </div>
   </div>
 
-  <!-- 💡 定位按鈕基準點鎖定在底板上方 16px -->
-  <div id="fab-group" class="absolute bottom-[calc(48vh+16px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
+  <!-- 💡 修正 2：定位按鈕改為 left-4，並跟隨面板精準浮動 -->
+  <div id="fab-group" class="absolute bottom-[calc(48vh+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
      <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
         <i class="fa-solid fa-location-crosshairs"></i>
      </button>
   </div>
 
   <!-- ================= 景點資訊詳情面板 ================= -->
+  <!-- 💡 修正 3：overscroll-contain 解決面板滑動穿透 -->
   <div id="spot-detail-panel" class="absolute inset-y-0 right-0 w-full md:w-[440px] bg-[#F2F5F8] z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50 transition-transform duration-500">
-     <div class="flex-1 overflow-y-auto hide-scrollbar bg-[#F2F5F8] relative pb-28">
-        <!-- 封面大圖 -->
+     <div class="flex-1 overflow-y-auto overscroll-contain hide-scrollbar bg-[#F2F5F8] relative pb-28">
+        
         <div class="h-[280px] md:h-[320px] bg-[#3E5C76] relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
            <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
            <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
@@ -203,8 +204,6 @@
         </div>
      </div>
 
-     <!-- 底部按鈕 -->
-     <!-- 💡 同樣利用 inline style 避開 CSS 污染 -->
      <div class="absolute bottom-0 w-full p-4 md:p-6 bg-white/95 backdrop-blur-md border-t border-[#E6EBEF]/50 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20" style="padding-bottom: max(16px, env(safe-area-inset-bottom));">
         <button id="btn-add-to-trip" class="w-full py-4 bg-[#748CAB] text-white text-[15px] font-bold rounded-[20px] shadow-lg shadow-[#748CAB]/30 active:scale-95 transition-all flex items-center justify-center gap-2">
            <i class="fa-solid fa-plus text-lg"></i> 將景點加入行程
@@ -271,7 +270,6 @@
   function initMap() {
       const mapEl = document.getElementById('map');
       if (!mapEl) return;
-      
       if (mapEl._leaflet_id) { mapEl._leaflet_id = null; }
 
       const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -285,6 +283,19 @@
       
       const resizeObserver = new ResizeObserver(() => { if (map) map.invalidateSize(); });
       resizeObserver.observe(mapEl);
+
+      // 💡 修正 3：徹底阻絕地圖與 UI 重疊處的觸控穿透事件 (避免拖曳選單時移動地圖)
+      const uiPanels = [
+          document.getElementById('mobile-list-panel'),
+          document.getElementById('top-bar-ui'),
+          document.getElementById('spot-detail-panel')
+      ];
+      uiPanels.forEach(panel => {
+          if (panel) {
+              L.DomEvent.disableClickPropagation(panel);
+              L.DomEvent.disableScrollPropagation(panel);
+          }
+      });
 
       map.on('locationfound', function(e) {
           if (!userMarker) {
@@ -396,6 +407,7 @@
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
         
         sheetPanel.style.height = `${newHeight}px`;
+        // 💡 確保定位按鈕精準跟著選單上下浮動
         document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 16px)`;
     }, {passive: true});
 
@@ -491,7 +503,7 @@
       }
   };
 
-  // 💡 100% 只載入 Firebase 真實資料，已移除所有假資料
+  // 💡 已完全拔除所有示範用假資料，現在清單只會顯示 Firebase 的真實資料
   function loadSpots() {
     const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
     onSnapshot(qSpots, (snapshot) => {
