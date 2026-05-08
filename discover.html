@@ -1,7 +1,7 @@
 <!-- ========================================== -->
 <!-- 尋覓世界 (discover.html) - 動態載入內容 -->
 <!-- ⚠️ 注意：這份檔案不需要 html, head, body 標籤 -->
-<!-- ⚠️ 完全還原舊版介面，並串接 Firebase 資料庫 -->
+<!-- ⚠️ 完全還原舊版介面，並強化 Firebase 錯誤攔截 -->
 <!-- ========================================== -->
 
 <!-- === 載入外部資源 === -->
@@ -223,7 +223,7 @@
 <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const fallbackConfig = {
         apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
@@ -272,6 +272,9 @@
                     loader.style.opacity = '0';
                     setTimeout(() => loader.style.display = 'none', 500);
                 }
+                
+                // 強制重繪地圖，解決灰頻問題
+                setTimeout(() => mapInstance.invalidateSize(), 300);
             }
         }, 100);
     }
@@ -307,11 +310,13 @@
         initMap(); // 確保地圖有被初始化
     }
 
-    function loadPublicSpots() {
+    // 💡 強化版的資料讀取：使用 getDocs 先嘗試一次，失敗就立刻退回預設資料，不讓畫面卡住
+    async function loadPublicSpots() {
         const isLocalEnv = typeof __firebase_config === 'undefined';
         const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
 
-        onSnapshot(spotsCollection, (snapshot) => {
+        try {
+            const snapshot = await getDocs(spotsCollection);
             if (snapshot.empty && allSpots.length === 0) {
                 useLocalDefaultSpots();
             } else {
@@ -333,10 +338,14 @@
                 allSpots = allSpots.filter(s => s.lat && s.lng);
                 renderMapMarkers();
                 initMap();
+                
+                // 順便掛上監聽
+                onSnapshot(spotsCollection, () => {}); 
             }
-        }, () => {
+        } catch (error) {
+            console.warn("Firestore 讀取被阻擋，切換為本地預設景點");
             useLocalDefaultSpots();
-        });
+        }
     }
 
     function loadUserFavorites() {
@@ -349,7 +358,9 @@
         onSnapshot(favRef, (snapshot) => {
             userFavorites = new Set(snapshot.docs.map(doc => doc.id));
             if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
-        }, () => {});
+        }, () => {
+             console.warn("無法即時讀取收藏");
+        });
     }
 
     function renderMapMarkers() {
@@ -414,7 +425,7 @@
 
     window.toggleFavorite = async function(spotId) {
         if (!currentUser) {
-            alert("請先登入，即可使用收藏！");
+            alert("請先前往登入頁面，即可使用收藏！");
             return;
         }
         
