@@ -24,12 +24,11 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* 舊版：修正 Leaflet 預設樣式 */
     .leaflet-container { font-family: 'GenJyuuGothic', 'Microsoft JhengHei', sans-serif; }
     .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     .leaflet-popup-content { margin: 16px; }
 
-    /* 舊版：自訂地圖圖示 */
+    /* 自訂地圖圖示 */
     .custom-marker-wrapper {
         display: flex; align-items: center; justify-content: center;
         width: 36px; height: 36px; background-color: white; border-radius: 50%;
@@ -39,8 +38,11 @@
     .custom-marker-wrapper:hover {
         transform: scale(1.1); background-color: #748CAB; color: white;
     }
-    .custom-marker-wrapper.user-location { border-color: #3E5C76; color: #3E5C76; }
-    .custom-marker-wrapper.user-location:hover { background-color: #3E5C76; }
+
+    /* 您的當前位置圖示 */
+    .user-marker {
+        display: flex; align-items: center; justify-content: center;
+    }
 
     /* 動畫 */
     .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -51,19 +53,19 @@
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 </style>
 
-<!-- 💡 修正 1：使用 absolute inset-0 確保外框 100% 撐滿 app-content -->
-<div id="discover-page-root" class="absolute inset-0 overflow-hidden bg-[#F2F5F8]">
+<!-- 💡 修正 2：改用 bottom-[calc(...)]，強制地圖容器在手機導覽列 (4rem) 之上，絕對不重疊 -->
+<div id="discover-page-root" class="absolute top-0 right-0 left-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 overflow-hidden bg-[#F2F5F8]">
 
-    <!-- 💡 修正 2：地圖容器也使用 absolute inset-0 強制滿版 -->
+    <!-- 地圖容器 -->
     <div id="full-screen-map" class="absolute inset-0 z-0 bg-[#F2F5F8]"></div>
 
-    <!-- 舊版：載入中遮罩 -->
+    <!-- 載入中遮罩 -->
     <div id="loading-overlay" class="absolute inset-0 bg-[#F2F5F8] z-[2000] flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-16 h-16 border-4 border-[#E6EBEF] border-t-[#748CAB] rounded-full animate-spin mb-4"></div>
         <p class="text-[#748CAB] font-bold tracking-wider animate-pulse">正在載入地圖資料...</p>
     </div>
 
-    <!-- 舊版：懸浮搜尋與篩選 -->
+    <!-- 懸浮搜尋與篩選 -->
     <div class="absolute top-4 left-4 right-4 z-[999] md:w-96 md:left-6 md:top-6 pointer-events-none">
         <div class="bg-white rounded-2xl shadow-lg flex items-center p-2 mb-3 pointer-events-auto">
             <div class="pl-3 pr-2 text-[#8796A5]"><i class="fas fa-search"></i></div>
@@ -80,7 +82,14 @@
         </div>
     </div>
 
-    <!-- 舊版：側邊/底部景點詳細資訊面板 -->
+    <!-- 💡 修正 3：加入定位按鈕 -->
+    <div class="absolute bottom-6 right-4 md:bottom-8 md:right-8 z-[400] pointer-events-auto flex flex-col items-center gap-3">
+        <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#748CAB] rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all focus:outline-none">
+            <i class="fas fa-location-crosshairs"></i>
+        </button>
+    </div>
+
+    <!-- 側邊/底部景點詳細資訊面板 -->
     <div id="spot-detail-panel" class="absolute inset-x-0 bottom-0 md:inset-y-0 md:right-0 md:left-auto md:w-[400px] bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl z-[1000] transform translate-y-full md:translate-y-0 md:translate-x-full transition-transform duration-300 flex flex-col rounded-t-3xl md:rounded-none h-[80%] md:h-full pb-safe">
         
         <div class="w-full flex justify-center py-3 md:hidden shrink-0 cursor-pointer" onclick="window.closeSpotDetail()">
@@ -94,7 +103,7 @@
             </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto relative bg-white pb-20 md:pb-0">
+        <div class="flex-1 overflow-y-auto relative bg-white pb-6 md:pb-0">
             <button id="btn-favorite-spot" class="absolute right-5 -top-6 w-12 h-12 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-300 text-xl z-10 hover:scale-110 transition-transform focus:outline-none">
                 <i id="fav-icon-inner" class="fas fa-heart"></i>
             </button>
@@ -180,8 +189,8 @@
     let userFavorites = new Set();
     let mapInstance = null;
     let markersLayer = null;
+    let userMarker = null; // 用來儲存定位點
 
-    // --- 確保不管發生什麼事，最多 2.5 秒後一定會隱藏載入遮罩 ---
     const forceHideLoader = setTimeout(hideLoadingOverlay, 2500);
 
     function hideLoadingOverlay() {
@@ -192,34 +201,64 @@
         }
     }
 
-    // --- 1. 強化版：初始化 Leaflet 地圖 ---
+    // --- 全域定位功能 ---
+    window.locateUser = function() {
+        if (!mapInstance) return;
+        const btnIcon = document.querySelector('#btn-locate i');
+        if(btnIcon) btnIcon.className = 'fas fa-spinner fa-spin text-[#748CAB]';
+        // 請求定位權限並移至該位置
+        mapInstance.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
+    };
+
     function initMap() {
         const checkL = setInterval(() => {
             if (typeof L !== 'undefined') {
                 const mapEl = document.getElementById('full-screen-map');
-                // 確保容器存在
                 if (!mapEl) return;
                 clearInterval(checkL);
 
-                // 如果之前有殘留的地圖實例，先清理掉 (解決 SPA 再次進入時報錯)
                 if (mapEl._leaflet_id) {
                     mapEl._leaflet_id = null;
                 }
 
-                // 初始化地圖
                 mapInstance = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="https://carto.com/">CartoDB</a>'
+                // 💡 修正 1：換成 Google Maps 街景圖磚
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
                 }).addTo(mapInstance);
 
                 L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
                 markersLayer = L.layerGroup().addTo(mapInstance);
 
+                // 綁定定位成功事件
+                mapInstance.on('locationfound', function(e) {
+                    if (!userMarker) {
+                        const userIcon = L.divIcon({ 
+                            className: 'user-marker', 
+                            html: `<div class="w-5 h-5 bg-[#4285F4] rounded-full border-[3px] border-white shadow-[0_0_16px_rgba(66,133,244,0.6)]"></div>`, 
+                            iconSize: [20, 20], 
+                            iconAnchor: [10, 10] 
+                        });
+                        userMarker = L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 }).addTo(mapInstance);
+                    } else { 
+                        userMarker.setLatLng(e.latlng); 
+                    }
+                    const btnIcon = document.querySelector('#btn-locate i');
+                    if(btnIcon) btnIcon.className = 'fas fa-location-crosshairs text-[#4285F4]';
+                });
+
+                // 綁定定位失敗事件
+                mapInstance.on('locationerror', function(e) {
+                    const btnIcon = document.querySelector('#btn-locate i');
+                    if(btnIcon) btnIcon.className = 'fas fa-location-crosshairs text-[#748CAB]';
+                    alert("無法取得位置，請確認是否允許瀏覽器存取您的定位權限。");
+                });
+
                 if (allSpots.length > 0) renderMapMarkers();
 
-                // 💡 修正 3：連續三次強制重算尺寸，徹底消滅灰屏問題！
                 setTimeout(() => mapInstance.invalidateSize(), 100);
                 setTimeout(() => mapInstance.invalidateSize(), 500);
                 setTimeout(() => mapInstance.invalidateSize(), 1500);
@@ -229,7 +268,6 @@
         }, 50);
     }
 
-    // --- 2. Firebase 資料載入 ---
     const initAuth = async () => {
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -241,8 +279,6 @@
             console.warn("Auth Error:", error.message); 
         }
     };
-    
-    // 開啟驗證
     initAuth();
 
     onAuthStateChanged(auth, (user) => {
@@ -288,8 +324,7 @@
                 renderMapMarkers();
                 initMap();
             }
-        }, (err) => {
-            console.warn("載入資料失敗:", err.message);
+        }, () => {
             useLocalDefaultSpots();
         });
     }
@@ -313,14 +348,14 @@
 
         allSpots.forEach(spot => {
             const iconHtml = `<div class="custom-marker-wrapper"><i class="${(spot.name||'').includes('山') ? 'fas fa-mountain' : 'fas fa-camera'}"></i></div>`;
-            const customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [36, 36], iconAnchor: [18, 18] });
+            const customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [36, 36], iconAnchor: [18, 36] });
             
             const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(markersLayer);
             marker.on('click', () => window.openSpotDetail(spot));
         });
     }
 
-    // --- 3. 介面互動 ---
+    // --- 面板互動邏輯 ---
     window.openSpotDetail = function(spot) {
         window.currentOpenSpotId = spot.id;
 
@@ -359,7 +394,7 @@
 
     window.toggleFavorite = async function(spotId) {
         if (!currentUser) {
-            alert("請先前往登入，即可使用收藏！");
+            alert("請先登入，即可使用收藏！");
             return;
         }
         
@@ -369,14 +404,20 @@
             : doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
 
         try {
-            if (userFavorites.has(spotId)) await deleteDoc(favDocRef);
-            else await setDoc(favDocRef, { savedAt: new Date().toISOString() });
-        } catch (error) { console.error("更新收藏失敗:", error); }
+            if (userFavorites.has(spotId)) {
+                await deleteDoc(favDocRef);
+            } else {
+                await setDoc(favDocRef, { savedAt: new Date().toISOString() });
+            }
+        } catch (error) {
+            console.error("更新收藏失敗:", error);
+        }
     };
 
     function updateFavoriteUI(spotId) {
         const favIcon = document.getElementById('fav-icon-inner');
         if (!favIcon) return;
+
         if (userFavorites.has(spotId)) {
             favIcon.classList.remove('text-gray-300');
             favIcon.classList.add('text-red-500');
