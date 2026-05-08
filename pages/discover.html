@@ -3,367 +3,607 @@
 <!-- ========================================== -->
 
 <style>
-    /* 舊版自訂字體 */
-    @font-face {
-        font-family: 'GenJyuuGothic';
-        src: url('https://cdn.jsdelivr.net/gh/tsengpenghsiang/genjyuugothic/GenJyuuGothic-Regular.woff2') format('woff2');
-        font-weight: normal;
-        font-style: normal;
-    }
-    @font-face {
-        font-family: 'GenJyuuGothic';
-        src: url('https://cdn.jsdelivr.net/gh/tsengpenghsiang/genjyuugothic/GenJyuuGothic-Bold.woff2') format('woff2');
-        font-weight: bold;
-        font-style: normal;
-    }
-
-    #discover-page-root {
-        font-family: 'GenJyuuGothic', 'Microsoft JhengHei', sans-serif;
-    }
-
+    /* 這裡只保留 discover 專屬的樣式，完全還原您的設計 */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+    .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-    .leaflet-container { font-family: 'GenJyuuGothic', 'Microsoft JhengHei', sans-serif; }
-    .leaflet-popup-content-wrapper { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    .leaflet-popup-content { margin: 16px; }
+    /* 💡 這裡還原了您原本針對縮放按鈕的客製化樣式 */
+    .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
+    .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
+    
+    /* 💡 將縮放按鈕推到搜尋欄下方，避開重疊 */
+    .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 150px !important; }
+    @media (min-width: 768px) {
+        .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
+    }
+    
+    .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
+    @media (max-width: 767px) {
+        .leaflet-bottom.leaflet-right { bottom: calc(65px + env(safe-area-inset-bottom)) !important; }
+    }
+    .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
-    /* 自訂地圖圖示 */
-    .custom-marker-wrapper {
-        display: flex; align-items: center; justify-content: center;
-        width: 36px; height: 36px; background-color: white; border-radius: 50%;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid #748CAB; color: #748CAB;
-        transition: transform 0.2s, background-color 0.2s, color 0.2s;
+    .custom-marker { background: transparent; border: none; }
+    .marker-pin { 
+        width: 44px; height: 44px; 
+        border-radius: 50% 50% 50% 0; 
+        transform: rotate(-45deg); 
+        background: linear-gradient(135deg, #1890FF 0%, #0050B3 100%); 
+        border: 3px solid #FFFFFF; 
+        box-shadow: 0 6px 16px rgba(0, 80, 179, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1); 
+        display: flex; align-items: center; justify-content: center; 
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
     }
-    .custom-marker-wrapper:hover {
-        transform: scale(1.1); background-color: #748CAB; color: white;
+    .marker-pin i { 
+        transform: rotate(45deg); 
+        color: white; font-size: 16px; 
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
     }
-
-    /* 您的當前位置圖示 */
-    .user-marker {
-        display: flex; align-items: center; justify-content: center;
+    .marker-pin:hover { 
+        transform: rotate(-45deg) scale(1.15) translateY(-6px); 
+        z-index: 1000 !important; 
+        box-shadow: 0 12px 24px rgba(0, 80, 179, 0.4);
     }
-
-    /* 動畫 */
-    .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: .7; transform: scale(1.05); }
-    }
-    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    
+    #spot-detail-panel { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 </style>
 
-<!-- 💡 修正 2：改用 bottom-[calc(...)]，強制地圖容器在手機導覽列 (4rem) 之上，絕對不重疊 -->
-<div id="discover-page-root" class="absolute top-0 right-0 left-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 overflow-hidden bg-[#F2F5F8]">
+<!-- Toast 提示框 -->
+<div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-[#2C3E50]/95 backdrop-blur-md text-white px-6 py-3.5 rounded-full shadow-2xl z-[2500] transition-all duration-400 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2.5 font-bold text-sm mt-2 border border-white/10">
+    <i class="fa-solid fa-circle-info text-[#748CAB]"></i> <span id="toast-msg">提示訊息</span>
+</div>
 
+<!-- 💡 重點修正：精準的 bottom 確保絕對不蓋住手機導覽列 -->
+<div class="absolute top-0 left-0 right-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 flex flex-col relative overflow-hidden bg-[#EAEAEA] fade-in">
+    
     <!-- 地圖容器 -->
-    <div id="full-screen-map" class="absolute inset-0 z-0 bg-[#F2F5F8]"></div>
+    <div id="map" class="absolute inset-0 z-0"></div>
 
-    <!-- 載入中遮罩 -->
-    <div id="loading-overlay" class="absolute inset-0 bg-[#F2F5F8] z-[2000] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-[#E6EBEF] border-t-[#748CAB] rounded-full animate-spin mb-4"></div>
-        <p class="text-[#748CAB] font-bold tracking-wider animate-pulse">正在載入地圖資料...</p>
-    </div>
-
-    <!-- 懸浮搜尋與篩選 -->
-    <div class="absolute top-4 left-4 right-4 z-[999] md:w-96 md:left-6 md:top-6 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-lg flex items-center p-2 mb-3 pointer-events-auto">
-            <div class="pl-3 pr-2 text-[#8796A5]"><i class="fas fa-search"></i></div>
-            <input type="text" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent border-none focus:outline-none text-[#2C3E50] w-full placeholder-[#8796A5]">
-            <button class="w-10 h-10 rounded-xl bg-[#F2F5F8] text-[#748CAB] flex items-center justify-center ml-2 hover:bg-[#E6EBEF] transition-colors focus:outline-none">
-                <i class="fas fa-sliders-h"></i>
-            </button>
-        </div>
-        <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 px-1 pointer-events-auto">
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-[#748CAB] text-white shadow-md focus:outline-none transition-colors"><i class="fas fa-map-marker-alt mr-1"></i> 全部</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-utensils mr-1"></i> 美食</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-mountain mr-1"></i> 自然</button>
-            <button class="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white text-[#2C3E50] shadow-sm hover:bg-[#F2F5F8] focus:outline-none transition-colors"><i class="fas fa-camera mr-1"></i> 景點</button>
-        </div>
-    </div>
-
-    <!-- 💡 修正 3：加入定位按鈕 -->
-    <div class="absolute bottom-6 right-4 md:bottom-8 md:right-8 z-[400] pointer-events-auto flex flex-col items-center gap-3">
-        <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#748CAB] rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all focus:outline-none">
-            <i class="fas fa-location-crosshairs"></i>
-        </button>
-    </div>
-
-    <!-- 側邊/底部景點詳細資訊面板 -->
-    <div id="spot-detail-panel" class="absolute inset-x-0 bottom-0 md:inset-y-0 md:right-0 md:left-auto md:w-[400px] bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl z-[1000] transform translate-y-full md:translate-y-0 md:translate-x-full transition-transform duration-300 flex flex-col rounded-t-3xl md:rounded-none h-[80%] md:h-full pb-safe">
+    <!-- 疊加 UI 區塊 -->
+    <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[65px] md:pb-6">
         
-        <div class="w-full flex justify-center py-3 md:hidden shrink-0 cursor-pointer" onclick="window.closeSpotDetail()">
-            <div class="w-12 h-1.5 bg-[#E6EBEF] rounded-full"></div>
-        </div>
-
-        <div class="relative h-48 md:h-64 shrink-0 w-full bg-[#E6EBEF]">
-            <img id="spot-detail-img" src="" alt="景點預覽" class="w-full h-full object-cover">
-            <button onclick="window.closeSpotDetail()" class="hidden md:flex absolute top-4 right-4 w-8 h-8 bg-black/40 text-white rounded-full items-center justify-center hover:bg-black/60 transition-colors z-10 focus:outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto relative bg-white pb-6 md:pb-0">
-            <button id="btn-favorite-spot" class="absolute right-5 -top-6 w-12 h-12 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-300 text-xl z-10 hover:scale-110 transition-transform focus:outline-none">
-                <i id="fav-icon-inner" class="fas fa-heart"></i>
-            </button>
-
-            <div class="p-5 md:p-6 pb-2">
-                <h2 id="spot-detail-title" class="text-2xl font-bold text-[#2C3E50] mb-1">載入中...</h2>
-                <div class="flex items-center text-sm text-[#8796A5] mb-4">
-                    <span class="text-yellow-400 mr-1"><i class="fas fa-star"></i></span>
-                    <span id="spot-detail-rating" class="font-medium mr-2">4.0</span>
-                    <span class="text-xs">(128 則評論)</span>
+        <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
+        
+            <!-- 頂部搜尋與篩選 -->
+            <div class="px-4 md:px-6 pt-safe md:pt-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3">
+                <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
+                    <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
+                        選地區 <i class="fa-solid fa-caret-down text-[11px] mt-0.5"></i>
+                    </div>
+                    <input type="text" id="input-explore-search" placeholder="想找什麼......" class="flex-1 bg-transparent outline-none pl-4 text-[16px] font-extrabold text-[#3E5C76] placeholder-gray-400">
+                    <button class="text-gray-500 hover:text-[#748CAB] px-2 transition-colors">
+                        <i class="fa-solid fa-microphone text-[18px]"></i>
+                    </button>
                 </div>
 
-                <div class="flex justify-around py-4 border-y border-[#E6EBEF] mb-5">
-                    <a id="circle-nav-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
-                            <i class="fas fa-location-arrow"></i>
+                <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pt-1 pb-2 px-1 -mx-1">
+                    <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF]/80 hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-camera text-[#8796A5]"></i> 景點
+                    </button>
+                    <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF]/80 hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-heart text-[#8796A5]"></i> 收藏
+                    </button>
+                    <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF]/80 hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-utensils text-[#8796A5]"></i> 美食
+                    </button>
+                    <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF]/80 hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-bag-shopping text-[#8796A5]"></i> 購物
+                    </button>
+                </div>
+            </div>
+
+            <!-- 手機版彈性空白區 -->
+            <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
+
+            <!-- 底部景點列表 (Bottom Sheet) -->
+            <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
+                
+                <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative">
+                    <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
+                    <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
+                        <button class="font-extrabold text-[#3E5C76] text-[16px] flex items-center gap-1.5 hover:text-[#748CAB] transition-colors">
+                        <i class="fa-solid fa-arrow-down-up-across-line text-[14px]"></i>
+                        <span>推薦</span>
+                        </button>
+                        <div class="flex gap-4 text-[#8796A5] text-[18px]">
+                        <i class="fa-solid fa-border-all cursor-pointer hover:text-[#3E5C76] transition-colors"></i>
+                        <i class="fa-solid fa-list cursor-pointer text-[#3E5C76] transition-colors"></i>
                         </div>
-                        <span class="text-[11px] font-medium text-[#8796A5]">導航</span>
-                    </a>
-                    <a id="circle-web-btn" target="_blank" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
-                            <i class="fas fa-globe"></i>
-                        </div>
-                        <span class="text-[11px] font-medium text-[#8796A5]">網站</span>
-                    </a>
-                    <a id="circle-phone-btn" class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <span class="text-[11px] font-medium text-[#8796A5]">電話</span>
-                    </a>
-                    <div class="flex flex-col items-center group cursor-pointer">
-                        <div class="w-12 h-12 rounded-full bg-[#E6EBEF] text-[#748CAB] flex items-center justify-center mb-1.5 group-hover:bg-[#748CAB] group-hover:text-white transition-colors text-lg">
-                            <i class="fas fa-share-alt"></i>
-                        </div>
-                        <span class="text-[11px] font-medium text-[#8796A5]">分享</span>
                     </div>
                 </div>
 
-                <div class="space-y-4 pb-12">
-                    <div class="flex items-start">
-                        <i class="fas fa-map-marker-alt w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <p id="spot-detail-address" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
-                    </div>
-                    <div class="flex items-start">
-                        <i class="fas fa-clock w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <div class="ml-3 text-sm text-[#2C3E50]">
-                            <p class="text-green-600 font-medium mb-0.5">營業中</p>
-                            <p class="text-[#8796A5] text-xs">09:00 - 22:00</p>
+                <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white">
+                    <div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] opacity-60 m-auto">
+                        <div class="w-16 h-16 bg-[#F2F5F8] rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl text-[#748CAB]"></i>
                         </div>
-                    </div>
-                    <div class="flex items-start">
-                        <i class="fas fa-info-circle w-5 text-center text-[#748CAB] mt-1 shrink-0"></i>
-                        <p id="spot-detail-desc" class="ml-3 text-sm text-[#2C3E50] leading-relaxed"></p>
+                        <p class="font-extrabold text-[15px]">載入中...</p>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
+
+    <!-- 右下角 定位按鈕 -->
+    <div id="fab-group" class="absolute bottom-[calc(48vh+85px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
+        <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
+            <i class="fa-solid fa-location-crosshairs"></i>
+        </button>
+    </div>
+
+    <!-- 景點資訊詳情面板 -->
+    <div id="spot-detail-panel" class="absolute inset-y-0 right-0 w-full md:w-[440px] bg-[#F2F5F8] z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50 transition-transform duration-500">
+        <div class="flex-1 overflow-y-auto hide-scrollbar bg-[#F2F5F8] relative pb-28">
+        
+        <div class="h-[280px] md:h-[320px] bg-[#3E5C76] relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
+            <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
+            <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
+            <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-20 pointer-events-none"></div>
+            <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30 active:scale-95 transition-all">
+                <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
+                <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
+            </button>
+        </div>
+
+        <div class="px-6 pt-8 pb-10 space-y-6 relative -mt-8 bg-[#F2F5F8] rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-10 min-h-[60vh]">
+            <button id="btn-favorite-spot" class="absolute -top-7 right-8 w-14 h-14 flex items-center justify-center rounded-full bg-white text-[#8796A5] shadow-[0_8px_20px_rgba(0,0,0,0.12)] border border-[#E6EBEF]/60 active:scale-90 transition-all z-20 group">
+                <i class="fa-regular fa-heart text-[24px]"></i>
+            </button>
+
+            <div class="pr-12">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h2 id="detail-name" class="text-[28px] font-extrabold text-[#3E5C76] leading-tight"></h2>
+                    <span id="detail-cat" class="px-2 py-0.5 bg-[#748CAB]/10 text-[#748CAB] text-[10px] font-bold rounded-md whitespace-nowrap">分類</span>
+                </div>
+                <div id="detail-foreign-names" class="text-[13px] font-bold text-[#8796A5] mt-2 hidden flex-col gap-1">
+                    <span id="detail-foreign-1" class="block"></span>
+                    <span id="detail-foreign-2" class="block"></span>
+                </div>
+            </div>
+
+            <div class="flex justify-around items-center py-4 border-y border-[#E6EBEF]/50 bg-[#F2F5F8]">
+                <a id="circle-nav-btn" href="#" target="_blank" class="flex flex-col items-center gap-2 group">
+                    <div class="w-12 h-12 rounded-full bg-[#4285F4]/10 text-[#4285F4] flex items-center justify-center shadow-sm group-hover:bg-[#4285F4] group-hover:text-white transition-all">
+                    <i class="fa-solid fa-location-arrow"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-[#8796A5]">導航</span>
+                </a>
+                <a id="circle-web-btn" href="#" target="_blank" class="hidden flex-col items-center gap-2 group">
+                    <div class="w-12 h-12 rounded-full bg-[#2A9D8F]/10 text-[#2A9D8F] flex items-center justify-center shadow-sm group-hover:bg-[#2A9D8F] group-hover:text-white transition-all">
+                    <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-[#8796A5]">官網</span>
+                </a>
+                <a id="circle-phone-btn" href="#" class="hidden flex-col items-center gap-2 group">
+                    <div class="w-12 h-12 rounded-full bg-[#E9C46A]/20 text-[#D4A33B] flex items-center justify-center shadow-sm group-hover:bg-[#E9C46A] group-hover:text-white transition-all">
+                    <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-[#8796A5]">電話</span>
+                </a>
+            </div>
+
+            <div class="bg-white p-4 rounded-[20px] border border-[#E6EBEF] shadow-sm flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-full bg-[#748CAB]/10 text-[#748CAB] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-location-dot text-[15px]"></i>
+                </div>
+                <span id="detail-address" class="flex-1 text-[14px] font-extrabold text-[#3E5C76] leading-relaxed mt-1"></span>
+            </div>
+            
+            <div id="detail-desc-container" class="hidden bg-white p-5 rounded-[24px] border border-[#E6EBEF] shadow-sm flex-col gap-3">
+                <h3 class="text-[14px] font-extrabold text-[#8796A5] uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-[#748CAB]"></i> 介紹與備註
+                </h3>
+                <p id="detail-desc" class="text-[14px] text-[#2C3E50] font-medium leading-loose whitespace-pre-wrap"></p>
+            </div>
+        </div>
+        </div>
+
+        <div class="absolute bottom-0 w-full p-4 md:p-6 bg-white/95 backdrop-blur-md border-t border-[#E6EBEF]/50 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20">
+            <button id="btn-add-to-trip" class="w-full py-4 bg-[#748CAB] text-white text-[15px] font-bold rounded-[20px] shadow-lg shadow-[#748CAB]/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-lg"></i> 將景點加入行程
+            </button>
+        </div>
+    </div>
+
 </div>
 
-<!-- 腳本邏輯 (SPA Module) -->
+<!-- Firebase 與 地圖邏輯 -->
 <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-        apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E",
-        authDomain: "travel-96009.firebaseapp.com",
-        projectId: "travel-96009",
-        storageBucket: "travel-96009.firebasestorage.app",
-        messagingSenderId: "578860064042",
-        appId: "1:578860064042:web:b147880df3a01dd8f75253"
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
+        apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", 
+        authDomain: "travel-96009.firebaseapp.com", 
+        projectId: "travel-96009", 
+        storageBucket: "travel-96009.firebasestorage.app", 
+        messagingSenderId: "578860064042", 
+        appId: "1:578860064042:web:b147880df3a01dd8f75253" 
     };
-    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp(); 
     const auth = getAuth(app);
-    const db = getFirestore(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'travel-app';
+    const db = getFirestore(app); 
+    const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
 
     let currentUser = null;
-    let allSpots = [];
+    let publicSpots = [];
     let userFavorites = new Set();
-    let mapInstance = null;
+    const isGuest = localStorage.getItem('isGuest') === 'true';
+    let isListCollapsed = false; 
+
+    window.showToast = function(msg) {
+        const el = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = msg;
+        el.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+        el.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+            el.classList.remove('opacity-100', 'translate-y-0');
+            el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+        }, 3000);
+    }
+
+    const LOCATION_MODES = [
+        { id: 'spot', label: '景點', icon: 'fa-solid fa-camera' },
+        { id: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
+        { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
+        { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel' },
+        { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles' },
+        { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key' },
+        { id: 'station', label: '車站', icon: 'fa-solid fa-train' },
+        { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival' },
+        { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot' }
+    ];
+
+    let map = null;
     let markersLayer = null;
-    let userMarker = null; // 用來儲存定位點
+    let userMarker = null;
+    let isFirstLoad = true;
 
-    const forceHideLoader = setTimeout(hideLoadingOverlay, 2500);
-
-    function hideLoadingOverlay() {
-        const loader = document.getElementById('loading-overlay');
-        if (loader && loader.style.display !== 'none') {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 500);
-        }
-    }
-
-    // --- 全域定位功能 ---
-    window.locateUser = function() {
-        if (!mapInstance) return;
-        const btnIcon = document.querySelector('#btn-locate i');
-        if(btnIcon) btnIcon.className = 'fas fa-spinner fa-spin text-[#748CAB]';
-        // 請求定位權限並移至該位置
-        mapInstance.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
-    };
-
+    // --- 💡 修正 1：徹底解決灰屏的殺手鐧 (ResizeObserver) ---
     function initMap() {
-        const checkL = setInterval(() => {
-            if (typeof L !== 'undefined') {
-                const mapEl = document.getElementById('full-screen-map');
-                if (!mapEl) return;
-                clearInterval(checkL);
+        if (map !== null) return;
+        
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
 
-                if (mapEl._leaflet_id) {
-                    mapEl._leaflet_id = null;
-                }
+        // 換成 Google 圖磚
+        const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            attribution: '&copy; Google Maps', maxZoom: 20, keepBuffer: 4, updateWhenIdle: true
+        });
 
-                mapInstance = L.map('full-screen-map', { zoomControl: false }).setView([23.5, 121], 6);
+        // 💡 修正 2：確保縮放按鈕在右上角 (topright)，不跟定位按鈕擠在一起
+        map = L.map('map', { zoomControl: false, layers: [streetLayer] }).setView([23.5, 121], 13); 
+        L.control.zoom({ position: 'topright' }).addTo(map);
 
-                // 💡 修正 1：換成 Google Maps 街景圖磚
-                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '&copy; Google Maps'
-                }).addTo(mapInstance);
-
-                L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
-                markersLayer = L.layerGroup().addTo(mapInstance);
-
-                // 綁定定位成功事件
-                mapInstance.on('locationfound', function(e) {
-                    if (!userMarker) {
-                        const userIcon = L.divIcon({ 
-                            className: 'user-marker', 
-                            html: `<div class="w-5 h-5 bg-[#4285F4] rounded-full border-[3px] border-white shadow-[0_0_16px_rgba(66,133,244,0.6)]"></div>`, 
-                            iconSize: [20, 20], 
-                            iconAnchor: [10, 10] 
-                        });
-                        userMarker = L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 }).addTo(mapInstance);
-                    } else { 
-                        userMarker.setLatLng(e.latlng); 
-                    }
-                    const btnIcon = document.querySelector('#btn-locate i');
-                    if(btnIcon) btnIcon.className = 'fas fa-location-crosshairs text-[#4285F4]';
-                });
-
-                // 綁定定位失敗事件
-                mapInstance.on('locationerror', function(e) {
-                    const btnIcon = document.querySelector('#btn-locate i');
-                    if(btnIcon) btnIcon.className = 'fas fa-location-crosshairs text-[#748CAB]';
-                    alert("無法取得位置，請確認是否允許瀏覽器存取您的定位權限。");
-                });
-
-                if (allSpots.length > 0) renderMapMarkers();
-
-                setTimeout(() => mapInstance.invalidateSize(), 100);
-                setTimeout(() => mapInstance.invalidateSize(), 500);
-                setTimeout(() => mapInstance.invalidateSize(), 1500);
-                
-                hideLoadingOverlay();
+        markersLayer = L.layerGroup().addTo(map);
+        
+        // 解決 SPA 灰屏的最佳實踐：監聽容器尺寸變化
+        const resizeObserver = new ResizeObserver(() => {
+            if (map) {
+                map.invalidateSize();
             }
-        }, 50);
+        });
+        resizeObserver.observe(mapContainer);
+
+        // 定位成功事件
+        map.on('locationfound', function(e) {
+            if (!userMarker) {
+                const userIcon = L.divIcon({ className: 'user-marker', html: `<div class="w-5 h-5 bg-[#4285F4] rounded-full border-[3px] border-white shadow-[0_0_16px_rgba(66,133,244,0.6)]"></div>`, iconSize: [20, 20], iconAnchor: [10, 10] });
+                userMarker = L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+            } else { userMarker.setLatLng(e.latlng); }
+            document.querySelector('#btn-locate i').className = 'fa-solid fa-location-crosshairs text-[#4285F4]';
+            window.showToast("已取得目前位置");
+            map.flyTo(e.latlng, 15); // 自動飛過去
+        });
+
+        // 定位失敗事件
+        map.on('locationerror', function() {
+            document.querySelector('#btn-locate i').className = 'fa-solid fa-location-crosshairs text-[#3E5C76]';
+            alert("無法取得位置，請確認您的裝置或瀏覽器已開啟定位權限。");
+        });
+    }
+    
+    // --- 💡 修正 3：加入定位功能 ---
+    window.locateUser = function() {
+        if (!map) return;
+        document.querySelector('#btn-locate i').className = 'fa-solid fa-spinner fa-spin text-[#748CAB]';
+        window.showToast("正在尋找您的位置...");
+        map.locate({ setView: false, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
+    };
+
+    function renderMarkersOnMap(spots) {
+        markersLayer.clearLayers();
+        let validCoords = [];
+
+        spots.forEach(spot => {
+            if (spot.lat && spot.lng) {
+                validCoords.push([spot.lat, spot.lng]);
+                
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="marker-pin bg-[#1890FF]"><i class="fa-solid fa-camera"></i></div>`,
+                    iconSize: [44, 44], iconAnchor: [22, 44], popupAnchor: [0, -44]
+                });
+                
+                const marker = L.marker([spot.lat, spot.lng], { icon: customIcon });
+                marker.on('click', () => window.flyToSpot(spot.id));
+                markersLayer.addLayer(marker);
+            }
+        });
+
+        if (isFirstLoad && validCoords.length > 0) {
+            map.setView(validCoords[0], 14);
+            isFirstLoad = false;
+        }
     }
 
-    const initAuth = async () => {
-        try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth).catch(() => console.warn("以訪客模式瀏覽。"));
-            }
-        } catch (error) { 
-            console.warn("Auth Error:", error.message); 
+    window.flyToSpot = function(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+        if (spot.lat && spot.lng) {
+            let targetLat = spot.lat;
+            if(window.innerWidth < 768 && !isListCollapsed) targetLat -= 0.003; 
+            map.flyTo([targetLat, spot.lng], 16, { duration: 1 });
         }
+        window.showSpotDetail(spotId);
     };
-    initAuth();
 
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        loadPublicSpots();
-        if (user) loadUserFavorites();
+    // --- 面板與列表佈局互動 ---
+    const sheetPanel = document.getElementById('mobile-list-panel');
+    const sheetHeader = document.getElementById('sheet-header');
+    let dragStartY = null;
+    let startHeight = 0;
+
+    function applyListLayoutMode() {
+        const list = document.getElementById('explore-list');
+        const cards = document.querySelectorAll('.spot-card');
+        
+        if (window.innerWidth >= 768) {
+            list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
+            cards.forEach(c => {
+                c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[16px]', 'shadow-sm', 'm-1');
+                c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
+            });
+            return;
+        }
+
+        if (isListCollapsed) {
+            list.className = 'flex-1 overflow-x-auto overflow-y-hidden px-4 pb-4 pt-1 hide-scrollbar flex flex-row relative gap-3 min-h-0 snap-x snap-mandatory transition-all bg-white';
+            cards.forEach(c => {
+                c.classList.remove('w-full', 'border-b', 'pb-4', 'mb-4');
+                c.classList.add('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'border-gray-200', 'rounded-[20px]', 'shadow-sm', 'p-0.5'); 
+            });
+        } else {
+            list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
+            cards.forEach(c => {
+                c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[20px]', 'shadow-sm', 'p-0.5');
+                c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
+            });
+        }
+    }
+    
+    window.addEventListener('resize', applyListLayoutMode);
+
+    if(sheetHeader) {
+        sheetHeader.addEventListener('touchstart', (e) => {
+            if(window.innerWidth >= 768) return;
+            dragStartY = e.touches[0].clientY;
+            startHeight = sheetPanel.offsetHeight;
+            sheetPanel.style.transition = 'none';
+        }, {passive: true});
+
+        sheetHeader.addEventListener('touchmove', (e) => {
+            if(window.innerWidth >= 768 || dragStartY === null) return;
+            const dy = dragStartY - e.touches[0].clientY;
+            let newHeight = startHeight + dy;
+            
+            if (newHeight < window.innerHeight * 0.1) newHeight = window.innerHeight * 0.1;
+            if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
+            
+            sheetPanel.style.height = `${newHeight}px`;
+            document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 85px)`;
+        }, {passive: true});
+
+        sheetHeader.addEventListener('touchend', () => {
+            if(window.innerWidth >= 768 || dragStartY === null) return;
+            dragStartY = null;
+            sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            document.getElementById('fab-group').style.transition = 'bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            
+            const vh = window.innerHeight;
+            const currentH = sheetPanel.offsetHeight;
+            let targetHeight = '';
+            
+            if (currentH > vh * 0.6) { targetHeight = '85vh'; isListCollapsed = false; } 
+            else if (currentH < vh * 0.35) { targetHeight = '220px'; isListCollapsed = true; } 
+            else { targetHeight = '50vh'; isListCollapsed = false; }
+            
+            sheetPanel.style.height = targetHeight;
+            document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 85px)`;
+            
+            applyListLayoutMode();
+            setTimeout(() => { document.getElementById('fab-group').style.transition = ''; }, 300);
+        });
+    }
+
+    // --- Firebase 處理 ---
+    onAuthStateChanged(auth, user => { 
+        currentUser = user; 
+        if (user && !isGuest) listenToFavorites(user.uid);
     });
 
-    function useLocalDefaultSpots() {
-        allSpots = [
-            { id: 'spot_1', name: "台北 101", lat: 25.0339, lng: 121.5644, rating: 4.8, address: "台北市信義區信義路五段7號", desc: "台灣最具代表性的摩天大樓，觀景台可俯瞰整個台北市。", img: "https://images.unsplash.com/photo-1552993873-0aa1140e7041?q=80&w=800", phone: "02-8101-8800", website: "https://www.taipei-101.com.tw/" },
-            { id: 'spot_2', name: "淺草寺", lat: 35.7147, lng: 139.7966, rating: 4.7, address: "日本東京都台東區淺草二丁目", desc: "東京歷史最悠久的寺廟，著名的「雷門」燈籠是必拍景點。", img: "https://images.unsplash.com/photo-1532236204992-f5e85c0142ce?q=80&w=800", phone: "+81-3-3842-0181", website: "https://www.senso-ji.jp/" },
-            { id: 'spot_3', name: "玉山國家公園", lat: 23.4699, lng: 120.9572, rating: 4.9, address: "台灣南投縣信義鄉", desc: "台灣面積最大的國家公園，擁有豐富的自然生態與高山景觀。", img: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800", phone: "049-277-3121", website: "" }
-        ];
-        renderMapMarkers();
-        initMap();
-    }
-
-    function loadPublicSpots() {
-        const isLocalEnv = typeof __firebase_config === 'undefined';
-        const spotsCollection = isLocalEnv ? collection(db, 'spots') : collection(db, 'artifacts', appId, 'public', 'data', 'spots');
-
-        onSnapshot(spotsCollection, (snapshot) => {
-            if (snapshot.empty && allSpots.length === 0) {
-                useLocalDefaultSpots();
-            } else {
-                allSpots = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
-                        name: data.name || '未知景點',
-                        lat: data.lat || data.latitude,
-                        lng: data.lng || data.longitude,
-                        rating: data.rating || 4.5,
-                        address: data.address || '',
-                        desc: data.desc || data.description || '',
-                        img: data.img || data.image || data.imageUrl || 'https://via.placeholder.com/800x600',
-                        phone: data.phone || '',
-                        website: data.website || ''
-                    };
-                });
-                allSpots = allSpots.filter(s => s.lat && s.lng);
-                renderMapMarkers();
-                initMap();
-            }
-        }, () => {
-            useLocalDefaultSpots();
-        });
-    }
-
-    function loadUserFavorites() {
-        if (!currentUser) return;
-        const isLocalEnv = typeof __firebase_config === 'undefined';
-        const favRef = isLocalEnv 
-            ? collection(db, 'users', currentUser.uid, 'favorites') 
-            : collection(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites');
-
+    function listenToFavorites(userId) {
+        const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
         onSnapshot(favRef, (snapshot) => {
             userFavorites = new Set(snapshot.docs.map(doc => doc.id));
-            if (window.currentOpenSpotId) updateFavoriteUI(window.currentOpenSpotId);
-        }, () => {});
-    }
-
-    function renderMapMarkers() {
-        if (!mapInstance || !markersLayer) return;
-        markersLayer.clearLayers();
-
-        allSpots.forEach(spot => {
-            const iconHtml = `<div class="custom-marker-wrapper"><i class="${(spot.name||'').includes('山') ? 'fas fa-mountain' : 'fas fa-camera'}"></i></div>`;
-            const customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [36, 36], iconAnchor: [18, 36] });
-            
-            const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }).addTo(markersLayer);
-            marker.on('click', () => window.openSpotDetail(spot));
+            publicSpots.forEach(spot => updateFavoriteUI(spot.id));
         });
     }
 
-    // --- 面板互動邏輯 ---
-    window.openSpotDetail = function(spot) {
-        window.currentOpenSpotId = spot.id;
+    function updateFavoriteUI(spotId) {
+        const isFav = userFavorites.has(spotId);
+        const favBtn = document.getElementById('btn-favorite-spot');
+        if(favBtn) {
+           const icon = favBtn.querySelector('i');
+           icon.className = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-[#8796A5]';
+        }
+        const listFavBtnIcon = document.querySelector(`#list-fav-btn-${spotId} i`);
+        if (listFavBtnIcon) {
+            listFavBtnIcon.className = isFav ? 'fa-solid fa-heart text-[#E63946] text-[18px]' : 'fa-regular fa-heart text-[#8796A5] text-[18px]';
+        }
+    }
 
-        document.getElementById('spot-detail-title').textContent = spot.name;
-        document.getElementById('spot-detail-address').textContent = spot.address;
-        document.getElementById('spot-detail-desc').textContent = spot.desc;
-        document.getElementById('spot-detail-rating').textContent = spot.rating || '4.0';
-        document.getElementById('spot-detail-img').src = spot.img || 'https://via.placeholder.com/800x600';
+    function updateFavoriteCountUI(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+        document.querySelectorAll(`.fav-count-${spotId}`).forEach(el => el.innerText = spot.favoriteCount || 0);
+    }
+
+    window.toggleFavorite = async function(spotId) {
+        if (isGuest || !currentUser) { window.showToast("請先登入後才能使用收藏功能"); return; }
+
+        const isFav = userFavorites.has(spotId);
+        const spot = publicSpots.find(s => s.id === spotId);
+        
+        if (isFav) {
+            userFavorites.delete(spotId);
+            if (spot) spot.favoriteCount = Math.max(0, (spot.favoriteCount || 0) - 1);
+        } else {
+            userFavorites.add(spotId);
+            if (spot) spot.favoriteCount = (spot.favoriteCount || 0) + 1;
+        }
+        
+        updateFavoriteUI(spotId);
+        updateFavoriteCountUI(spotId);
+
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
+            if (isFav) await deleteDoc(docRef);
+            else await setDoc(docRef, { timestamp: Date.now() });
+
+            if (spot) {
+                const spotRef = doc(db, 'artifacts', appId, 'public', 'data', 'spots', spotId);
+                await updateDoc(spotRef, { favoriteCount: spot.favoriteCount });
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    function loadSpots() {
+      const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
+      onSnapshot(qSpots, (snapshot) => {
+        publicSpots = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderListAndMap(document.getElementById('input-explore-search') ? document.getElementById('input-explore-search').value : '');
+      });
+    }
+
+    function renderListAndMap(filter = '') {
+      const container = document.getElementById('explore-list');
+      if(!container) return;
+
+      let spots = publicSpots;
+      if (filter) {
+          const kw = filter.toLowerCase();
+          spots = spots.filter(s => (s.name || '').toLowerCase().includes(kw) || (s.address || s.subtitle || '').toLowerCase().includes(kw));
+      }
+
+      if (map) renderMarkersOnMap(spots);
+
+      if (spots.length === 0) {
+          container.innerHTML = `<div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] m-auto">未找到景點</div>`;
+          return;
+      }
+
+      container.innerHTML = [...spots].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(spot => {
+          const thumbnailHtml = spot.imageUrl
+              ? `<img src="${spot.imageUrl}" class="w-full h-full object-cover">`
+              : `<div class="w-full h-full bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-image text-gray-400"></i></div>`;
+
+          const isFav = userFavorites.has(spot.id);
+          const favIconClass = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-[#8796A5]';
+          const mockDistance = Math.floor(Math.random() * 800 + 100) + 'm'; 
+
+          return `
+          <div onclick="window.flyToSpot('${spot.id}')" class="spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group">
+             <div class="w-[130px] h-[130px] rounded-[16px] overflow-hidden relative shrink-0">
+                 ${thumbnailHtml}
+             </div>
+             <div class="flex-1 py-1 pr-1 flex flex-col min-w-0">
+                <div class="flex justify-between items-start">
+                   <h3 class="text-[17px] font-extrabold text-[#2C3E50] leading-tight pr-2 truncate">${spot.name}</h3>
+                   <button id="list-fav-btn-${spot.id}" onclick="event.stopPropagation(); window.toggleFavorite('${spot.id}')" class="p-1 -mt-1 -mr-1">
+                       <i class="${favIconClass} text-[18px] transition-transform active:scale-90"></i>
+                   </button>
+                </div>
+                <div class="text-[13px] text-[#8796A5] font-bold mt-0.5 flex items-center gap-1">
+                   <i class="fa-regular fa-heart text-[11px]"></i>
+                   <span class="fav-count-${spot.id}">${spot.favoriteCount || 0}</span>
+                   <span>·</span>
+                   <span>${mockDistance}</span>
+                </div>
+                <div class="mt-auto flex gap-2">
+                   <button onclick="event.stopPropagation(); window.showToast('排入行程');" class="bg-[#F5F7FA] hover:bg-gray-200 text-[#2C3E50] text-[13px] font-extrabold py-1.5 px-3.5 rounded-full flex items-center gap-1.5 transition-colors">
+                       <i class="fa-solid fa-plus text-[#E58F65]"></i> 行程
+                   </button>
+                   <button onclick="event.stopPropagation(); window.flyToSpot('${spot.id}');" class="bg-[#F5F7FA] hover:bg-gray-200 text-[#2C3E50] text-[13px] font-extrabold py-1.5 px-3.5 rounded-full flex items-center gap-1.5 transition-colors">
+                       <i class="fa-solid fa-location-dot text-[#A0ABB7]"></i> 位置
+                   </button>
+                </div>
+             </div>
+          </div>`;
+      }).join('');
+
+      applyListLayoutMode();
+    }
+
+    const searchInput = document.getElementById('input-explore-search');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => renderListAndMap(e.target.value));
+    }
+
+    window.showSpotDetail = function(spotId) {
+        const spot = publicSpots.find(s => s.id === spotId);
+        if (!spot) return;
+        const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[0];
+
+        if (spot.imageUrl) {
+            document.getElementById('detail-cover-image').style.backgroundImage = `url('${spot.imageUrl}')`;
+            document.getElementById('detail-cover-image').classList.remove('opacity-0');
+        } else {
+            document.getElementById('detail-cover-image').classList.add('opacity-0');
+        }
+
+        document.getElementById('detail-name').innerText = spot.name;
+        document.getElementById('detail-cat').innerText = locObj.label;
+
+        const fnContainer = document.getElementById('detail-foreign-names');
+        if (spot.foreignName1 || spot.foreignName2) {
+            fnContainer.classList.remove('hidden');
+            fnContainer.classList.add('flex');
+            document.getElementById('detail-foreign-1').innerText = spot.foreignName1 || '';
+            document.getElementById('detail-foreign-1').style.display = spot.foreignName1 ? 'block' : 'none';
+            document.getElementById('detail-foreign-2').innerText = spot.foreignName2 || '';
+            document.getElementById('detail-foreign-2').style.display = spot.foreignName2 ? 'block' : 'none';
+        } else {
+            fnContainer.classList.add('hidden');
+            fnContainer.classList.remove('flex');
+        }
+
+        document.getElementById('detail-address').innerText = spot.address || spot.subtitle || '無詳細地址';
+        
+        const descContainer = document.getElementById('detail-desc-container');
+        if (spot.description) {
+            document.getElementById('detail-desc').innerHTML = spot.description.replace(/\n/g, '<br>');
+            descContainer.classList.remove('hidden');
+            descContainer.classList.add('flex');
+        } else {
+            descContainer.classList.add('hidden');
+            descContainer.classList.remove('flex');
+        }
 
         const navBtn = document.getElementById('circle-nav-btn');
         if (spot.lat && spot.lng) navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
@@ -378,52 +618,27 @@
         else phoneBtn.style.display = 'none';
 
         updateFavoriteUI(spot.id);
-
         const favBtn = document.getElementById('btn-favorite-spot');
         favBtn.onclick = () => window.toggleFavorite(spot.id);
 
-        document.getElementById('spot-detail-panel').classList.remove('translate-y-full', 'md:translate-x-full');
-        document.getElementById('spot-detail-panel').classList.add('translate-y-0', 'md:translate-x-0');
+        document.getElementById('spot-detail-panel').classList.remove('translate-x-full');
     };
 
     window.closeSpotDetail = function() {
-        window.currentOpenSpotId = null;
-        document.getElementById('spot-detail-panel').classList.add('translate-y-full', 'md:translate-x-full');
-        document.getElementById('spot-detail-panel').classList.remove('translate-y-0', 'md:translate-x-0');
+        document.getElementById('spot-detail-panel').classList.add('translate-x-full');
     };
 
-    window.toggleFavorite = async function(spotId) {
-        if (!currentUser) {
-            alert("請先登入，即可使用收藏！");
-            return;
-        }
-        
-        const isLocalEnv = typeof __firebase_config === 'undefined';
-        const favDocRef = isLocalEnv 
-            ? doc(db, 'users', currentUser.uid, 'favorites', spotId)
-            : doc(db, 'artifacts', appId, 'users', currentUser.uid, 'favorites', spotId);
-
+    async function startApp() {
         try {
-            if (userFavorites.has(spotId)) {
-                await deleteDoc(favDocRef);
-            } else {
-                await setDoc(favDocRef, { savedAt: new Date().toISOString() });
-            }
-        } catch (error) {
-            console.error("更新收藏失敗:", error);
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+            else await signInAnonymously(auth);
+        } catch (e) {
+            console.warn('Firebase 匿名登入失敗', e);
         }
-    };
-
-    function updateFavoriteUI(spotId) {
-        const favIcon = document.getElementById('fav-icon-inner');
-        if (!favIcon) return;
-
-        if (userFavorites.has(spotId)) {
-            favIcon.classList.remove('text-gray-300');
-            favIcon.classList.add('text-red-500');
-        } else {
-            favIcon.classList.remove('text-red-500');
-            favIcon.classList.add('text-gray-300');
-        }
+        initMap(); 
+        loadSpots();
     }
+
+    // 確保 DOM 載入後再執行
+    setTimeout(startApp, 100);
 </script>
