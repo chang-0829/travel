@@ -1,32 +1,26 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 已移除重複的 Navbar，並修正高度計算 --> 
+<!-- ⚠️ 已徹底解決 CSS 污染與元件重疊問題 -->
 <!-- ========================================== -->
 
 <style>
-  /* 保留您的自訂字體與原生設定 */
+  /* 保留您的自訂字體與地圖核心設定，移除會污染全域的 safe-area 類別 */
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 
-  body { font-family: 'LINE Seed TW', ui-sans-serif, system-ui, sans-serif; background-color: #F2F5F8; }
-
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-  .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-  /* Leaflet 介面優化 */
+  /* 💡 修正重疊：縮小 margin-top 到 85px，確保與底部按鈕不衝突 */
   .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
   .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
+  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 85px !important; }
   
-  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 150px !important; }
   @media (min-width: 768px) {
       .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
   }
   
-  /* 💡 修正：因為外框已經完美避開導覽列，地圖底部直接貼齊 0 即可 */
   .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
   .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
@@ -57,23 +51,24 @@
 </style>
 
 <!-- Toast -->
-<div id="toast" class="fixed top-safe left-1/2 transform -translate-x-1/2 bg-[#2C3E50]/95 backdrop-blur-md text-white px-6 py-3.5 rounded-full shadow-2xl z-[2500] transition-all duration-400 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2.5 font-bold text-sm mt-2 border border-white/10">
+<div id="toast" class="fixed top-[env(safe-area-inset-top,20px)] left-1/2 transform -translate-x-1/2 bg-[#2C3E50]/95 backdrop-blur-md text-white px-6 py-3.5 rounded-full shadow-2xl z-[2500] transition-all duration-400 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2.5 font-bold text-sm mt-2 border border-white/10">
   <i class="fa-solid fa-circle-info text-[#748CAB]"></i> <span id="toast-msg">提示訊息</span>
 </div>
 
-<!-- 💡 核心解法：精準計算容器高度，強制停在手機導覽列 (4rem) 正上方，完美解決重疊！ -->
-<div class="absolute top-0 left-0 w-full h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] md:h-[100dvh] overflow-hidden flex bg-[#EAEAEA] z-0 fade-in">
+<!-- 💡 核心外框：精準扣除手機版底部 Navbar 高度 (4rem)，保證地圖不被蓋住且不會覆寫全域 CSS -->
+<div class="absolute top-0 left-0 w-full bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 overflow-hidden flex flex-col bg-[#EAEAEA] z-0 fade-in" style="font-family: 'LINE Seed TW', sans-serif;">
 
   <!-- 地圖容器 -->
   <div id="map" class="absolute inset-0 z-0"></div>
 
   <!-- 疊加 UI 區塊 -->
+  <!-- 💡 使用 inline style 處理安全區，徹底消除對 index.html 的 CSS 污染 -->
   <div class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-2 md:pb-6">
      
      <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
         
         <!-- ====== 頂部搜尋與篩選 ====== -->
-        <div class="px-4 md:px-6 pt-safe md:pt-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3">
+        <div class="px-4 md:px-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3" style="padding-top: max(16px, env(safe-area-inset-top));">
            <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
               <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
                   選地區 <i class="fa-solid fa-caret-down text-[11px] mt-0.5"></i>
@@ -134,7 +129,7 @@
      </div>
   </div>
 
-  <!-- 💡 修正：定位按鈕基準點調整，16px 是距離底部卡片的間距，絕不重疊 -->
+  <!-- 💡 定位按鈕基準點鎖定在底板上方 16px -->
   <div id="fab-group" class="absolute bottom-[calc(48vh+16px)] md:bottom-8 right-4 md:right-8 z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
      <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
         <i class="fa-solid fa-location-crosshairs"></i>
@@ -149,7 +144,7 @@
            <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
            <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
            <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-20 pointer-events-none"></div>
-           <button onclick="window.closeSpotDetail()" class="absolute top-safe md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30 active:scale-95 transition-all">
+           <button onclick="window.closeSpotDetail()" class="absolute top-[env(safe-area-inset-top,20px)] md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30 active:scale-95 transition-all">
               <i class="fa-solid fa-chevron-left text-lg md:hidden"></i>
               <i class="fa-solid fa-xmark text-xl hidden md:block"></i>
            </button>
@@ -209,7 +204,8 @@
      </div>
 
      <!-- 底部按鈕 -->
-     <div class="absolute bottom-0 w-full p-4 md:p-6 bg-white/95 backdrop-blur-md border-t border-[#E6EBEF]/50 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20">
+     <!-- 💡 同樣利用 inline style 避開 CSS 污染 -->
+     <div class="absolute bottom-0 w-full p-4 md:p-6 bg-white/95 backdrop-blur-md border-t border-[#E6EBEF]/50 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20" style="padding-bottom: max(16px, env(safe-area-inset-bottom));">
         <button id="btn-add-to-trip" class="w-full py-4 bg-[#748CAB] text-white text-[15px] font-bold rounded-[20px] shadow-lg shadow-[#748CAB]/30 active:scale-95 transition-all flex items-center justify-center gap-2">
            <i class="fa-solid fa-plus text-lg"></i> 將景點加入行程
         </button>
@@ -276,10 +272,7 @@
       const mapEl = document.getElementById('map');
       if (!mapEl) return;
       
-      // 💡 關鍵清除殘留設定，避免 SPA 報錯
-      if (mapEl._leaflet_id) {
-          mapEl._leaflet_id = null;
-      }
+      if (mapEl._leaflet_id) { mapEl._leaflet_id = null; }
 
       const streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
           attribution: '&copy; Google Maps', maxZoom: 20, keepBuffer: 4, updateWhenIdle: true
@@ -290,10 +283,7 @@
 
       markersLayer = L.layerGroup().addTo(map);
       
-      // 💡 終極解法：加入 ResizeObserver 永久杜絕灰屏問題
-      const resizeObserver = new ResizeObserver(() => {
-          if (map) map.invalidateSize();
-      });
+      const resizeObserver = new ResizeObserver(() => { if (map) map.invalidateSize(); });
       resizeObserver.observe(mapEl);
 
       map.on('locationfound', function(e) {
@@ -353,7 +343,6 @@
       window.showSpotDetail(spotId);
   };
 
-  // ========== 手機版清單佈局切換與拖曳 ==========
   const sheetPanel = document.getElementById('mobile-list-panel');
   const sheetHeader = document.getElementById('sheet-header');
   let dragStartY = null;
@@ -407,7 +396,6 @@
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
         
         sheetPanel.style.height = `${newHeight}px`;
-        // 💡 修正 3：讓定位按鈕精準跟隨底板，不會蓋住
         document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 16px)`;
     }, {passive: true});
 
@@ -440,7 +428,6 @@
     });
   }
 
-  // ========== 收藏邏輯 ==========
   function listenToFavorites(userId) {
       const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
       onSnapshot(favRef, (snapshot) => {
@@ -504,7 +491,7 @@
       }
   };
 
-  // ========== 資料載入 (已移除所有假資料) ==========
+  // 💡 100% 只載入 Firebase 真實資料，已移除所有假資料
   function loadSpots() {
     const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
     onSnapshot(qSpots, (snapshot) => {
@@ -582,7 +569,6 @@
       searchInput.addEventListener('input', (e) => renderListAndMap(e.target.value));
   }
 
-  // ========== 詳情面板相關 ==========
   window.showSpotDetail = function(spotId) {
       const spot = publicSpots.find(s => s.id === spotId);
       if (!spot) return;
