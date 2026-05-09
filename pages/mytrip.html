@@ -1,9 +1,34 @@
 <!-- ========================================== -->
-<!-- 行程工坊 (pages/mytrip.html) -->
-<!-- ⚠️ 已修正佈局，解開寬度限制，徹底刪除重複選單 -->
+<!-- 我的行程 (pages/mytrip.html) -->
+<!-- ⚠️ 已移除字體污染、獨立選單，並適配 SPA 滿版佈局 -->
 <!-- ========================================== -->
 
+<script>
+  // 💡 保留 Tailwind 擴充，確保 brand 專屬色彩與透明度能正常解析
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            primary: '#748CAB',
+            dark: '#3E5C76',
+            light: '#E6EBEF',
+            bg: '#F2F5F8',
+            card: '#FFFFFF',
+            textMain: '#2C3E50',
+            textSub: '#8796A5',
+            accent: '#D5896F' 
+          }
+        }
+      }
+    }
+  }
+</script>
+
 <style>
+  /* --- 僅保留組件專屬樣式，已刪除字體宣告 --- */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
   input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   
@@ -15,6 +40,9 @@
   .overlay.closed { opacity: 0; pointer-events: none; }
   textarea { resize: none; overflow: hidden; }
   
+  .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
+
   /* 表單 UI 樣式 */
   .form-card { background: #FFFFFF; border-radius: 20px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid rgba(230,235,239,0.8); }
   .form-input { width: 100%; background: #F8FAFC; border: 1px solid transparent; border-radius: 12px; padding: 12px 16px; font-size: 15px; font-weight: 700; color: #2C3E50; outline: none; transition: all 0.2s ease; }
@@ -26,15 +54,15 @@
 </style>
 
 <!-- 提示訊息 -->
-<div id="toast" class="fixed top-[env(safe-area-inset-top,20px)] left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[2500] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
+<div id="toast" class="fixed top-[max(16px,env(safe-area-inset-top))] left-1/2 transform -translate-x-1/2 bg-brand-textMain text-white px-6 py-3 rounded-full shadow-2xl z-[2500] transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 flex items-center gap-2 font-bold text-sm mt-2">
   <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg">成功！</span>
 </div>
 
-<!-- 💡 核心修正：移除 max-w-md mx-auto，改為 w-full h-full，完美填滿 SPA 內容區 -->
+<!-- 💡 核心修正：移除 max-w-md，改為 w-full h-full 完美填滿 SPA 內容區 -->
 <div class="w-full h-full bg-brand-bg relative flex flex-col fade-in overflow-hidden">
 
   <!-- Header 1: 行程列表 (預設顯示) -->
-  <header id="header-standard" class="bg-brand-bg pt-[max(16px,env(safe-area-inset-top))] pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
+  <header id="header-standard" class="bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
     <div>
       <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">My Trip</p>
       <h1 class="text-3xl font-extrabold text-brand-dark tracking-tight">我的行程</h1>
@@ -45,7 +73,7 @@
   </header>
 
   <!-- Header 2: 行程詳細內容 (預設隱藏) -->
-  <header id="header-itinerary" class="hidden bg-brand-bg pt-[max(16px,env(safe-area-inset-top))] pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
+  <header id="header-itinerary" class="hidden bg-brand-bg pt-safe pb-2 px-4 shrink-0 flex justify-between items-center border-b border-brand-light z-10">
     <button onclick="window.switchView('plans')" class="w-10 h-10 mt-2 flex items-center justify-center text-brand-dark hover:text-brand-primary transition-colors">
       <i class="fa-solid fa-chevron-left text-xl"></i>
     </button>
@@ -64,7 +92,7 @@
   </header>
 
   <!-- Header 3: 行程設定 (預設隱藏) -->
-  <header id="header-setup" class="hidden bg-brand-bg pt-[max(16px,env(safe-area-inset-top))] pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
+  <header id="header-setup" class="hidden bg-brand-bg pt-safe pb-4 px-6 shrink-0 flex justify-between items-end border-b border-brand-light z-10 transition-all">
     <div>
       <p class="text-sm font-bold text-brand-primary mb-1 uppercase tracking-widest mt-2">Setup</p>
       <h1 id="header-setup-title" class="text-3xl font-extrabold text-brand-dark tracking-tight">行程設定</h1>
@@ -75,9 +103,10 @@
   </header>
 
   <!-- 主內容 1: 行程列表 -->
-  <!-- 💡 因為 SPA 底部已經有 Navbar (並且利用 pb-16 讓出空間了)，這裡只需保留基本的 pb-6 -->
-  <div id="view-plans" class="flex-1 overflow-y-auto px-6 pb-6 hide-scrollbar relative pt-2">
+  <!-- 💡 修正 padding-bottom 確保不被全域 Navbar 蓋住 -->
+  <div id="view-plans" class="flex-1 overflow-y-auto px-6 pb-[calc(85px+env(safe-area-inset-bottom))] hide-scrollbar relative pt-2">
     <div id="plans-list" class="space-y-4 mt-4">
+      <!-- JS 渲染區 -->
       <div class="py-12 text-center text-brand-textSub opacity-50"><i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i><p class="font-bold text-sm">載入中...</p></div>
     </div>
     <button onclick="window.openSetup(null)" class="w-full mt-6 py-4 border-2 border-dashed border-brand-primary text-brand-primary font-bold rounded-[20px] hover:bg-brand-light transition-all flex justify-center items-center gap-2">
@@ -90,12 +119,12 @@
     <div class="px-6 py-3 shrink-0 border-b border-brand-light bg-brand-bg z-10">
       <div id="days-tabs" class="flex overflow-x-auto gap-3 snap-x hide-scrollbar pb-1"></div>
     </div>
-    <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-24 pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
+    <div id="timeline-container" class="flex-1 overflow-y-auto px-2 pb-[calc(100px+env(safe-area-inset-bottom))] pt-6 relative bg-brand-card mx-2 mt-2 border border-transparent">
       <!-- 時間軸渲染區 -->
     </div>
     
     <!-- 浮動新增按鈕 -->
-    <div id="fab-container" class="absolute bottom-6 right-6 z-20 pointer-events-none hidden transition-transform scale-0 duration-300">
+    <div id="fab-container" class="absolute bottom-[calc(85px+env(safe-area-inset-bottom))] right-6 z-20 pointer-events-none hidden transition-transform scale-0 duration-300">
       <button onclick="window.showAddMenu('main')" class="pointer-events-auto w-14 h-14 bg-brand-primary text-brand-card rounded-full shadow-lg shadow-brand-primary/30 flex items-center justify-center text-2xl hover:bg-brand-dark active:scale-95 transition-all">
         <i class="fa-solid fa-plus"></i>
       </button>
@@ -103,7 +132,7 @@
   </div>
 
   <!-- 主內容 3: 行程設定 (建立/編輯表單) -->
-  <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-12 hide-scrollbar bg-brand-bg">
+  <div id="view-setup" class="hidden flex-1 overflow-y-auto px-4 pb-[calc(100px+env(safe-area-inset-bottom))] hide-scrollbar bg-brand-bg">
     <form id="form-setup" class="space-y-6 mt-4">
       <!-- 基礎設定 -->
       <div class="bg-white p-4 rounded-[24px] border border-brand-light shadow-sm space-y-3">
@@ -242,14 +271,15 @@
       </div>
     </div>
   </div>
+
 </div>
 
-<!-- ================= MODALS & SHEETS ================= -->
+<!-- ================= MODALS & SHEETS (保留原本強大的互動視窗) ================= -->
+<!-- 💡 提升 z-index 確保蓋過全域 Navbar -->
 <div id="modal-overlay" onclick="window.closeAllModals()" class="overlay closed fixed inset-0 z-[1050] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
 
 <!-- 1. 新增項目選單 -->
 <div id="sheet-add-menu" class="bottom-sheet closed fixed inset-x-0 bottom-0 z-[1052] flex flex-col justify-end pointer-events-none">
-  <!-- 💡 Modal 內部才需要 max-w-md mx-auto 以保持置中 -->
   <div class="pointer-events-auto relative bg-brand-bg w-full md:max-w-md mx-auto rounded-t-[32px] shadow-2xl flex flex-col pb-safe max-h-[85vh]">
     <div class="w-12 h-1.5 bg-brand-light rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
     <div class="px-6 py-4 flex justify-between items-center shrink-0 border-b border-brand-light/50">
@@ -290,7 +320,7 @@
     </div>
     <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
       
-      <!-- 已選定的鎖定地點卡片 -->
+      <!-- 已選定的鎖定地點卡片 (從公共庫帶入) -->
       <div id="group-selected-spot" class="hidden bg-brand-primary/5 border border-brand-primary/20 rounded-[20px] p-4 relative overflow-hidden">
           <span class="block text-[12px] font-bold text-brand-primary mb-2 pl-1">已選定景點</span>
           <div class="flex items-center gap-3">
@@ -334,6 +364,7 @@
       </div>
       
       <div id="group-dynamic-fields" class="form-card hidden">
+          <!-- 轉乘/直通欄位 -->
           <div id="group-transfer-fields" class="hidden flex flex-col gap-3 relative">
              <div class="form-row"><div><span class="form-label">原本搭乘路線</span><input type="text" id="input-trans-lineA" class="form-input"></div><div><span class="form-label">轉乘搭乘路線</span><input type="text" id="input-trans-lineB" class="form-input"></div></div>
              <div class="form-row"><div><span class="form-label">下車站名</span><input type="text" id="input-trans-staA" class="form-input"></div><div><span class="form-label">上車站名</span><input type="text" id="input-trans-staB" class="form-input"></div></div>
@@ -434,12 +465,12 @@
 </div>
 
 <script type="module">
-  import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
   import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
   import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
   const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
-  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp(); 
+  const app = initializeApp(firebaseConfig); 
   const auth = getAuth(app); 
   const db = getFirestore(app); 
   const appId = typeof __app_id !== 'undefined' ? __app_id : "travel-platform-v2";
@@ -467,7 +498,6 @@
     tripData: { title: '', startDate: '', days: 3, accommodations: [], itinerary: {} }
   };
 
-  // 清除舊的監聽器避免 SPA 重複觸發
   if (window._mytripPlansUnsubscribe) window._mytripPlansUnsubscribe();
 
   function safeSet(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
@@ -483,7 +513,6 @@
     setTimeout(() => { el.classList.remove('opacity-100', 'translate-y-0'); el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none'); }, 3000);
   }
 
-  // Auth & Data loading
   onAuthStateChanged(auth, async (user) => {
     if (!user && !state.isGuest) {
         try { await signInAnonymously(auth); } catch(e) { console.error(e); }
@@ -491,7 +520,6 @@
     }
     state.user = user;
     
-    // Load Public Spots
     if(state.isGuest) {
         const localSpots = localStorage.getItem('guest_spots');
         state.publicSpots = localSpots ? JSON.parse(localSpots) : [];
@@ -501,7 +529,6 @@
         });
     }
 
-    // Load Plans
     if (state.isGuest) {
       const localPlans = localStorage.getItem('guest_plans');
       state.plans = localPlans ? JSON.parse(localPlans) : [];
@@ -518,18 +545,20 @@
     }
   });
 
-  // 視圖切換
   window.switchView = function(viewName) {
       ['plans', 'itinerary', 'setup'].forEach(v => {
-          document.getElementById(`view-${v}`).classList.add('hidden');
-          document.getElementById(`header-${v === 'plans' ? 'standard' : v}`).classList.add('hidden');
+          const viewEl = document.getElementById(`view-${v}`);
+          const headerEl = document.getElementById(`header-${v === 'plans' ? 'standard' : v}`);
+          if(viewEl) viewEl.classList.add('hidden');
+          if(headerEl) headerEl.classList.add('hidden');
       });
       
-      document.getElementById(`view-${viewName}`).classList.remove('hidden');
-      document.getElementById(`header-${viewName === 'plans' ? 'standard' : viewName}`).classList.remove('hidden');
+      const targetView = document.getElementById(`view-${viewName}`);
+      const targetHeader = document.getElementById(`header-${viewName === 'plans' ? 'standard' : viewName}`);
+      if(targetView) targetView.classList.remove('hidden');
+      if(targetHeader) targetHeader.classList.remove('hidden');
   }
 
-  // 渲染行程列表
   function renderPlansList() {
     const container = document.getElementById('plans-list');
     if(!container) return;
@@ -847,7 +876,6 @@
     html += '</div>'; container.innerHTML = html;
   }
 
-  // 展開詳細交通內容
   window.viewTransit = function(itemsJson) {
       const items = JSON.parse(decodeURIComponent(itemsJson));
       const container = document.getElementById('transit-detail-container'); const isEdit = state.isEditMode;
