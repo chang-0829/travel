@@ -1,14 +1,18 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 定位按鈕整合、精準置中定位、智能全展開直角 -->
+<!-- ⚠️ 僅修正 #discover-page-root 避開底部導覽列 -->
 <!-- ========================================== -->
 
 <style>
-  /* 💡 統一依賴全域字體與外框，不污染其他頁面 */
+  /* 💡 核心修正：將 bottom 設定為全域導覽列的高度 (65px + 底部安全區)，完美避開遮擋！ */
   #discover-page-root {
-      position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+      position: absolute; top: 0; left: 0; right: 0;
+      bottom: calc(65px + max(12px, env(safe-area-inset-bottom))); 
       z-index: 10; touch-action: none; overscroll-behavior: none;
       background-color: #EAEAEA;
+  }
+  @media (min-width: 768px) { 
+      #discover-page-root { bottom: 0; } /* 電腦版沒有底部選單，所以貼齊底端 */
   }
 
   .allow-scroll-y { touch-action: pan-y; overscroll-behavior: contain; }
@@ -17,31 +21,30 @@
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* 💡 Leaflet 按鈕樣式整合 (+ / - / 定位) */
-  #discover-page-root .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 170px !important; }
-  @media (min-width: 768px) { #discover-page-root .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; } }
+  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 170px !important; }
+  @media (min-width: 768px) { .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; } }
   
-  #discover-page-root .leaflet-control-custom { border: none !important; margin-right: 16px !important; margin-top: 0 !important; box-shadow: none !important; background: transparent !important; }
-  @media (min-width: 768px) { #discover-page-root .leaflet-control-custom { margin-right: 24px !important; } }
+  .leaflet-control-custom { border: none !important; margin-right: 16px !important; margin-top: 0 !important; box-shadow: none !important; background: transparent !important; }
+  @media (min-width: 768px) { .leaflet-control-custom { margin-right: 24px !important; } }
 
-  #discover-page-root .leaflet-control-zoom a, 
-  #discover-page-root .leaflet-control-custom a { 
+  .leaflet-control-zoom a, 
+  .leaflet-control-custom a { 
       color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; 
       box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; 
       backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; 
       width: 36px !important; height: 36px !important; display: flex !important; align-items: center; justify-content: center;
       text-decoration: none; cursor: pointer;
   }
-  #discover-page-root .leaflet-control-zoom a:hover, 
-  #discover-page-root .leaflet-control-custom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
+  .leaflet-control-zoom a:hover, 
+  .leaflet-control-custom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
 
-  #discover-page-root .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
-  #discover-page-root .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
+  .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
+  .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
-  #discover-page-root .custom-marker { background: transparent; border: none; }
-  #discover-page-root .marker-pin { width: 44px; height: 44px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #1890FF 0%, #0050B3 100%); border: 3px solid #FFFFFF; box-shadow: 0 6px 16px rgba(0, 80, 179, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  #discover-page-root .marker-pin i { transform: rotate(45deg); color: white; font-size: 16px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
-  #discover-page-root .marker-pin:hover { transform: rotate(-45deg) scale(1.15) translateY(-6px); z-index: 1000 !important; box-shadow: 0 12px 24px rgba(0, 80, 179, 0.4); }
+  .custom-marker { background: transparent; border: none; }
+  .marker-pin { width: 44px; height: 44px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #1890FF 0%, #0050B3 100%); border: 3px solid #FFFFFF; box-shadow: 0 6px 16px rgba(0, 80, 179, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .marker-pin i { transform: rotate(45deg); color: white; font-size: 16px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+  .marker-pin:hover { transform: rotate(-45deg) scale(1.15) translateY(-6px); z-index: 1000 !important; box-shadow: 0 12px 24px rgba(0, 80, 179, 0.4); }
   #spot-detail-panel { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 </style>
 
@@ -99,7 +102,6 @@
   </div>
 
   <!-- ================= 3. 中層：橫向滾動的卡片 ================= -->
-  <!-- 💡 當底板縮到 75px 時，這個橫向清單就會自然顯露出來供操作 -->
   <div id="carousel-container" class="absolute bottom-[75px] left-0 right-0 z-[350] pointer-events-auto md:hidden overflow-hidden">
       <div id="carousel-list" class="flex overflow-x-auto gap-3 px-4 pb-4 pt-4 snap-x snap-mandatory hide-scrollbar allow-scroll-x">
           <!-- 橫向卡片由 JS 生成 -->
@@ -140,10 +142,6 @@
            <div class="bg-white p-4 rounded-[20px] border border-[#E6EBEF] shadow-sm flex items-start gap-3.5"><div class="w-8 h-8 rounded-full bg-[#748CAB]/10 text-[#748CAB] flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot text-[15px]"></i></div><span id="detail-address" class="flex-1 text-[14px] font-extrabold text-[#3E5C76] leading-relaxed mt-1"></span></div>
            <div id="detail-desc-container" class="hidden bg-white p-5 rounded-[24px] border border-[#E6EBEF] shadow-sm flex-col gap-3"><h3 class="text-[14px] font-extrabold text-[#8796A5] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-file-lines text-[#748CAB]"></i> 介紹與備註</h3><p id="detail-desc" class="text-[14px] text-[#2C3E50] font-medium leading-loose whitespace-pre-wrap"></p></div>
         </div>
-     </div>
-
-     <div class="absolute bottom-0 w-full p-4 md:p-6 bg-white/95 backdrop-blur-md border-t border-[#E6EBEF]/50 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20" style="padding-bottom: max(16px, env(safe-area-inset-bottom));">
-        <button id="btn-add-to-trip" class="w-full py-4 bg-[#748CAB] text-white text-[15px] font-bold rounded-[20px] shadow-lg shadow-[#748CAB]/30 active:scale-95 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-plus text-lg"></i> 將景點加入行程</button>
      </div>
   </div>
 </div>
@@ -192,7 +190,6 @@
       map = L.map('map', { zoomControl: false, layers: [streetLayer] }).setView([23.5, 121], 13); 
       L.control.zoom({ position: 'topright' }).addTo(map); markersLayer = L.layerGroup().addTo(map);
       
-      // 💡 修正 3：加入原生 Leaflet Controller 定位按鈕，精準掛載在 +/- 按鈕下方
       const LocateControl = L.Control.extend({
           options: { position: 'topright' },
           onAdd: function () {
@@ -205,7 +202,6 @@
 
       const resizeObserver = new ResizeObserver(() => { if (map) map.invalidateSize(); }); resizeObserver.observe(mapEl);
 
-      // 💡 修正 5：將 carousel-container 也加入禁止地圖穿透的名單，操作時地圖絕對靜止
       const uiPanels = [document.getElementById('mobile-list-panel'), document.getElementById('top-bar-ui'), document.getElementById('spot-detail-panel'), document.getElementById('carousel-container')];
       uiPanels.forEach(panel => { if (panel) { L.DomEvent.disableClickPropagation(panel); L.DomEvent.disableScrollPropagation(panel); } });
 
@@ -220,7 +216,6 @@
           map.flyTo(e.latlng, 15, { duration: 1 });
       });
 
-      // 點擊地圖空白處，自動將底板彈回 200px
       map.on('click', function() { 
           if(listState === 'min') window.collapseBottomSheet(); 
       });
@@ -249,15 +244,13 @@
       if (isFirstLoad && validCoords.length > 0) { map.setView(validCoords[0], 14); isFirstLoad = false; }
   }
 
-  // 💡 修正 3：定位點絕對置中，並觸發底板最小化
   window.jumpToSpotLocation = function(spotId) {
       const spot = publicSpots.find(s => s.id === spotId); if (!spot || !map) return;
       if (spot.lat && spot.lng) { 
-          // 移除高度偏移，精準置中
           map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 }); 
       }
       if (window.innerWidth < 768) {
-          window.minimizeBottomSheet(); // 降到 75px
+          window.minimizeBottomSheet();
           const carouselCard = document.getElementById(`carousel-card-${spot.id}`);
           if (carouselCard) { carouselCard.scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
       } else { window.showSpotDetail(spotId); }
@@ -266,7 +259,6 @@
   window.onMarkerClick = function(spotId) { window.jumpToSpotLocation(spotId); };
   window.onListClick = function(spotId) { window.showSpotDetail(spotId); };
 
-  // 💡 修正 4：智慧判斷圓角/直角 (避免文字或把手被吃掉)
   function updateSheetCorners(isFull) {
       const panel = document.getElementById('mobile-list-panel'); const header = document.getElementById('sheet-header');
       if (!panel || !header) return;
@@ -274,7 +266,6 @@
       else { panel.classList.add('rounded-t-[32px]'); header.classList.add('rounded-t-[32px]'); }
   }
 
-  // 精準獲取可用最大高度
   function getMaxSheetHeight() {
       const wrapper = document.getElementById('ui-overlay').firstElementChild;
       const topBar = document.getElementById('top-bar-ui');
@@ -295,7 +286,6 @@
       sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; sheetPanel.style.height = `${targetHeight}px`;
   };
 
-  // 💡 降至 75px (只露出把手與標題，展露後方的橫向清單)
   window.minimizeBottomSheet = function() {
       if(window.innerWidth >= 768) return;
       const targetHeight = 75; listState = 'min'; updateSheetCorners(false);
@@ -331,10 +321,9 @@
         const dy = dragStartY - e.touches[0].clientY; let newHeight = startHeight + dy;
         const maxH = getMaxSheetHeight();
         
-        if (newHeight < 75) newHeight = 75; // 限制最小拖曳高度
+        if (newHeight < 75) newHeight = 75; 
         if (newHeight > maxH) newHeight = maxH;
         
-        // 靠近頂部自動切換直角
         if (newHeight >= maxH - 10) { updateSheetCorners(true); } else { updateSheetCorners(false); }
         sheetPanel.style.height = `${newHeight}px`; 
     }, {passive: false});
@@ -346,7 +335,6 @@
         const maxH = getMaxSheetHeight();
         const currentH = sheetPanel.offsetHeight; let targetHeight = 0;
         
-        // 💡 三段式 Snap 邏輯：超過 60% 就全開，大於 130 變 200，小於 130 就縮合
         if (currentH > maxH * 0.6) { targetHeight = maxH; listState = 'full'; updateSheetCorners(true); } 
         else if (currentH > 130) { targetHeight = 200; listState = 'mid'; updateSheetCorners(false); }
         else { targetHeight = 75; listState = 'min'; updateSheetCorners(false); }
@@ -419,7 +407,6 @@
         const thumbnailHtml = spot.imageUrl ? `<img src="${spot.imageUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-image text-gray-400"></i></div>`;
         const isFav = userFavorites.has(spot.id); const favIconClass = isFav ? 'fa-solid fa-heart text-[#E63946]' : 'fa-regular fa-heart text-[#8796A5]';
 
-        // 垂直清單的卡片 (無距離)
         listHtml += `
         <div onclick="window.onListClick('${spot.id}')" class="w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-3">
            <div class="w-[100px] h-[100px] rounded-[16px] overflow-hidden relative shrink-0">${thumbnailHtml}</div>
@@ -438,7 +425,6 @@
            </div>
         </div>`;
 
-        // 💡 橫向 Carousel 的卡片 (無距離)
         carouselHtml += `
         <div id="carousel-card-${spot.id}" onclick="window.onListClick('${spot.id}')" class="w-[85vw] max-w-[340px] shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group snap-center border border-gray-200 rounded-[20px] shadow-sm p-3">
            <div class="w-[100px] h-[100px] rounded-[16px] overflow-hidden relative shrink-0">${thumbnailHtml}</div>
