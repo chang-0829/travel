@@ -1,6 +1,6 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 已修正第一段高度不一致的問題，統一為 160px -->
+<!-- ⚠️ 已修正為兩段式滑動，並更新首頁底板高度與UI -->
 <!-- ========================================== -->
 
 <style>
@@ -75,19 +75,17 @@
 
         <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-        <!-- 💡 統一高度設定：載入時直接設為 160px，與 JS 第 1 段完全一致 -->
-        <div id="mobile-list-panel" class="h-[160px] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
+        <!-- 💡 初始高度設定為 240px，讓第一筆卡片能完整顯示 -->
+        <div id="mobile-list-panel" class="h-[240px] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
            
            <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none">
               <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
               <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
-                 <button class="font-extrabold text-[#3E5C76] text-[16px] flex items-center gap-1.5 hover:text-[#748CAB] transition-colors">
-                    <i class="fa-solid fa-arrow-down-up-across-line text-[14px]"></i> <span>推薦</span>
-                 </button>
-                 <div class="flex gap-4 text-[#8796A5] text-[18px]">
-                    <i class="fa-solid fa-border-all cursor-pointer hover:text-[#3E5C76] transition-colors"></i>
-                    <i class="fa-solid fa-list cursor-pointer text-[#3E5C76] transition-colors"></i>
+                 <!-- 💡 變更標題文字與圖標 -->
+                 <div class="font-extrabold text-[#3E5C76] text-[16px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-[14px]"></i> <span>探索景點</span>
                  </div>
+                 <!-- 💡 已移除右側網格/清單切換圖示 -->
               </div>
            </div>
 
@@ -107,8 +105,8 @@
      </div>
   </div>
 
-  <!-- 💡 定位按鈕也對齊 160px -->
-  <div id="fab-group" class="absolute bottom-[calc(160px+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300 origin-bottom scale-100 opacity-100">
+  <!-- 💡 定位按鈕初始底距改為 240px + 16px -->
+  <div id="fab-group" class="absolute bottom-[calc(240px+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300 origin-bottom scale-100 opacity-100">
      <button onclick="event.preventDefault(); window.locateUser(false);" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
         <i class="fa-solid fa-location-crosshairs"></i>
      </button>
@@ -310,7 +308,7 @@
 
   window.collapseBottomSheet = function() {
       if(window.innerWidth >= 768) return;
-      const targetHeight = 160; listState = 'collapsed';
+      const targetHeight = 240; listState = 'collapsed';
       sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
       sheetPanel.style.height = `${targetHeight}px`;
 
@@ -323,6 +321,12 @@
   const listEl = document.getElementById('explore-list');
   const fabGroup = document.getElementById('fab-group');
   let dragStartY = null; let startHeight = 0;
+
+  if (listEl) {
+      listEl.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
+      listEl.addEventListener('touchmove', (e) => e.stopPropagation(), {passive: true});
+      listEl.addEventListener('touchend', (e) => e.stopPropagation(), {passive: true});
+  }
 
   function applyListLayoutMode() {
       const cards = document.querySelectorAll('.spot-card'); if(!listEl) return;
@@ -360,10 +364,9 @@
         
         const vh = window.innerHeight; const currentH = sheetPanel.offsetHeight; let targetHeight = 0;
         
-        // 💡 確保這三個段落與第一段 160px 呼應
-        if (currentH > vh * 0.6) { targetHeight = vh - 100; listState = 'full'; } 
-        else if (currentH < vh * 0.35) { targetHeight = 160; listState = 'collapsed'; } 
-        else { targetHeight = vh * 0.55; listState = 'half'; }
+        // 💡 修正 2：改為俐落的兩段式，超過 40% 高度就全開，否則縮合到 240px
+        if (currentH > vh * 0.4) { targetHeight = vh - 100; listState = 'full'; } 
+        else { targetHeight = 240; listState = 'collapsed'; }
         
         sheetPanel.style.height = `${targetHeight}px`; fabGroup.style.bottom = `calc(${targetHeight}px + 16px)`;
         setTimeout(() => { fabGroup.style.transition = ''; }, 300);
