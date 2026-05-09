@@ -1,18 +1,15 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 實心頂部搜尋列、打字自動展開底板 -->
+<!-- ⚠️ 已修復收藏功能、定位按鈕邏輯，並加入全展開直角效果 -->
 <!-- ========================================== -->
 
 <style>
-  @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Th.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
-  @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-  @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-
+  /* 💡 已移除多餘字體設定，統一使用系統字體 */
   #discover-page-root {
       position: fixed; top: 0; left: 0; width: 100%;
       height: calc(100dvh - 4rem - env(safe-area-inset-bottom));
       z-index: 10; touch-action: none; overscroll-behavior: none;
-      background-color: #EAEAEA; font-family: 'LINE Seed TW', sans-serif;
+      background-color: #EAEAEA;
   }
   @media (min-width: 768px) { #discover-page-root { left: 4.5rem; width: calc(100% - 4.5rem); height: 100dvh; } }
 
@@ -23,10 +20,9 @@
   .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-  /* 💡 縮放按鈕再往下推一點，避開實心的頂部區域 */
   .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
   .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
-  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 150px !important; }
+  .leaflet-control-zoom { border: none !important; margin-right: 16px !important; margin-top: 140px !important; }
   @media (min-width: 768px) { .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; } }
   
   .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
@@ -50,10 +46,7 @@
   <div id="ui-overlay" class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-0 md:pb-6">
      <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
         
-        <!-- 💡 修正 1：改為實心白色背景 (bg-white)，並加入底部陰影 (shadow-sm) -->
         <div id="top-bar-ui" class="bg-white px-4 md:px-6 pb-3 shrink-0 pointer-events-auto flex flex-col gap-3 shadow-sm relative z-20" style="padding-top: max(12px, env(safe-area-inset-top));">
-           
-           <!-- 💡 修正：搜尋框改為淺灰底，不再有背景模糊和白色邊框 -->
            <div class="bg-[#F2F5F8] rounded-[16px] border border-[#E6EBEF] flex items-center px-4 py-3 group mt-1">
               <div class="flex items-center gap-2 pr-3 border-r border-[#D5DDE5] text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
                   選地區 <i class="fa-solid fa-caret-down text-[11px] mt-0.5"></i>
@@ -61,7 +54,6 @@
               <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent outline-none pl-4 text-[16px] font-extrabold text-[#3E5C76] placeholder-[#8796A5]">
            </div>
 
-           <!-- 篩選標籤 -->
            <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pb-1 px-1 -mx-1 allow-scroll">
               <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
                   <i class="fa-solid fa-camera text-[#8796A5]"></i> 景點
@@ -80,10 +72,9 @@
 
         <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden z-0"></div>
 
-        <!-- 底部景點列表 (三段式 Bottom Sheet) -->
         <div id="mobile-list-panel" class="h-[200px] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
            
-           <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none">
+           <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none transition-all duration-300">
               <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
               <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
                  <div class="font-extrabold text-[#3E5C76] text-[16px] flex items-center gap-1.5">
@@ -121,7 +112,7 @@
            <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
            <div id="detail-cover-image" class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 z-10"></div>
            <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-20 pointer-events-none"></div>
-           <button onclick="window.closeSpotDetail()" class="absolute top-[env(safe-area-inset-top,20px)] md:top-6 left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30 active:scale-95 transition-all">
+           <button onclick="window.closeSpotDetail()" class="absolute left-5 w-11 h-11 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 shadow-md z-30 active:scale-95 transition-all" style="top: max(16px, env(safe-area-inset-top));">
               <i class="fa-solid fa-chevron-left text-lg md:hidden"></i><i class="fa-solid fa-xmark text-xl hidden md:block"></i>
            </button>
         </div>
@@ -169,6 +160,14 @@
   const isGuest = localStorage.getItem('isGuest') === 'true';
 
   let listState = 'collapsed'; 
+
+  // 💡 修正 2：補回 Auth 監聽器，確保 currentUser 被正確賦值，收藏功能恢復正常
+  onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user && !isGuest) {
+          listenToFavorites(user.uid);
+      }
+  });
 
   window.showToast = function(msg) {
     const el = document.getElementById('toast'); if(!el) return;
@@ -243,16 +242,23 @@
       if (isFirstLoad && validCoords.length > 0) { map.setView(validCoords[0], 14); isFirstLoad = false; }
   }
 
-  window.onMarkerClick = function(spotId) {
-      const spot = publicSpots.find(s => s.id === spotId); if (!spot || !map) return;
-      if (spot.lat && spot.lng) { let targetLat = spot.lat; if(window.innerWidth < 768) targetLat -= 0.002; map.flyTo([targetLat, spot.lng], 16, { duration: 0.5 }); }
-      
+  // 💡 修正 1：專門處理「位置按鈕」跳轉定位的邏輯 (直接飛過去並降底板)
+  window.jumpToSpotLocation = function(spotId) {
+      const spot = publicSpots.find(s => s.id === spotId);
+      if (!spot || !map) return;
+      if (spot.lat && spot.lng) {
+          let targetLat = spot.lat;
+          if (window.innerWidth < 768) targetLat -= 0.002;
+          map.flyTo([targetLat, spot.lng], 16, { duration: 0.5 });
+      }
       if (window.innerWidth < 768) {
           window.renderFloatingCard(spot);
           window.collapseBottomSheet();
-      } else {
-          window.showSpotDetail(spotId);
       }
+  };
+
+  window.onMarkerClick = function(spotId) {
+      window.jumpToSpotLocation(spotId);
   };
 
   window.onListClick = function(spotId) {
@@ -308,13 +314,27 @@
       if(fab) { fab.classList.remove('scale-0', 'opacity-0', 'pointer-events-none'); fab.classList.add('scale-100', 'opacity-100'); }
   };
 
-  // 💡 修正：提供全域呼叫的自動展開函數
+  // 💡 修正 4：智慧判斷圓角/直角
+  function updateSheetCorners(isFull) {
+      const panel = document.getElementById('mobile-list-panel');
+      const header = document.getElementById('sheet-header');
+      if (!panel || !header) return;
+      if (isFull) {
+          panel.classList.remove('rounded-t-[32px]');
+          header.classList.remove('rounded-t-[32px]');
+      } else {
+          panel.classList.add('rounded-t-[32px]');
+          header.classList.add('rounded-t-[32px]');
+      }
+  }
+
   window.expandBottomSheetToFull = function() {
       if(window.innerWidth >= 768) return;
       const vh = window.innerHeight;
       const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
-      const targetHeight = vh - topBarHeight - 10; // 留一點點空隙給頂部
+      const targetHeight = vh - topBarHeight - 10;
       listState = 'full';
+      updateSheetCorners(true);
       
       sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
       sheetPanel.style.height = `${targetHeight}px`;
@@ -333,6 +353,8 @@
   window.collapseBottomSheet = function() {
       if(window.innerWidth >= 768) return;
       const targetHeight = 200; listState = 'collapsed';
+      updateSheetCorners(false);
+
       sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
       sheetPanel.style.height = `${targetHeight}px`;
 
@@ -370,9 +392,16 @@
     sheetHeader.addEventListener('touchmove', (e) => {
         if(window.innerWidth >= 768 || dragStartY === null) return; e.stopPropagation();
         const dy = dragStartY - e.touches[0].clientY; let newHeight = startHeight + dy;
+        const vh = window.innerHeight;
+        const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
+        
         if (newHeight < window.innerHeight * 0.1) newHeight = window.innerHeight * 0.1;
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
         
+        // 💡 修正 4：拖曳靠近頂部時自動變直角
+        if (newHeight >= vh - topBarHeight - 50) { updateSheetCorners(true); } 
+        else { updateSheetCorners(false); }
+
         sheetPanel.style.height = `${newHeight}px`; 
         
         let fabBottom = newHeight;
@@ -389,8 +418,15 @@
         const vh = window.innerHeight; const currentH = sheetPanel.offsetHeight; let targetHeight = 0;
         const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
         
-        if (currentH > vh * 0.4) { targetHeight = vh - topBarHeight - 10; listState = 'full'; } 
-        else { targetHeight = 200; listState = 'collapsed'; }
+        if (currentH > vh * 0.4) { 
+            targetHeight = vh - topBarHeight - 10; 
+            listState = 'full'; 
+            updateSheetCorners(true);
+        } else { 
+            targetHeight = 200; 
+            listState = 'collapsed'; 
+            updateSheetCorners(false);
+        }
         
         sheetPanel.style.height = `${targetHeight}px`; 
         
@@ -489,7 +525,8 @@
                  <button onclick="event.stopPropagation(); window.showToast('排入行程');" class="bg-[#F2F5F8] hover:bg-[#E6EBEF] text-[#2C3E50] text-[12px] font-bold py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors shadow-sm border border-transparent">
                      <span class="text-[#E76F51] font-extrabold text-[14px] leading-none">+</span> 行程
                  </button>
-                 <button onclick="event.stopPropagation(); window.flyToSpot('${spot.id}');" class="bg-[#F2F5F8] hover:bg-[#E6EBEF] text-[#2C3E50] text-[12px] font-bold py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors shadow-sm border border-transparent">
+                 <!-- 💡 修正 1：改為觸發 jumpToSpotLocation 函數 -->
+                 <button onclick="event.stopPropagation(); window.jumpToSpotLocation('${spot.id}');" class="bg-[#F2F5F8] hover:bg-[#E6EBEF] text-[#2C3E50] text-[12px] font-bold py-1.5 px-3 rounded-full flex items-center gap-1 transition-colors shadow-sm border border-transparent">
                      <i class="fa-solid fa-location-dot text-[#8796A5] text-[11px]"></i> 位置
                  </button>
               </div>
@@ -500,7 +537,6 @@
     applyListLayoutMode(); 
   }
 
-  // 💡 修正 2：綁定打字自動全展開邏輯
   const searchInput = document.getElementById('input-explore-search');
   if(searchInput) {
       searchInput.addEventListener('input', (e) => {
