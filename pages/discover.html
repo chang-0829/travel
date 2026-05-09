@@ -98,7 +98,7 @@
      </div>
   </div>
 
-  <!-- ================= 景點資訊詳情面板 (💡 修正陰影：使用 translate-x-[120%] 徹底移出畫面) ================= -->
+  <!-- ================= 景點資訊詳情面板 ================= -->
   <div id="spot-detail-panel" class="absolute inset-y-0 right-0 w-full md:w-[440px] bg-[#F2F5F8] z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-[120%] flex flex-col border-l border-white/50 transition-transform duration-500">
      <div class="flex-1 overflow-y-auto hide-scrollbar bg-[#F2F5F8] relative pb-28 allow-scroll-y">
         <div class="h-[280px] md:h-[320px] bg-[#3E5C76] relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
@@ -210,7 +210,6 @@
           map.flyTo(e.latlng, 15, { duration: 1 });
       });
 
-      // 💡 點擊地圖空白處，自動將底板彈回 200px 以便繼續瀏覽
       map.on('click', function() { 
           if(listState === 'min') window.collapseBottomSheet(); 
       });
@@ -239,13 +238,11 @@
       if (isFirstLoad && validCoords.length > 0) { map.setView(validCoords[0], 14); isFirstLoad = false; }
   }
 
-  // 💡 點擊位置：底板降下 (65px) 露出後方 Carousel，並將其滑動到對應卡片
   window.jumpToSpotLocation = function(spotId) {
       const spot = publicSpots.find(s => s.id === spotId); if (!spot || !map) return;
       if (spot.lat && spot.lng) { map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 }); }
       if (window.innerWidth < 768) {
-          window.minimizeBottomSheet(); // 降到 65px
-          // 橫向清單自動滾動到被點擊的卡片
+          window.minimizeBottomSheet();
           const carouselCard = document.getElementById(`carousel-card-${spot.id}`);
           if (carouselCard) { carouselCard.scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
       } else { window.showSpotDetail(spotId); }
@@ -265,7 +262,6 @@
       if(window.innerWidth >= 768) return;
       const vh = document.getElementById('discover-page-root').offsetHeight; 
       const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
-      // 💡 修正 1：加上 8px，讓底板往上吃進去 TopBar 的陰影底部，完美吸附無縫隙
       const targetHeight = vh - topBarHeight + 8;
       listState = 'full'; updateSheetCorners(true);
       sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; sheetPanel.style.height = `${targetHeight}px`;
@@ -300,7 +296,6 @@
         const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
         
         if (newHeight < 65) newHeight = 65; 
-        // 💡 修正 1：拖曳時的最高限制也加上 8px，防止拉動時露出縫隙
         if (newHeight > vh - topBarHeight + 8) newHeight = vh - topBarHeight + 8; 
         
         if (newHeight >= vh - topBarHeight - 10) { updateSheetCorners(true); } else { updateSheetCorners(false); }
@@ -315,13 +310,49 @@
         const currentH = sheetPanel.offsetHeight; let targetHeight = 0;
         const topBarHeight = document.getElementById('top-bar-ui') ? document.getElementById('top-bar-ui').offsetHeight : 100;
         
-        // 💡 修正 1：放手時也鎖定在吸附的高度 (+ 8px)
         if (currentH > vh * 0.5) { targetHeight = vh - topBarHeight + 8; listState = 'full'; updateSheetCorners(true); } 
         else if (currentH > 150) { targetHeight = 240; listState = 'mid'; updateSheetCorners(false); }
         else { targetHeight = 65; listState = 'min'; updateSheetCorners(false); }
         
         sheetPanel.style.height = `${targetHeight}px`; 
     });
+  }
+
+  // 💡 新增：監聽橫向清單的滑動，並自動將地圖定位置中於該卡片
+  const carouselListEl = document.getElementById('carousel-list');
+  let carouselScrollTimeout;
+  if(carouselListEl) {
+      carouselListEl.addEventListener('scroll', () => {
+          clearTimeout(carouselScrollTimeout);
+          // 停頓 150 毫秒後，判定滑動結束，計算畫面正中央是哪張卡片
+          carouselScrollTimeout = setTimeout(() => {
+              const containerRect = carouselListEl.getBoundingClientRect();
+              const containerCenterX = containerRect.left + (containerRect.width / 2);
+              
+              let closestCard = null;
+              let minDistance = Infinity;
+
+              const cards = carouselListEl.querySelectorAll('[id^="carousel-card-"]');
+              cards.forEach(card => {
+                  const cardRect = card.getBoundingClientRect();
+                  const cardCenterX = cardRect.left + (cardRect.width / 2);
+                  const distance = Math.abs(containerCenterX - cardCenterX);
+                  
+                  if (distance < minDistance) {
+                      minDistance = distance;
+                      closestCard = card;
+                  }
+              });
+
+              if (closestCard) {
+                  const spotId = closestCard.id.replace('carousel-card-', '');
+                  const spot = publicSpots.find(s => s.id === spotId);
+                  if (spot && spot.lat && spot.lng && map) {
+                      map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 });
+                  }
+              }
+          }, 150); 
+      });
   }
 
   function listenToFavorites(userId) {
@@ -469,13 +500,11 @@
 
       updateFavoriteUI(spot.id); const favBtn = document.getElementById('btn-favorite-spot'); if(favBtn) favBtn.onclick = () => window.toggleFavorite(spot.id);
       
-      // 💡 修正 2：展開時恢復到 translate-x-0
       document.getElementById('spot-detail-panel').classList.remove('translate-x-[120%]');
       document.getElementById('spot-detail-panel').classList.add('translate-x-0');
   };
 
   window.closeSpotDetail = function() { 
-      // 💡 修正 2：關閉時完全推到 translate-x-[120%] 避免陰影露出來
       document.getElementById('spot-detail-panel').classList.remove('translate-x-0');
       document.getElementById('spot-detail-panel').classList.add('translate-x-[120%]'); 
   };
