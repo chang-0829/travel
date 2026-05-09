@@ -1,6 +1,6 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 新增功能：初始載入時自動執行定位 -->
+<!-- ⚠️ 已修正清單初始高度，徹底刪除橫向捲動邏輯 -->
 <!-- ========================================== -->
 
 <style>
@@ -16,7 +16,7 @@
   }
   @media (min-width: 768px) { #discover-page-root { left: 4.5rem; width: calc(100% - 4.5rem); height: 100dvh; } }
 
-  .allow-scroll { touch-action: pan-y pan-x; overscroll-behavior: contain; }
+  .allow-scroll { touch-action: pan-y; overscroll-behavior: contain; }
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   
@@ -49,7 +49,7 @@
   <div id="ui-overlay" class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-0 md:pb-6">
      <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
         
-        <!-- 頂部搜尋與篩選 -->
+        <!-- ====== 頂部搜尋與篩選 ====== -->
         <div id="top-bar-ui" class="px-4 md:px-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3" style="padding-top: max(16px, env(safe-area-inset-top));">
            <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
               <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
@@ -76,8 +76,9 @@
 
         <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
-        <!-- 底部景點列表 (三段式 Bottom Sheet) -->
-        <div id="mobile-list-panel" class="h-[50vh] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
+        <!-- ====== 底部景點列表 (三段式 Bottom Sheet) ====== -->
+        <!-- 💡 修正 1：初始高度改為 30vh，只露出清單的頭部 -->
+        <div id="mobile-list-panel" class="h-[30vh] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
            
            <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none">
               <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
@@ -92,6 +93,7 @@
               </div>
            </div>
 
+           <!-- 列表永遠保持垂直 -->
            <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-0 min-h-0 transition-all bg-white allow-scroll">
               <div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] opacity-60 m-auto">
                  <div class="w-16 h-16 bg-[#F2F5F8] rounded-full flex items-center justify-center mb-4"><i class="fa-solid fa-spinner fa-spin text-2xl text-[#748CAB]"></i></div>
@@ -110,8 +112,8 @@
   </div>
 
   <!-- 定位按鈕 -->
-  <div id="fab-group" class="absolute bottom-[calc(50vh+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300 origin-bottom scale-100 opacity-100">
-     <!-- 💡 加入 event.preventDefault 避免與其他觸控事件衝突 -->
+  <!-- 💡 修正 1：定位按鈕的基準高度配合 30vh -->
+  <div id="fab-group" class="absolute bottom-[calc(30vh+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300 origin-bottom scale-100 opacity-100">
      <button onclick="event.preventDefault(); window.locateUser(false);" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
         <i class="fa-solid fa-location-crosshairs"></i>
      </button>
@@ -210,26 +212,21 @@
           } else { userMarker.setLatLng(e.latlng); }
           const locateIcon = document.querySelector('#btn-locate i'); if(locateIcon) locateIcon.className = 'fa-solid fa-location-crosshairs text-[#4285F4]';
           
-          // 💡 只有在手動點擊按鈕時才顯示 Toast，初始自動定位時保持安靜
           if (window._isManualLocation) {
               window.showToast("已取得目前位置");
               window._isManualLocation = false;
           }
-          
-          // 自動將視角移過去
           map.flyTo(e.latlng, 15, { duration: 1 });
       });
 
       map.on('click', function() { window.hideFloatingCard(); });
       
-      // 💡 初始化完畢後，立刻自動執行定位 (設定 silent 旗標)
       setTimeout(() => {
           window._isManualLocation = false;
           map.locate({ setView: false, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
       }, 500);
   }
   
-  // 💡 修改：手動定位時才顯示轉圈與 Toast
   window.locateUser = function(showToast = true) {
       if(!map) return;
       window._isManualLocation = showToast;
@@ -326,27 +323,24 @@
       if(fab) { fab.style.transition = 'bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; fab.style.bottom = `calc(${targetHeight}px + 16px)`; }
   };
 
+  // --- 底板拖曳與排版邏輯 ---
   const sheetPanel = document.getElementById('mobile-list-panel');
   const sheetHeader = document.getElementById('sheet-header');
   const listEl = document.getElementById('explore-list');
   const fabGroup = document.getElementById('fab-group');
   let dragStartY = null; let startHeight = 0;
 
+  // 💡 修正 2：徹底拔除所有橫向邏輯，每次重新渲染卡片時確保維持垂直樣式
   function applyListLayoutMode() {
       const cards = document.querySelectorAll('.spot-card'); if(!listEl) return;
       
+      // 永遠保持直向 (flex-col)，不再被 listState === 'collapsed' 影響
       if (window.innerWidth >= 768) {
            listEl.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white allow-scroll';
            cards.forEach(c => c.className = 'spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-4');
-           return;
-      }
-
-      if (listState === 'collapsed') {
-          listEl.className = 'flex-1 overflow-x-auto overflow-y-hidden px-4 pb-4 pt-2 hide-scrollbar flex flex-row relative gap-3 min-h-0 snap-x snap-mandatory transition-all bg-white allow-scroll';
-          cards.forEach(c => c.className = 'spot-card w-[85vw] max-w-[340px] shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group snap-center border border-gray-200 rounded-[20px] shadow-sm p-3'); 
       } else {
-          listEl.className = 'flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white allow-scroll';
-          cards.forEach(c => c.className = 'spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-2');
+          listEl.className = 'flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-0 min-h-0 transition-all bg-white allow-scroll';
+          cards.forEach(c => c.className = 'spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-3');
       }
   }
   
@@ -364,6 +358,7 @@
         const dy = dragStartY - e.touches[0].clientY; let newHeight = startHeight + dy;
         if (newHeight < window.innerHeight * 0.1) newHeight = window.innerHeight * 0.1;
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
+        
         sheetPanel.style.height = `${newHeight}px`; fabGroup.style.bottom = `calc(${newHeight}px + 16px)`;
     }, {passive: false});
 
@@ -373,13 +368,13 @@
         
         const vh = window.innerHeight; const currentH = sheetPanel.offsetHeight; let targetHeight = 0;
         
-        if (currentH > vh * 0.7) { targetHeight = vh - 100; listState = 'full'; } 
-        else if (currentH < vh * 0.35) { targetHeight = 85; listState = 'collapsed'; } 
-        else { targetHeight = vh * 0.5; listState = 'half'; }
+        // 💡 修正 1：中間段的初始高度設為 30vh (0.3)
+        if (currentH > vh * 0.6) { targetHeight = vh - 100; listState = 'full'; } 
+        else if (currentH < vh * 0.25) { targetHeight = 85; listState = 'collapsed'; } 
+        else { targetHeight = vh * 0.30; listState = 'half'; }
         
         sheetPanel.style.height = `${targetHeight}px`; fabGroup.style.bottom = `calc(${targetHeight}px + 16px)`;
-        
-        applyListLayoutMode(); setTimeout(() => { fabGroup.style.transition = ''; }, 300);
+        setTimeout(() => { fabGroup.style.transition = ''; }, 300);
     });
   }
 
@@ -443,7 +438,7 @@
         const mockDistance = Math.floor(Math.random() * 800 + 100) + 'm'; 
 
         return `
-        <div onclick="window.onListClick('${spot.id}')" class="spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-2">
+        <div onclick="window.onListClick('${spot.id}')" class="spot-card w-full shrink-0 bg-white flex flex-row gap-3 relative cursor-pointer group border-b border-gray-100 pb-4 mb-3">
            <div class="w-[100px] h-[100px] rounded-[16px] overflow-hidden relative shrink-0">
                ${thumbnailHtml}
            </div>
@@ -477,7 +472,7 @@
         </div>`;
     }).join('');
 
-    applyListLayoutMode();
+    applyListLayoutMode(); // 確保每次渲染都會套用垂直樣式
   }
 
   const searchInput = document.getElementById('input-explore-search');
