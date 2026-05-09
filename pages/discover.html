@@ -69,17 +69,12 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.25); 
   }
 
-  /* 💡 新增：選中狀態的反白樣式 */
   .custom-marker-wrapper.active-marker { z-index: 1500 !important; }
   .custom-marker-wrapper.active-marker .custom-map-marker {
       transform: scale(1.2) translateY(-6px);
       box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-      /* 背景色會透過 inline style 動態設定為該分類顏色 */
   }
-  .custom-marker-wrapper.active-marker .custom-map-marker i {
-      color: #FFFFFF !important; /* Icon 反白 */
-  }
-  /* 小尾巴的顏色也透過 inline style 動態設定 */
+  .custom-marker-wrapper.active-marker .custom-map-marker i { color: #FFFFFF !important; }
   
   .filter-btn { transition: all 0.2s ease; cursor: pointer; }
   .filter-btn.active-filter { background-color: #3E5C76 !important; border-color: #3E5C76 !important; color: #FFFFFF !important; }
@@ -106,12 +101,9 @@
         <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent outline-none pl-4 text-[16px] font-extrabold text-[#3E5C76] placeholder-[#8796A5]">
      </div>
 
-     <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pb-1 px-1 -mx-1 allow-scroll-x">
-        <button onclick="window.setCategoryFilter('favorite')" id="filter-btn-favorite" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-heart text-[#E63946]"></i> 收藏</button>
-        <button onclick="window.setCategoryFilter('all')" id="filter-btn-all" class="filter-btn active-filter shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2">全部</button>
-        <button onclick="window.setCategoryFilter('spot')" id="filter-btn-spot" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-camera text-[#1890FF]"></i> 景點</button>
-        <button onclick="window.setCategoryFilter('food')" id="filter-btn-food" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-utensils text-[#F4A261]"></i> 美食</button>
-        <button onclick="window.setCategoryFilter('shop')" id="filter-btn-shop" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-[#9D4EDD]"></i> 購物</button>
+     <!-- 💡 這裡的內容將由 JavaScript 動態生成 -->
+     <div id="category-filters-container" class="flex gap-2.5 overflow-x-auto hide-scrollbar pb-1 px-1 -mx-1 allow-scroll-x">
+        <!-- 動態生成的按鈕會放在這裡 -->
      </div>
   </div>
 
@@ -125,7 +117,6 @@
   <!-- ================= 4. 高層：可拖曳的垂直 Bottom Sheet ================= -->
   <div id="mobile-list-panel" class="absolute bottom-0 left-0 w-full md:w-[420px] md:relative md:h-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto z-[400]" style="height: 240px;">
      
-     <!-- 拖曳把手區 -->
      <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none transition-all duration-300">
         <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
         <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
@@ -135,7 +126,6 @@
         </div>
      </div>
 
-     <!-- 垂直列表區 -->
      <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-2 hide-scrollbar flex flex-col relative gap-0 min-h-0 bg-white allow-scroll-y">
         <div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] opacity-60 m-auto">
            <div class="w-16 h-16 bg-[#F2F5F8] rounded-full flex items-center justify-center mb-4"><i class="fa-solid fa-spinner fa-spin text-2xl text-[#748CAB]"></i></div>
@@ -190,6 +180,9 @@
   import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
   import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+  
+  // 💡 匯入共用的分類設定
+  import { LOCATION_MODES } from '../js/config.js';
 
   const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyCQF8A3ieML0JP3X8X78NCRuiUETRAiu5E", authDomain: "travel-96009.firebaseapp.com", projectId: "travel-96009", storageBucket: "travel-96009.firebasestorage.app", messagingSenderId: "578860064042", appId: "1:578860064042:web:b147880df3a01dd8f75253" };
   const app = !getApps().length ? initializeApp(firebaseConfig) : getApp(); 
@@ -200,8 +193,8 @@
 
   let listState = 'mid'; 
   let currentFilterCategory = 'all';
-  let activeSpotId = null; // 💡 新增：追蹤目前被選中的景點 ID
-  let markerInstances = {}; // 💡 新增：儲存所有的 marker 實例以便更新樣式
+  let activeSpotId = null; 
+  let markerInstances = {}; 
 
   onAuthStateChanged(auth, (user) => {
       currentUser = user;
@@ -215,23 +208,30 @@
     setTimeout(() => { el.classList.remove('opacity-100', 'translate-y-0'); el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none'); }, 3000);
   }
 
-  const LOCATION_MODES = [
-    { id: 'spot', label: '景點', icon: 'fa-solid fa-camera', color: '#1890FF' }, 
-    { id: 'food', label: '美食', icon: 'fa-solid fa-utensils', color: '#F4A261' },
-    { id: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping', color: '#9D4EDD' }, 
-    { id: 'hotel', label: '住宿', icon: 'fa-solid fa-hotel', color: '#2A9D8F' },
-    { id: 'park', label: '樂園', icon: 'fa-solid fa-wand-magic-sparkles', color: '#E76F51' }, 
-    { id: 'car_rental', label: '租車站', icon: 'fa-solid fa-key', color: '#2C3E50' },
-    { id: 'station', label: '車站', icon: 'fa-solid fa-train', color: '#3E5C76' }, 
-    { id: 'airport', label: '機場', icon: 'fa-solid fa-plane-arrival', color: '#3E5C76' },
-    { id: 'other', label: '其他', icon: 'fa-solid fa-location-dot', color: '#8796A5' }
-  ];
-
   let map = null; let markersLayer = null; let userMarker = null; let isFirstLoad = true;
+
+  // 💡 動態生成頂部的分類按鈕
+  function renderCategoryButtons() {
+      const container = document.getElementById('category-filters-container');
+      if (!container) return;
+
+      // 固定的「收藏」與「全部」按鈕
+      let html = `
+          <button onclick="window.setCategoryFilter('favorite')" id="filter-btn-favorite" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-heart text-[#E63946]"></i> 收藏</button>
+          <button onclick="window.setCategoryFilter('all')" id="filter-btn-all" class="filter-btn active-filter shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2">全部</button>
+      `;
+
+      // 動態讀取 LOCATION_MODES 生成其他按鈕
+      LOCATION_MODES.forEach(mode => {
+          html += `<button onclick="window.setCategoryFilter('${mode.id}')" id="filter-btn-${mode.id}" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="${mode.icon}" style="color: ${mode.color};"></i> ${mode.label}</button>`;
+      });
+
+      container.innerHTML = html;
+  }
 
   window.setCategoryFilter = function(cat) {
       currentFilterCategory = cat;
-      activeSpotId = null; // 切換分類時清除選取狀態
+      activeSpotId = null; 
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
       const activeBtn = document.getElementById(`filter-btn-${cat}`);
       if(activeBtn) { activeBtn.classList.add('active-filter'); }
@@ -275,7 +275,6 @@
       });
 
       map.on('click', function() { 
-          // 💡 點擊地圖空白處，取消選取狀態
           activeSpotId = null;
           updateMarkersStyle();
           if(listState === 'min') window.collapseBottomSheet(); 
@@ -292,7 +291,6 @@
       map.locate({ setView: false, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
   };
 
-  // 💡 獨立出更新 Marker 樣式的函數
   function updateMarkersStyle() {
       for (const [id, marker] of Object.entries(markerInstances)) {
           const spot = publicSpots.find(s => s.id === id);
@@ -301,8 +299,6 @@
           
           const isActive = id === activeSpotId;
           const wrapperClass = isActive ? 'custom-marker-wrapper active-marker' : 'custom-marker-wrapper';
-          
-          // 💡 動態產生 inline style 覆蓋背景與邊框顏色（反白效果）
           const activeStyle = isActive ? `background-color: ${locObj.color}; border-color: ${locObj.color};` : '';
           
           marker.setIcon(L.divIcon({ 
@@ -325,23 +321,23 @@
 
   function renderMarkersOnMap(spots) {
       if(!markersLayer) return; markersLayer.clearLayers(); let validCoords = [];
-      markerInstances = {}; // 清空實例紀錄
+      markerInstances = {}; 
 
       spots.forEach(spot => {
           if (spot.lat && spot.lng) {
               validCoords.push([spot.lat, spot.lng]);
               const marker = L.marker([spot.lat, spot.lng]); 
-              markerInstances[spot.id] = marker; // 儲存實例
+              markerInstances[spot.id] = marker; 
               marker.on('click', () => {
-                  activeSpotId = spot.id; // 💡 點擊更新 active 狀態
-                  updateMarkersStyle();   // 💡 重繪所有 marker 樣式
+                  activeSpotId = spot.id; 
+                  updateMarkersStyle();   
                   window.onMarkerClick(spot.id);
               }); 
               markersLayer.addLayer(marker);
           }
       });
       
-      updateMarkersStyle(); // 初始化樣式
+      updateMarkersStyle(); 
 
       if (validCoords.length > 0) {
           if (isFirstLoad) { map.setView(validCoords[0], 14); isFirstLoad = false; }
@@ -349,7 +345,7 @@
   }
 
   window.jumpToSpotLocation = function(spotId) {
-      activeSpotId = spotId; // 💡 確保透過清單點擊時也更新選取狀態
+      activeSpotId = spotId; 
       updateMarkersStyle();
       const spot = publicSpots.find(s => s.id === spotId); if (!spot || !map) return;
       if (spot.lat && spot.lng) { map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 }); }
@@ -456,7 +452,6 @@
 
               if (closestCard) {
                   const spotId = closestCard.id.replace('carousel-card-', '');
-                  // 💡 滑動結束時，更新選取狀態並反白地圖標記
                   if (activeSpotId !== spotId) {
                       activeSpotId = spotId;
                       updateMarkersStyle();
@@ -655,6 +650,10 @@
           if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
           else await signInAnonymously(auth);
       } catch (e) {}
+      
+      // 💡 在載入地圖之前，先生成分類按鈕
+      renderCategoryButtons();
+      
       initMap(); loadSpots();
   }
 
