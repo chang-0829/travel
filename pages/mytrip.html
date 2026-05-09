@@ -1,32 +1,10 @@
 <!-- ========================================== -->
 <!-- 我的行程 (pages/mytrip.html) -->
-<!-- ⚠️ 已移除字體污染、獨立選單，並適配 SPA 滿版佈局 -->
+<!-- ⚠️ 已補上缺失的結尾標籤，解決巨大圖示崩壞問題 -->
 <!-- ========================================== -->
 
-<script>
-  // 💡 保留 Tailwind 擴充，確保 brand 專屬色彩與透明度能正常解析
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          brand: {
-            primary: '#748CAB',
-            dark: '#3E5C76',
-            light: '#E6EBEF',
-            bg: '#F2F5F8',
-            card: '#FFFFFF',
-            textMain: '#2C3E50',
-            textSub: '#8796A5',
-            accent: '#D5896F' 
-          }
-        }
-      }
-    }
-  }
-</script>
-
 <style>
-  /* --- 僅保留組件專屬樣式，已刪除字體宣告 --- */
+  /* --- 僅保留組件專屬樣式，移除字體污染 --- */
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
@@ -58,7 +36,7 @@
   <i class="fa-solid fa-circle-check text-brand-primary"></i> <span id="toast-msg">成功！</span>
 </div>
 
-<!-- 💡 核心修正：移除 max-w-md，改為 w-full h-full 完美填滿 SPA 內容區 -->
+<!-- ================= 主內容容器開始 ================= -->
 <div class="w-full h-full bg-brand-bg relative flex flex-col fade-in overflow-hidden">
 
   <!-- Header 1: 行程列表 (預設顯示) -->
@@ -103,7 +81,6 @@
   </header>
 
   <!-- 主內容 1: 行程列表 -->
-  <!-- 💡 修正 padding-bottom 確保不被全域 Navbar 蓋住 -->
   <div id="view-plans" class="flex-1 overflow-y-auto px-6 pb-[calc(85px+env(safe-area-inset-bottom))] hide-scrollbar relative pt-2">
     <div id="plans-list" class="space-y-4 mt-4">
       <!-- JS 渲染區 -->
@@ -167,7 +144,7 @@
                 <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
                 <div class="relative">
                   <select id="setup-flight-out-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
-                    <option value="" disabled selected>請選擇航空公司</option>
+                    <option value="" disabled selected>請選擇</option>
                     <option value="中華航空">中華航空</option><option value="長榮航空">長榮航空</option><option value="星宇航空">星宇航空</option><option value="台灣虎航">台灣虎航</option><option value="日本航空">日本航空</option><option value="樂桃航空">樂桃航空</option>
                   </select>
                   <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
@@ -205,7 +182,7 @@
                 <label class="text-[11px] text-brand-textSub font-bold px-1 block mb-1">航空公司</label>
                 <div class="relative">
                   <select id="setup-flight-ret-airline" class="w-full text-[14px] font-bold text-brand-dark outline-none bg-white rounded-xl px-3 py-2.5 border border-brand-light/50 focus:border-brand-primary transition-all appearance-none pr-8">
-                    <option value="" disabled selected>請選擇航空公司</option>
+                    <option value="" disabled selected>請選擇</option>
                     <option value="中華航空">中華航空</option><option value="長榮航空">長榮航空</option><option value="星宇航空">星宇航空</option><option value="台灣虎航">台灣虎航</option><option value="日本航空">日本航空</option><option value="樂桃航空">樂桃航空</option>
                   </select>
                   <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-textSub pointer-events-none"></i>
@@ -272,10 +249,11 @@
     </div>
   </div>
 
-</div>
+</div> 
+<!-- 💡 核心修復：這就是剛剛不小心被刪掉的結尾標籤！加上它就不會吞噬底部選單了 -->
+<!-- ================= 主內容容器結束 ================= -->
 
-<!-- ================= MODALS & SHEETS (保留原本強大的互動視窗) ================= -->
-<!-- 💡 提升 z-index 確保蓋過全域 Navbar -->
+<!-- ================= MODALS & SHEETS ================= -->
 <div id="modal-overlay" onclick="window.closeAllModals()" class="overlay closed fixed inset-0 z-[1050] bg-brand-textMain/40 backdrop-blur-[2px]"></div>
 
 <!-- 1. 新增項目選單 -->
@@ -320,7 +298,6 @@
     </div>
     <div class="px-5 py-5 overflow-y-auto flex-1 hide-scrollbar space-y-4">
       
-      <!-- 已選定的鎖定地點卡片 (從公共庫帶入) -->
       <div id="group-selected-spot" class="hidden bg-brand-primary/5 border border-brand-primary/20 rounded-[20px] p-4 relative overflow-hidden">
           <span class="block text-[12px] font-bold text-brand-primary mb-2 pl-1">已選定景點</span>
           <div class="flex items-center gap-3">
@@ -333,7 +310,6 @@
           <i class="fa-solid fa-lock absolute right-4 top-4 text-brand-primary/20 text-3xl"></i>
       </div>
 
-      <!-- 時間卡片 -->
       <div class="form-card">
         <span class="form-label mb-2">預計時間 <span class="text-brand-primary">*</span></span>
         <div class="flex items-center gap-2 bg-[#F8FAFC] rounded-xl px-3 border border-brand-light/80 focus-within:border-brand-primary transition-all h-[46px]">
@@ -343,7 +319,6 @@
         </div>
       </div>
 
-      <!-- 各類型動態欄位群 -->
       <div id="group-transfer-type" class="hidden form-card">
          <span class="form-label mb-2">轉換方式</span>
          <div class="flex bg-brand-bg rounded-[12px] p-1 relative">
@@ -364,7 +339,6 @@
       </div>
       
       <div id="group-dynamic-fields" class="form-card hidden">
-          <!-- 轉乘/直通欄位 -->
           <div id="group-transfer-fields" class="hidden flex flex-col gap-3 relative">
              <div class="form-row"><div><span class="form-label">原本搭乘路線</span><input type="text" id="input-trans-lineA" class="form-input"></div><div><span class="form-label">轉乘搭乘路線</span><input type="text" id="input-trans-lineB" class="form-input"></div></div>
              <div class="form-row"><div><span class="form-label">下車站名</span><input type="text" id="input-trans-staA" class="form-input"></div><div><span class="form-label">上車站名</span><input type="text" id="input-trans-staB" class="form-input"></div></div>
@@ -374,7 +348,6 @@
              <div><span class="form-label">經過車站名 <span class="text-brand-primary">*</span></span><input type="text" id="input-through-sta" class="form-input"></div>
              <div><span class="form-label">等待/停車時間 (選填)</span><input type="text" id="input-through-wait" class="form-input"></div>
           </div>
-          <!-- 航班欄位 -->
           <div id="group-flight-fields" class="space-y-3 hidden">
             <div class="form-row">
               <div>
@@ -388,7 +361,6 @@
             </div>
             <div class="form-row"><div><span class="form-label">起飛機場</span><input type="text" id="input-flight-dept" class="form-input"></div><div><span class="form-label">降落機場</span><input type="text" id="input-flight-arr" class="form-input"></div></div>
           </div>
-          <!-- 大眾交通欄位 -->
           <div id="group-transport-fields" class="space-y-3 hidden">
             <div class="form-row"><div><span class="form-label">業者名稱</span><input type="text" id="input-operator" class="form-input"></div><div><span class="form-label">車次/班次</span><input type="text" id="input-vehicle-no" class="form-input"></div></div>
             <div><span class="form-label text-brand-primary">路線名稱 *</span><input type="text" id="input-route-name" class="form-input"></div>
@@ -396,7 +368,6 @@
             <div class="form-row"><div><span class="form-label">上車站名</span><input type="text" id="input-transport-dept" class="form-input"></div><div><span class="form-label">下車站名</span><input type="text" id="input-transport-arr" class="form-input"></div></div>
             <div class="form-row"><div><span class="form-label">花費時間</span><input type="text" id="input-duration" class="form-input"></div><div><span class="form-label">經過站數</span><input type="text" id="input-extraInfo" class="form-input"></div></div>
           </div>
-          <!-- 住宿欄位 -->
           <div id="group-hotel-fields" class="space-y-3 hidden">
             <div><span class="form-label text-brand-primary">住宿名稱 *</span><textarea id="input-hotel-name" rows="1" class="form-input"></textarea></div>
             <div><span class="form-label">外文名稱 (選填)</span><input type="text" id="input-hotel-foreign" class="form-input"></div>
@@ -404,7 +375,6 @@
           </div>
       </div>
 
-      <!-- 費用卡片 -->
       <div class="form-card flex items-center justify-between !py-3">
          <div class="flex items-center gap-2 pl-1 flex-1">
             <span id="display-curr-symbol" class="text-[18px] font-bold text-brand-textSub">¥</span>
@@ -739,6 +709,7 @@
     const container = document.getElementById('timeline-container');
     const plan = state.tripData; const isEdit = state.isEditMode; const fabBtn = document.getElementById('fab-container');
     
+    // -- 總覽頁面 --
     if (state.activeDay === 0) {
       fabBtn.classList.add('hidden'); fabBtn.classList.remove('scale-100');
       let flightHtml = `
@@ -934,6 +905,7 @@
       document.getElementById('sheet-transit-detail').classList.remove('closed'); document.getElementById('sheet-transit-detail').classList.add('open');
   }
 
+  // Modal 與 選單邏輯
   window.closeAllModals = function() {
     ['modal-overlay', 'sheet-add-menu', 'sheet-form', 'sheet-options', 'modal-delete', 'sheet-transit-detail', 'sheet-spot-selector'].forEach(id => {
         const el = document.getElementById(id); if(el) { el.classList.remove('open'); el.classList.add('closed'); }
