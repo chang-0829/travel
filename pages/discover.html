@@ -36,7 +36,6 @@
   .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
   .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
-  /* 💡 修正 3：重新設計精緻版地圖標記 */
   .custom-marker-wrapper { background: transparent; border: none; }
   .custom-map-marker {
       background-color: #FFFFFF;
@@ -61,15 +60,27 @@
       border-style: solid;
       border-color: #FFFFFF transparent transparent transparent;
       filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+      transition: border-color 0.3s ease;
   }
-  .custom-map-marker i { font-size: 15px; }
+  .custom-map-marker i { font-size: 15px; transition: color 0.3s ease; }
   .custom-map-marker:hover { 
       transform: scale(1.15) translateY(-4px); 
       z-index: 1000 !important; 
       box-shadow: 0 8px 20px rgba(0,0,0,0.25); 
   }
+
+  /* 💡 新增：選中狀態的反白樣式 */
+  .custom-marker-wrapper.active-marker { z-index: 1500 !important; }
+  .custom-marker-wrapper.active-marker .custom-map-marker {
+      transform: scale(1.2) translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      /* 背景色會透過 inline style 動態設定為該分類顏色 */
+  }
+  .custom-marker-wrapper.active-marker .custom-map-marker i {
+      color: #FFFFFF !important; /* Icon 反白 */
+  }
+  /* 小尾巴的顏色也透過 inline style 動態設定 */
   
-  /* 分類按鈕的樣式與 Active 狀態 */
   .filter-btn { transition: all 0.2s ease; cursor: pointer; }
   .filter-btn.active-filter { background-color: #3E5C76 !important; border-color: #3E5C76 !important; color: #FFFFFF !important; }
   .filter-btn.active-filter i { color: #FFFFFF !important; }
@@ -95,7 +106,6 @@
         <input type="text" id="input-explore-search" placeholder="在地圖上搜尋景點..." class="flex-1 bg-transparent outline-none pl-4 text-[16px] font-extrabold text-[#3E5C76] placeholder-[#8796A5]">
      </div>
 
-     <!-- 💡 修正 1 & 2：加入全部按鈕、將收藏移到最左邊，並綁定過濾點擊事件 -->
      <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pb-1 px-1 -mx-1 allow-scroll-x">
         <button onclick="window.setCategoryFilter('favorite')" id="filter-btn-favorite" class="filter-btn shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2"><i class="fa-solid fa-heart text-[#E63946]"></i> 收藏</button>
         <button onclick="window.setCategoryFilter('all')" id="filter-btn-all" class="filter-btn active-filter shrink-0 bg-white shadow-sm border border-[#E6EBEF] hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2">全部</button>
@@ -189,7 +199,9 @@
   const isGuest = localStorage.getItem('isGuest') === 'true';
 
   let listState = 'mid'; 
-  let currentFilterCategory = 'all'; // 💡 新增：追蹤目前選中的分類
+  let currentFilterCategory = 'all';
+  let activeSpotId = null; // 💡 新增：追蹤目前被選中的景點 ID
+  let markerInstances = {}; // 💡 新增：儲存所有的 marker 實例以便更新樣式
 
   onAuthStateChanged(auth, (user) => {
       currentUser = user;
@@ -203,7 +215,6 @@
     setTimeout(() => { el.classList.remove('opacity-100', 'translate-y-0'); el.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none'); }, 3000);
   }
 
-  // 💡 修正 3：加入代表顏色，讓地圖標籤有不同色彩區別
   const LOCATION_MODES = [
     { id: 'spot', label: '景點', icon: 'fa-solid fa-camera', color: '#1890FF' }, 
     { id: 'food', label: '美食', icon: 'fa-solid fa-utensils', color: '#F4A261' },
@@ -218,9 +229,9 @@
 
   let map = null; let markersLayer = null; let userMarker = null; let isFirstLoad = true;
 
-  // 💡 新增：處理上方分類按鈕點擊
   window.setCategoryFilter = function(cat) {
       currentFilterCategory = cat;
+      activeSpotId = null; // 切換分類時清除選取狀態
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
       const activeBtn = document.getElementById(`filter-btn-${cat}`);
       if(activeBtn) { activeBtn.classList.add('active-filter'); }
@@ -264,6 +275,9 @@
       });
 
       map.on('click', function() { 
+          // 💡 點擊地圖空白處，取消選取狀態
+          activeSpotId = null;
+          updateMarkersStyle();
           if(listState === 'min') window.collapseBottomSheet(); 
       });
       
@@ -278,36 +292,65 @@
       map.locate({ setView: false, maxZoom: 16, enableHighAccuracy: true, timeout: 10000 });
   };
 
+  // 💡 獨立出更新 Marker 樣式的函數
+  function updateMarkersStyle() {
+      for (const [id, marker] of Object.entries(markerInstances)) {
+          const spot = publicSpots.find(s => s.id === id);
+          if(!spot) continue;
+          const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[LOCATION_MODES.length-1];
+          
+          const isActive = id === activeSpotId;
+          const wrapperClass = isActive ? 'custom-marker-wrapper active-marker' : 'custom-marker-wrapper';
+          
+          // 💡 動態產生 inline style 覆蓋背景與邊框顏色（反白效果）
+          const activeStyle = isActive ? `background-color: ${locObj.color}; border-color: ${locObj.color};` : '';
+          
+          marker.setIcon(L.divIcon({ 
+              className: wrapperClass, 
+              html: `
+              <style>
+                  #marker-icon-${id}.active-marker .custom-map-marker::after { border-top-color: ${locObj.color}; }
+              </style>
+              <div id="marker-icon-${id}" class="${wrapperClass}">
+                  <div class="custom-map-marker" style="color: ${locObj.color}; ${activeStyle}">
+                      <i class="${locObj.icon}"></i>
+                  </div>
+              </div>`, 
+              iconSize: [36, 43], 
+              iconAnchor: [18, 43], 
+              popupAnchor: [0, -43] 
+          }));
+      }
+  }
+
   function renderMarkersOnMap(spots) {
       if(!markersLayer) return; markersLayer.clearLayers(); let validCoords = [];
+      markerInstances = {}; // 清空實例紀錄
+
       spots.forEach(spot => {
           if (spot.lat && spot.lng) {
               validCoords.push([spot.lat, spot.lng]);
-              const locObj = LOCATION_MODES.find(m => m.id === spot.locMode) || LOCATION_MODES[LOCATION_MODES.length-1];
-              
-              // 💡 修正 3：套用全新設計的標籤與動態顏色
-              const customIcon = L.divIcon({ 
-                  className: 'custom-marker-wrapper', 
-                  html: `<div class="custom-map-marker" style="color: ${locObj.color};"><i class="${locObj.icon}"></i></div>`, 
-                  iconSize: [36, 43], 
-                  iconAnchor: [18, 43], 
-                  popupAnchor: [0, -43] 
-              });
-              
-              const marker = L.marker([spot.lat, spot.lng], { icon: customIcon }); 
-              marker.on('click', () => window.onMarkerClick(spot.id)); markersLayer.addLayer(marker);
+              const marker = L.marker([spot.lat, spot.lng]); 
+              markerInstances[spot.id] = marker; // 儲存實例
+              marker.on('click', () => {
+                  activeSpotId = spot.id; // 💡 點擊更新 active 狀態
+                  updateMarkersStyle();   // 💡 重繪所有 marker 樣式
+                  window.onMarkerClick(spot.id);
+              }); 
+              markersLayer.addLayer(marker);
           }
       });
       
-      // 若目前地圖上有標記且是初次載入，或經過過濾後重繪，自動調整視角至包含所有點
+      updateMarkersStyle(); // 初始化樣式
+
       if (validCoords.length > 0) {
           if (isFirstLoad) { map.setView(validCoords[0], 14); isFirstLoad = false; }
-          // 如果想在切換分類時自動縮放包含所有點，可取消下方註解
-          // else { map.fitBounds(L.latLngBounds(validCoords), { padding: [50, 50], maxZoom: 15 }); }
       }
   }
 
   window.jumpToSpotLocation = function(spotId) {
+      activeSpotId = spotId; // 💡 確保透過清單點擊時也更新選取狀態
+      updateMarkersStyle();
       const spot = publicSpots.find(s => s.id === spotId); if (!spot || !map) return;
       if (spot.lat && spot.lng) { map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 }); }
       if (window.innerWidth < 768) {
@@ -413,6 +456,12 @@
 
               if (closestCard) {
                   const spotId = closestCard.id.replace('carousel-card-', '');
+                  // 💡 滑動結束時，更新選取狀態並反白地圖標記
+                  if (activeSpotId !== spotId) {
+                      activeSpotId = spotId;
+                      updateMarkersStyle();
+                  }
+                  
                   const spot = publicSpots.find(s => s.id === spotId);
                   if (spot && spot.lat && spot.lng && map) {
                       map.flyTo([spot.lat, spot.lng], 16, { duration: 0.5 });
@@ -428,7 +477,6 @@
           userFavorites = new Set(snapshot.docs.map(doc => doc.id)); 
           publicSpots.forEach(spot => updateFavoriteUI(spot.id));
           
-          // 如果當前是在「收藏」分類下，更新時要重繪清單
           if(currentFilterCategory === 'favorite') {
               const searchInput = document.getElementById('input-explore-search');
               renderListAndMap(searchInput ? searchInput.value : '');
@@ -462,7 +510,6 @@
       
       updateFavoriteUI(spotId); updateFavoriteCountUI(spotId);
 
-      // 如果正在看「收藏」分類，取消收藏時即時移除該卡片
       if (currentFilterCategory === 'favorite' && isFav) {
           const searchInput = document.getElementById('input-explore-search');
           renderListAndMap(searchInput ? searchInput.value : '');
@@ -491,7 +538,6 @@
     
     let spots = publicSpots;
 
-    // 💡 新增：處理分類過濾邏輯
     if (currentFilterCategory === 'favorite') {
         spots = spots.filter(s => userFavorites.has(s.id));
     } else if (currentFilterCategory !== 'all') {
