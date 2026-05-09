@@ -1,6 +1,6 @@
 <!-- ========================================== -->
 <!-- 探索地圖 (pages/discover.html) -->
-<!-- ⚠️ 已修正空隙、防觸控穿透、移除假資料 -->
+<!-- ⚠️ 終極防護：鎖定頁面高度、杜絕 iOS 彈性滑動 -->
 <!-- ========================================== -->
 
 <style>
@@ -8,13 +8,41 @@
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Rg.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'LINE Seed TW'; src: url('./fonts/LINESeedTW_OTF_Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 
+  /* 💡 終極防護：鎖死固定高度與位置，脫離外層的錯誤計算 */
+  #discover-page-root {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: calc(100dvh - 4rem - env(safe-area-inset-bottom)); /* 手機版：完美扣除底部選單與安全區 */
+      z-index: 10;
+      touch-action: none; /* 杜絕整個頁面被往下拖曳 (Rubber-banding) */
+      overscroll-behavior: none;
+      background-color: #EAEAEA;
+      font-family: 'LINE Seed TW', sans-serif;
+  }
+  
+  @media (min-width: 768px) {
+      #discover-page-root {
+          left: 4.5rem; /* 電腦版：完美閃過左側選單的 72px */
+          width: calc(100% - 4.5rem);
+          height: 100dvh;
+      }
+  }
+
+  /* 只允許特定清單內可以垂直滑動 */
+  .allow-scroll {
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+  }
+
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   
   .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
 
-  /* 💡 修正 1：加大 margin-top (140px)，確保 +/- 不會被頂部分類標籤擋住 */
+  /* Leaflet 介面優化，加大 margin-top 閃過上方標籤 */
   .leaflet-control-zoom a { color: #3E5C76 !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.8) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(8px); margin-bottom: 8px !important; transition: all 0.2s; width: 36px !important; height: 36px !important; line-height: 36px !important;}
   .leaflet-control-zoom a:hover { background: #FFFFFF !important; transform: scale(1.05); }
   
@@ -23,6 +51,7 @@
       .leaflet-control-zoom { margin-top: 24px !important; margin-right: 24px !important; }
   }
   
+  /* 因外框已經完美鎖定，地圖元素直接貼齊底部即可 */
   .leaflet-bottom.leaflet-right { bottom: 0 !important; right: 0 !important; transition: all 0.3s; z-index: 400; }
   .leaflet-control-attribution { background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(4px); border-radius: 6px 0 0 0; padding: 2px 6px !important; font-size: 10px; box-shadow: none !important; margin: 0 !important; border: 1px solid rgba(255,255,255,0.4); border-bottom: none; border-right: none;}
 
@@ -55,17 +84,18 @@
   <i class="fa-solid fa-circle-info text-[#748CAB]"></i> <span id="toast-msg">提示訊息</span>
 </div>
 
-<!-- 💡 修正 2：使用 absolute inset-0 完全填滿，不留任何空隙 -->
-<div class="absolute inset-0 overflow-hidden flex flex-col bg-[#EAEAEA] z-0 fade-in" style="font-family: 'LINE Seed TW', sans-serif;">
+<!-- 💡 使用全新的鎖死根節點 -->
+<div id="discover-page-root" class="fade-in flex flex-col relative overflow-hidden">
 
   <!-- 地圖容器 -->
   <div id="map" class="absolute inset-0 z-0 bg-[#EAEAEA]"></div>
 
-  <!-- 💡 疊加 UI 區塊：精準計算 pb，讓它剛好頂在手機導覽列上方，徹底消除空隙！ -->
-  <div id="ui-overlay" class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6">
+  <!-- 疊加 UI 區塊 (去除多餘的 padding bottom，因為外框已鎖死) -->
+  <div id="ui-overlay" class="absolute inset-0 pointer-events-none z-[400] flex flex-col md:p-6 pb-2 md:pb-6">
      
      <div class="w-full h-full flex flex-col md:w-[420px] md:bg-white/95 md:backdrop-blur-xl md:rounded-[32px] md:shadow-2xl md:pointer-events-auto md:overflow-hidden relative md:border md:border-white">
         
+        <!-- ====== 頂部搜尋與篩選 ====== -->
         <div id="top-bar-ui" class="px-4 md:px-6 pb-2 shrink-0 pointer-events-auto flex flex-col gap-3" style="padding-top: max(16px, env(safe-area-inset-top));">
            <div class="bg-white/95 backdrop-blur-md rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white flex items-center px-4 py-3.5 group">
               <div class="flex items-center gap-2 pr-3 border-r border-gray-200 text-[#3E5C76] font-extrabold whitespace-nowrap text-[15px] cursor-pointer hover:text-[#748CAB] transition-colors">
@@ -77,6 +107,7 @@
               </button>
            </div>
 
+           <!-- 篩選標籤列表 -->
            <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pt-1 pb-2 px-1 -mx-1">
               <button class="shrink-0 bg-white shadow-sm border border-[#E6EBEF]/80 hover:border-[#748CAB]/40 rounded-full px-4 py-2 text-[14px] font-extrabold text-[#3E5C76] flex items-center gap-2 transition-all">
                   <i class="fa-solid fa-camera text-[#8796A5]"></i> 景點
@@ -95,9 +126,10 @@
 
         <div id="mobile-spacer" class="flex-1 pointer-events-none md:hidden"></div>
 
+        <!-- ====== 底部景點列表 (Bottom Sheet) ====== -->
         <div id="mobile-list-panel" class="h-[48vh] md:h-auto md:flex-1 w-full bg-white rounded-t-[32px] md:rounded-none shadow-[0_-12px_40px_rgba(0,0,0,0.12)] md:shadow-none flex flex-col pointer-events-auto transition-all duration-300 relative z-10 min-h-0">
            
-           <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative">
+           <div id="sheet-header" class="shrink-0 cursor-grab active:cursor-grabbing bg-white rounded-t-[32px] md:rounded-none z-20 relative touch-none">
               <div class="md:hidden w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-1 shrink-0"></div>
               <div class="px-5 pb-2 pt-2 flex justify-between items-center shrink-0">
                  <button class="font-extrabold text-[#3E5C76] text-[16px] flex items-center gap-1.5 hover:text-[#748CAB] transition-colors">
@@ -111,8 +143,8 @@
               </div>
            </div>
 
-           <!-- 💡 修正 4：加入 overscroll-contain 避免滑動清單時地圖跟著動 -->
-           <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white">
+           <!-- 💡 加上 allow-scroll，讓清單可以滾動但不穿透 -->
+           <div id="explore-list" class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-4 min-h-0 transition-all bg-white allow-scroll">
               <div class="h-full w-full flex flex-col items-center justify-center text-center text-[#8796A5] opacity-60 m-auto">
                  <div class="w-16 h-16 bg-[#F2F5F8] rounded-full flex items-center justify-center mb-4">
                     <i class="fa-solid fa-spinner fa-spin text-2xl text-[#748CAB]"></i>
@@ -125,16 +157,17 @@
      </div>
   </div>
 
-  <!-- 💡 修正 3：定位按鈕移至左下角 (left-4)，且高度完美跟隨底板 -->
-  <div id="fab-group" class="absolute bottom-[calc(48vh+4rem+env(safe-area-inset-bottom)+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
+  <!-- 定位按鈕 (鎖死在底板之上 16px) -->
+  <div id="fab-group" class="absolute bottom-[calc(48vh+16px)] left-4 md:bottom-8 md:left-[450px] z-[450] pointer-events-auto flex flex-col items-center gap-3 transition-all duration-300">
      <button onclick="window.locateUser()" id="btn-locate" class="w-12 h-12 bg-white text-[#3E5C76] rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl hover:text-[#4285F4] active:scale-95 transition-all">
         <i class="fa-solid fa-location-crosshairs"></i>
      </button>
   </div>
 
-  <!-- 景點資訊詳情面板 (Fixed 確保能蓋在 Navbar 上方) -->
-  <div id="spot-detail-panel" class="fixed inset-y-0 right-0 w-full md:w-[440px] bg-[#F2F5F8] z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50 transition-transform duration-500">
-     <div class="flex-1 overflow-y-auto overscroll-contain hide-scrollbar bg-[#F2F5F8] relative pb-28">
+  <!-- ================= 景點資訊詳情面板 ================= -->
+  <div id="spot-detail-panel" class="absolute inset-y-0 right-0 w-full md:w-[440px] bg-[#F2F5F8] z-[2000] shadow-[-16px_0_40px_rgba(0,0,0,0.15)] transform translate-x-full flex flex-col border-l border-white/50 transition-transform duration-500">
+     <!-- 💡 加上 allow-scroll -->
+     <div class="flex-1 overflow-y-auto hide-scrollbar bg-[#F2F5F8] relative pb-28 allow-scroll">
         
         <div class="h-[280px] md:h-[320px] bg-[#3E5C76] relative flex flex-col justify-center items-center overflow-hidden shrink-0 z-0">
            <i id="detail-default-icon" class="fa-solid fa-map-location-dot text-[120px] text-white/10 relative z-0"></i>
@@ -336,26 +369,18 @@
       window.showSpotDetail(spotId);
   };
 
-  // --- 💡 修正 4：防觸控穿透與事件隔離 ---
   const sheetPanel = document.getElementById('mobile-list-panel');
   const sheetHeader = document.getElementById('sheet-header');
-  const listEl = document.getElementById('explore-list');
   let dragStartY = null;
   let startHeight = 0;
 
-  // 阻絕清單的捲動與觸控事件傳遞給地圖
-  if (listEl) {
-      listEl.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
-      listEl.addEventListener('touchmove', (e) => e.stopPropagation(), {passive: true});
-      listEl.addEventListener('touchend', (e) => e.stopPropagation(), {passive: true});
-  }
-
   function applyListLayoutMode() {
+      const list = document.getElementById('explore-list');
       const cards = document.querySelectorAll('.spot-card');
-      if(!listEl) return;
+      if(!list) return;
       
       if (window.innerWidth >= 768) {
-           listEl.className = 'flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-5 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
+           list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-5 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white allow-scroll';
            cards.forEach(c => {
               c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[16px]', 'shadow-sm', 'm-1');
               c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
@@ -364,13 +389,13 @@
       }
 
       if (isListCollapsed) {
-          listEl.className = 'flex-1 overflow-x-auto overflow-y-hidden overscroll-contain px-4 pb-4 pt-1 hide-scrollbar flex flex-row relative gap-3 min-h-0 snap-x snap-mandatory transition-all bg-white';
+          list.className = 'flex-1 overflow-x-auto overflow-y-hidden px-4 pb-4 pt-1 hide-scrollbar flex flex-row relative gap-3 min-h-0 snap-x snap-mandatory transition-all bg-white allow-scroll';
           cards.forEach(c => {
               c.classList.remove('w-full', 'border-b', 'pb-4', 'mb-4');
               c.classList.add('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'border-gray-200', 'rounded-[20px]', 'shadow-sm', 'p-0.5'); 
           });
       } else {
-          listEl.className = 'flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white';
+          list.className = 'flex-1 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-1 hide-scrollbar flex flex-col relative gap-0 transition-all bg-white allow-scroll';
           cards.forEach(c => {
               c.classList.remove('w-[85vw]', 'max-w-[340px]', 'snap-start', 'border', 'rounded-[20px]', 'shadow-sm', 'p-0.5');
               c.classList.add('w-full', 'border-b', 'border-gray-100', 'pb-4', 'mb-4');
@@ -383,15 +408,13 @@
   if(sheetHeader) {
     sheetHeader.addEventListener('touchstart', (e) => {
         if(window.innerWidth >= 768) return;
-        e.stopPropagation(); // 阻止地圖跟隨
         dragStartY = e.touches[0].clientY;
         startHeight = sheetPanel.offsetHeight;
         sheetPanel.style.transition = 'none';
-    }, {passive: false});
+    }, {passive: true});
 
     sheetHeader.addEventListener('touchmove', (e) => {
         if(window.innerWidth >= 768 || dragStartY === null) return;
-        e.stopPropagation(); // 阻止地圖跟隨
         const dy = dragStartY - e.touches[0].clientY;
         let newHeight = startHeight + dy;
         
@@ -399,12 +422,11 @@
         if (newHeight > window.innerHeight * 0.9) newHeight = window.innerHeight * 0.9;
         
         sheetPanel.style.height = `${newHeight}px`;
-        document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 4rem + env(safe-area-inset-bottom) + 16px)`;
-    }, {passive: false});
+        document.getElementById('fab-group').style.bottom = `calc(${newHeight}px + 16px)`;
+    }, {passive: true});
 
-    sheetHeader.addEventListener('touchend', (e) => {
+    sheetHeader.addEventListener('touchend', () => {
         if(window.innerWidth >= 768 || dragStartY === null) return;
-        e.stopPropagation(); // 阻止地圖跟隨
         dragStartY = null;
         sheetPanel.style.transition = 'height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
         document.getElementById('fab-group').style.transition = 'bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
@@ -413,12 +435,19 @@
         const currentH = sheetPanel.offsetHeight;
         let targetHeight = '';
         
-        if (currentH > vh * 0.6) { targetHeight = '85vh'; isListCollapsed = false; } 
-        else if (currentH < vh * 0.35) { targetHeight = '220px'; isListCollapsed = true; } 
-        else { targetHeight = '50vh'; isListCollapsed = false; }
+        if (currentH > vh * 0.6) {
+            targetHeight = '85vh';
+            isListCollapsed = false;
+        } else if (currentH < vh * 0.35) {
+            targetHeight = '220px'; 
+            isListCollapsed = true;
+        } else {
+            targetHeight = '50vh';
+            isListCollapsed = false;
+        }
         
         sheetPanel.style.height = targetHeight;
-        document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 4rem + env(safe-area-inset-bottom) + 16px)`;
+        document.getElementById('fab-group').style.bottom = `calc(${targetHeight} + 16px)`;
         
         applyListLayoutMode();
         setTimeout(() => { document.getElementById('fab-group').style.transition = ''; }, 300);
@@ -488,7 +517,6 @@
       }
   };
 
-  // 💡 已完全拔除假資料，只會呈現 Firebase 動態資料庫的景點
   function loadSpots() {
     const qSpots = collection(db, 'artifacts', appId, 'public', 'data', 'spots');
     onSnapshot(qSpots, (snapshot) => {
