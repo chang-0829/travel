@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿堯的 e-SIM 推薦清單</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 隱藏預設捲軸，但保留滑動功能 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 卡片懸浮動畫 */
+        .travel-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (hover: hover) {
+            .travel-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
+
+    <!-- 導覽列 -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <div class="bg-brand-500 p-2 rounded-lg text-white">
+                        <i data-lucide="plane-takeoff" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">阿堯的 e-SIM 嚴選</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 頁首 Hero 區塊 -->
+    <header class="relative pt-16 pb-12 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-50 to-slate-100 -z-10"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                出國上網 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-600">免換卡</span>
+            </h1>
+            <p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                為您挑選最穩定、速度最快的當地原生線路。<br class="hidden sm:block">掃描 QR Code 即可啟用，落地馬上連線報平安！
+            </p>
+        </div>
+    </header>
+
+    <!-- 推薦清單滑動區塊 -->
+    <main class="flex-grow max-w-6xl mx-auto px-0 sm:px-6 lg:px-8 w-full -mt-6 mb-12">
+        
+        <div class="relative">
+            <!-- 左右滑動控制按鈕 (桌面版顯示) -->
+            <button id="scrollLeft" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </button>
+            <button id="scrollRight" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
+                <i data-lucide="chevron-right" class="w-6 h-6"></i>
+            </button>
+
+            <!-- 滑動容器 -->
+            <div id="slider" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 px-4 py-8 sm:px-0 md:justify-center">
+                
+                <!-- ==================== 卡片 1: 泰國 ==================== -->
+                <div class="travel-card snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col relative group">
+                    <!-- 推薦標籤 -->
+                    <div class="absolute top-4 right-4 z-10 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+                        <i data-lucide="flame" class="w-3 h-3"></i> 熱賣中
+                    </div>
+
+                    <!-- 圖片區塊 -->
+                    <div class="h-48 relative overflow-hidden bg-slate-200">
+                        <!-- 使用 Unsplash 泰國圖片作為背景 -->
+                        <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Thailand" 
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                             onerror="this.src='https://placehold.co/800x400/14b8a6/white?text=Thailand'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-4 left-5">
+                            <h2 class="text-3xl font-black text-white drop-shadow-md">泰國</h2>
+                            <p class="text-white/90 text-sm font-medium tracking-wider">Thailand</p>
+                        </div>
+                    </div>
+
+                    <!-- 內容區塊 -->
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <!-- 線路特點 -->
+                            <div class="inline-flex items-center gap-2 bg-brand-50 text-brand-900 px-3 py-1.5 rounded-xl text-sm font-bold mb-4 border border-brand-100">
+                                <i data-lucide="zap" class="w-4 h-4 text-brand-500 fill-brand-500"></i>
+                                Dtac 5G 原生線路
+                            </div>
+                            
+                            <ul class="space-y-3 text-sm text-slate-600 mb-6">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>當地最大電信之一，訊號覆蓋廣</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>原生線路不降速，查地圖看影片超順暢</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>免實體卡，QR Code 隨掃即用</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 購買按鈕 -->
+                        <a href="https://tw.trip.com/things-to-do/detail/48207482?locale=zh-TW&curr=TWD" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="w-full bg-slate-900 hover:bg-brand-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
+                            <span>前往 Trip.com 購買</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ==================== 卡片 2: 日本 ==================== -->
+                <div class="travel-card snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col relative group">
+                    
+                    <!-- 圖片區塊 -->
+                    <div class="h-48 relative overflow-hidden bg-slate-200">
+                        <!-- 使用 Unsplash 日本圖片作為背景 -->
+                        <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Japan" 
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                             onerror="this.src='https://placehold.co/800x400/3b82f6/white?text=Japan'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-4 left-5">
+                            <h2 class="text-3xl font-black text-white drop-shadow-md">日本</h2>
+                            <p class="text-white/90 text-sm font-medium tracking-wider">Japan</p>
+                        </div>
+                    </div>
+
+                    <!-- 內容區塊 -->
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <!-- 線路特點 -->
+                            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-900 px-3 py-1.5 rounded-xl text-sm font-bold mb-4 border border-blue-100">
+                                <i data-lucide="zap" class="w-4 h-4 text-blue-500 fill-blue-500"></i>
+                                au KDDI 5G 原生線路
+                            </div>
+                            
+                            <ul class="space-y-3 text-sm text-slate-600 mb-6">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>日本頂級電信，郊區市區皆順暢</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span class="font-medium text-slate-700">原生線路不降速，查地圖看影片超順暢</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span class="font-medium text-slate-700">免實體卡，QR Code 隨掃即用</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 購買按鈕 -->
+                        <a href="https://tw.trip.com/things-to-do/detail/54439224?locale=zh-TW&curr=TWD" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="w-full bg-slate-900 hover:bg-brand-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
+                            <span>前往 Trip.com 購買</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- 手機版滑動提示 -->
+        <div class="text-center mt-4 text-slate-400 flex items-center justify-center gap-2 md:hidden">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <span class="text-sm">左右滑動查看更多</span>
+        </div>
+
+    </main>
+
+    <!-- 初始化 Icons 與 滑動邏輯 -->
+    <script>
+        // 初始化 Lucide 圖示
+        lucide.createIcons();
+
+        // 桌面版左右滑動控制邏輯
+        const slider = document.getElementById('slider');
+        const scrollLeftBtn = document.getElementById('scrollLeft');
+        const scrollRightBtn = document.getElementById('scrollRight');
+
+        // 設定每次滑動距離大約為一個卡片的寬度 + gap
+        const scrollAmount = 360; 
+
+        scrollLeftBtn.addEventListener('click', () => {
+            slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+        
+        // 簡單的檢查，若內容不足以滾動則隱藏按鈕 (針對大螢幕)
+        const checkScrollButtons = () => {
+            if (slider.scrollWidth <= slider.clientWidth) {
+                scrollLeftBtn.style.display = 'none';
+                scrollRightBtn.style.display = 'none';
+            } else {
+                // 恢復為原本的 flex 顯示
+                if(window.innerWidth >= 768) { // md 斷點
+                    scrollLeftBtn.style.display = 'flex';
+                    scrollRightBtn.style.display = 'flex';
+                }
+            }
+        };
+
+        window.addEventListener('resize', checkScrollButtons);
+        // 初始化檢查
+        setTimeout(checkScrollButtons, 100);
+    </script>
+</body>
+</html>
