@@ -19,16 +19,12 @@
                         sans: ['"Noto Sans TC"', 'sans-serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            900: '#134e4a',
-                        },
                         trip: {
+                            50: '#f0f5fa',
+                            100: '#e0ebf5',
+                            500: '#0056b3',
                             main: '#004899', // Trip.com 主色調
-                            hover: '#0056b3'
+                            hover: '#003370'
                         }
                     }
                 }
@@ -57,49 +53,47 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
+<body class="bg-gradient-to-br from-blue-100 via-white to-cyan-50 text-slate-800 antialiased selection:bg-trip-main selection:text-white flex flex-col min-h-screen">
 
     <!-- 頁首 Hero 區塊 -->
-    <header class="relative pt-12 pb-8 overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-brand-50 to-slate-100 -z-10"></div>
+    <header class="relative pt-28 md:pt-32 pb-8 overflow-hidden">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
-                出國上網 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-600">免換卡</span>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-5 tracking-tight">
+                出國上網 <span class="text-transparent bg-clip-text bg-gradient-to-r from-trip-main to-blue-500">免換卡</span>
             </h1>
-            <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
                 為您挑選最穩定、速度最快的當地原生線路。<br class="hidden sm:block">掃描 QR Code 即可啟用，落地馬上連線報平安！
             </p>
         </div>
     </header>
 
     <!-- 推薦清單滑動區塊 -->
-    <main class="flex-grow max-w-6xl mx-auto px-0 sm:px-6 lg:px-8 w-full mb-12">
+    <main class="flex-grow max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 w-full mb-12">
         
         <div class="relative">
             <!-- 左右滑動控制按鈕 (桌面版顯示) -->
-            <button id="scrollLeft" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
+            <button id="scrollLeft" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-trip-main hover:scale-110 transition-all focus:outline-none">
                 <i data-lucide="chevron-left" class="w-6 h-6"></i>
             </button>
-            <button id="scrollRight" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
+            <button id="scrollRight" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-trip-main hover:scale-110 transition-all focus:outline-none">
                 <i data-lucide="chevron-right" class="w-6 h-6"></i>
             </button>
 
             <!-- 滑動容器 -->
-            <div id="slider" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 px-4 py-8 sm:px-0 md:justify-center">
+            <div id="slider" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-5 md:gap-6 px-5 py-8 sm:px-2 md:justify-center">
                 
                 <!-- ==================== 卡片 1: 泰國 ==================== -->
-                <div class="travel-card snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col relative group">
+                <div class="travel-card snap-center shrink-0 w-[82vw] max-w-[320px] bg-white rounded-3xl shadow-lg border border-white/50 overflow-hidden flex flex-col relative group">
                     
                     <!-- 圖片區塊 -->
                     <div class="h-48 relative overflow-hidden bg-slate-200">
-                        <!-- 使用 Unsplash 泰國圖片作為背景 -->
                         <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                              alt="Thailand" 
-                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                             onerror="this.src='https://placehold.co/800x400/14b8a6/white?text=Thailand'">
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                             onerror="this.src='https://placehold.co/800x400/004899/white?text=Thailand'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-4 left-5">
-                            <h2 class="text-3xl font-black text-white drop-shadow-md">泰國</h2>
+                            <h2 class="text-3xl font-black text-white drop-shadow-md tracking-wide">泰國</h2>
                             <p class="text-white/90 text-sm font-medium tracking-wider">Thailand</p>
                         </div>
                     </div>
@@ -108,23 +102,23 @@
                     <div class="p-6 flex-grow flex flex-col justify-between">
                         <div>
                             <!-- 線路特點 -->
-                            <div class="inline-flex items-center gap-2 bg-brand-50 text-brand-900 px-3 py-1.5 rounded-xl text-sm font-bold mb-4 border border-brand-100">
-                                <i data-lucide="zap" class="w-4 h-4 text-brand-500 fill-brand-500"></i>
+                            <div class="inline-flex items-center gap-2 bg-trip-50 text-trip-main px-3 py-1.5 rounded-xl text-sm font-bold mb-5 border border-trip-100">
+                                <i data-lucide="zap" class="w-4 h-4 fill-trip-main"></i>
                                 Dtac 5G 原生線路
                             </div>
                             
-                            <ul class="space-y-3 text-sm text-slate-600 mb-6">
-                                <li class="flex items-start gap-2">
+                            <ul class="space-y-3.5 text-sm text-slate-700 mb-6 font-medium">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
                                     <span>當地最大電信之一，訊號覆蓋廣</span>
                                 </li>
-                                <li class="flex items-start gap-2">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span class="font-medium text-slate-700">原生線路不降速，查地圖看影片超順暢</span>
+                                    <span>原生線路不降速，查地圖看影片超順暢</span>
                                 </li>
-                                <li class="flex items-start gap-2">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span class="font-medium text-slate-700">免實體卡，QR Code 隨掃即用</span>
+                                    <span>免實體卡，QR Code 隨掃即用</span>
                                 </li>
                             </ul>
                         </div>
@@ -141,18 +135,17 @@
                 </div>
 
                 <!-- ==================== 卡片 2: 日本 ==================== -->
-                <div class="travel-card snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col relative group">
+                <div class="travel-card snap-center shrink-0 w-[82vw] max-w-[320px] bg-white rounded-3xl shadow-lg border border-white/50 overflow-hidden flex flex-col relative group">
                     
                     <!-- 圖片區塊 -->
                     <div class="h-48 relative overflow-hidden bg-slate-200">
-                        <!-- 使用 Unsplash 日本圖片作為背景 -->
                         <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                              alt="Japan" 
-                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                             onerror="this.src='https://placehold.co/800x400/3b82f6/white?text=Japan'">
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                             onerror="this.src='https://placehold.co/800x400/004899/white?text=Japan'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-4 left-5">
-                            <h2 class="text-3xl font-black text-white drop-shadow-md">日本</h2>
+                            <h2 class="text-3xl font-black text-white drop-shadow-md tracking-wide">日本</h2>
                             <p class="text-white/90 text-sm font-medium tracking-wider">Japan</p>
                         </div>
                     </div>
@@ -161,23 +154,23 @@
                     <div class="p-6 flex-grow flex flex-col justify-between">
                         <div>
                             <!-- 線路特點 -->
-                            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-900 px-3 py-1.5 rounded-xl text-sm font-bold mb-4 border border-blue-100">
-                                <i data-lucide="zap" class="w-4 h-4 text-blue-500 fill-blue-500"></i>
+                            <div class="inline-flex items-center gap-2 bg-trip-50 text-trip-main px-3 py-1.5 rounded-xl text-sm font-bold mb-5 border border-trip-100">
+                                <i data-lucide="zap" class="w-4 h-4 fill-trip-main"></i>
                                 au KDDI 5G 原生線路
                             </div>
                             
-                            <ul class="space-y-3 text-sm text-slate-600 mb-6">
-                                <li class="flex items-start gap-2">
+                            <ul class="space-y-3.5 text-sm text-slate-700 mb-6 font-medium">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
                                     <span>日本頂級電信，郊區市區皆順暢</span>
                                 </li>
-                                <li class="flex items-start gap-2">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span class="font-medium text-slate-700">原生線路不降速，查地圖看影片超順暢</span>
+                                    <span>原生線路不降速，查地圖看影片超順暢</span>
                                 </li>
-                                <li class="flex items-start gap-2">
+                                <li class="flex items-start gap-2.5">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span class="font-medium text-slate-700">免實體卡，QR Code 隨掃即用</span>
+                                    <span>免實體卡，QR Code 隨掃即用</span>
                                 </li>
                             </ul>
                         </div>
@@ -192,12 +185,65 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- ==================== 卡片 3: 韓國 ==================== -->
+                <div class="travel-card snap-center shrink-0 w-[82vw] max-w-[320px] bg-white rounded-3xl shadow-lg border border-white/50 overflow-hidden flex flex-col relative group">
+                    
+                    <!-- 圖片區塊 -->
+                    <div class="h-48 relative overflow-hidden bg-slate-200">
+                        <!-- 已更換為您指定的韓國照片 -->
+                        <img src="https://images.unsplash.com/photo-1546874177-9e664107314e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Korea" 
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                             onerror="this.src='https://placehold.co/800x400/004899/white?text=Korea'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-4 left-5">
+                            <h2 class="text-3xl font-black text-white drop-shadow-md tracking-wide">韓國</h2>
+                            <p class="text-white/90 text-sm font-medium tracking-wider">South Korea</p>
+                        </div>
+                    </div>
+
+                    <!-- 內容區塊 -->
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <!-- 線路特點 -->
+                            <div class="inline-flex items-center gap-2 bg-trip-50 text-trip-main px-3 py-1.5 rounded-xl text-sm font-bold mb-5 border border-trip-100">
+                                <i data-lucide="zap" class="w-4 h-4 fill-trip-main"></i>
+                                韓國 SKT 原生線路
+                            </div>
+                            
+                            <ul class="space-y-3.5 text-sm text-slate-700 mb-6 font-medium">
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>韓國市佔第一電信，網速極致體驗</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>原生線路不降速，查地圖看影片超順暢</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
+                                    <span>免實體卡，QR Code 隨掃即用</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 購買按鈕 -->
+                        <a href="https://tw.trip.com/things-to-do/detail/69043342?locale=zh-TW&curr=TWD" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="w-full bg-trip-main hover:bg-trip-hover text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
+                            <span>前往 Trip.com 購買</span>
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
                 
             </div>
         </div>
         
         <!-- 手機版滑動提示 -->
-        <div class="text-center mt-4 text-slate-400 flex items-center justify-center gap-2 md:hidden">
+        <div class="text-center mt-2 text-slate-400 flex items-center justify-center gap-2 md:hidden">
             <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
             <span class="text-sm">左右滑動查看更多</span>
         </div>
@@ -214,8 +260,7 @@
         const scrollLeftBtn = document.getElementById('scrollLeft');
         const scrollRightBtn = document.getElementById('scrollRight');
 
-        // 設定每次滑動距離大約為一個卡片的寬度 + gap
-        const scrollAmount = 360; 
+        const scrollAmount = 340; 
 
         scrollLeftBtn.addEventListener('click', () => {
             slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -225,14 +270,12 @@
             slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         });
         
-        // 簡單的檢查，若內容不足以滾動則隱藏按鈕 (針對大螢幕)
         const checkScrollButtons = () => {
             if (slider.scrollWidth <= slider.clientWidth) {
                 scrollLeftBtn.style.display = 'none';
                 scrollRightBtn.style.display = 'none';
             } else {
-                // 恢復為原本的 flex 顯示
-                if(window.innerWidth >= 768) { // md 斷點
+                if(window.innerWidth >= 1024) { // lg 斷點
                     scrollLeftBtn.style.display = 'flex';
                     scrollRightBtn.style.display = 'flex';
                 }
@@ -240,7 +283,6 @@
         };
 
         window.addEventListener('resize', checkScrollButtons);
-        // 初始化檢查
         setTimeout(checkScrollButtons, 100);
     </script>
 </body>
