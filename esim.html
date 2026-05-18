@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>阿堯的 e-SIM 推薦清單</title>
+    <title>e-SIM 推薦清單</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -25,6 +25,10 @@
                             500: '#14b8a6',
                             600: '#0d9488',
                             900: '#134e4a',
+                        },
+                        trip: {
+                            main: '#004899', // Trip.com 主色調
+                            hover: '#0056b3'
                         }
                     }
                 }
@@ -55,38 +59,37 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
 
-    <!-- 導覽列 -->
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-2">
-                    <div class="bg-[#3264ff] p-2 rounded-lg text-white">
-                        <i data-lucide="plane-takeoff" class="w-5 h-5"></i>
-                    </div>
-                    <span class="font-bold text-xl tracking-tight text-slate-900">阿堯的 e-SIM 嚴選</span>
-                </div>
-            </div>
+    <!-- 頁首 Hero 區塊 -->
+    <header class="relative pt-12 pb-8 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-50 to-slate-100 -z-10"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                出國上網 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-600">免換卡</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                為您挑選最穩定、速度最快的當地原生線路。<br class="hidden sm:block">掃描 QR Code 即可啟用，落地馬上連線報平安！
+            </p>
         </div>
-    </nav>
+    </header>
 
     <!-- 推薦清單滑動區塊 -->
-    <main class="flex-grow max-w-6xl mx-auto px-0 sm:px-6 lg:px-8 w-full pt-8 mb-12">
+    <main class="flex-grow max-w-6xl mx-auto px-0 sm:px-6 lg:px-8 w-full mb-12">
         
         <div class="relative">
             <!-- 左右滑動控制按鈕 (桌面版顯示) -->
-            <button id="scrollLeft" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-[#3264ff] hover:scale-110 transition-all focus:outline-none">
+            <button id="scrollLeft" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
                 <i data-lucide="chevron-left" class="w-6 h-6"></i>
             </button>
-            <button id="scrollRight" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-[#3264ff] hover:scale-110 transition-all focus:outline-none">
+            <button id="scrollRight" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-lg rounded-full p-3 text-slate-600 hover:text-brand-600 hover:scale-110 transition-all focus:outline-none">
                 <i data-lucide="chevron-right" class="w-6 h-6"></i>
             </button>
 
             <!-- 滑動容器 -->
-            <div id="slider" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 px-4 py-4 sm:px-0 md:justify-center">
+            <div id="slider" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 px-4 py-8 sm:px-0 md:justify-center">
                 
                 <!-- ==================== 卡片 1: 泰國 ==================== -->
                 <div class="travel-card snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden flex flex-col relative group">
-
+                    
                     <!-- 圖片區塊 -->
                     <div class="h-48 relative overflow-hidden bg-slate-200">
                         <!-- 使用 Unsplash 泰國圖片作為背景 -->
@@ -117,11 +120,11 @@
                                 </li>
                                 <li class="flex items-start gap-2">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span>原生線路不降速，查地圖看影片超順暢</span>
+                                    <span class="font-medium text-slate-700">原生線路不降速，查地圖看影片超順暢</span>
                                 </li>
                                 <li class="flex items-start gap-2">
                                     <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 shrink-0"></i>
-                                    <span>免實體卡，QR Code 隨掃即用</span>
+                                    <span class="font-medium text-slate-700">免實體卡，QR Code 隨掃即用</span>
                                 </li>
                             </ul>
                         </div>
@@ -130,7 +133,7 @@
                         <a href="https://tw.trip.com/things-to-do/detail/48207482?locale=zh-TW&curr=TWD" 
                            target="_blank" 
                            rel="noopener noreferrer"
-                           class="w-full bg-[#3264ff] hover:bg-[#254edb] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
+                           class="w-full bg-trip-main hover:bg-trip-hover text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
                             <span>前往 Trip.com 購買</span>
                             <i data-lucide="external-link" class="w-4 h-4"></i>
                         </a>
@@ -183,7 +186,7 @@
                         <a href="https://tw.trip.com/things-to-do/detail/54439224?locale=zh-TW&curr=TWD" 
                            target="_blank" 
                            rel="noopener noreferrer"
-                           class="w-full bg-[#3264ff] hover:bg-[#254edb] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
+                           class="w-full bg-trip-main hover:bg-trip-hover text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 shadow-md hover:shadow-lg">
                             <span>前往 Trip.com 購買</span>
                             <i data-lucide="external-link" class="w-4 h-4"></i>
                         </a>
